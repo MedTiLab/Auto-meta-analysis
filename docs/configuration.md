@@ -2,7 +2,7 @@
 
 # Configuration Reference
 
-MedHelp® is configured through environment variables in a `.env` file at the project root. This guide documents every variable the application reads.
+AutoMeta is configured through environment variables in a `.env` file at the project root. This guide documents the primary runtime variables.
 
 ## How `.env` Loading Works
 
@@ -21,7 +21,7 @@ MedHelp® is configured through environment variables in a `.env` file at the pr
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `HOST` | No | `127.0.0.1` | Server bind host. Set to `0.0.0.0` only behind a trusted reverse proxy and after setting `JWT_SECRET`. |
+| `HOST` | No | `127.0.0.1` | Server bind host. Set to `0.0.0.0` only behind a trusted reverse proxy. |
 | `PORT` | No | `3001` | Express API + WebSocket server port. |
 | `VITE_PORT` | No | `5173` | Vite dev server port (development only). |
 | `CORS_ORIGINS` / `CORS_ORIGIN` | No | Loopback origins only | Comma-separated browser origins allowed to call the API cross-origin, for example `https://medhelp.example.com`. |
@@ -36,16 +36,13 @@ MedHelp® is configured through environment variables in a `.env` file at the pr
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DATABASE_PATH` | No | `server/database/auth.db` | Absolute path to the SQLite database file. The directory is created automatically if it does not exist. |
+| `DATABASE_PATH` | No | `~/.autometa/auth.db` | Absolute path to the SQLite database file. The directory is created automatically if it does not exist. |
 
-### Authentication
-
-> These variables are **security-sensitive**. See the [Security Checklist](#security-checklist) below.
+### Access protection
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `JWT_SECRET` | **Yes** (production) | `claude-ui-dev-secret-change-in-production` | Secret used to sign and verify JWT tokens. **Must** be changed before exposing MedHelp® outside localhost. Generate one with: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `API_KEY` | No | *(none — validation skipped)* | When set, every HTTP request must include an `X-Api-Key` header with this value. Useful for restricting access in hosted setups. |
+| `API_KEY` | No | *(none)* | Set this for an additional access-control layer in non-local deployments. |
 
 ### Context Window
 
@@ -60,8 +57,8 @@ Platform mode is an advanced deployment option. Most users should leave these co
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `VITE_IS_PLATFORM` | No | `false` | Set to `true` to enable Platform mode. In this mode JWT authentication is bypassed and the first database user is used for all requests. |
-| `WORKSPACES_ROOT` | No | User home directory (`os.homedir()`) | Root directory where MedHelp® looks for and creates project workspaces. Only meaningful when `VITE_IS_PLATFORM=true`. |
+| `VITE_IS_PLATFORM` | No | `false` | Enables platform-deployment behavior. |
+| `WORKSPACES_ROOT` | No | Platform-specific `autometa_workspace` | Default root where AutoMeta creates workspaces. Users can still choose a custom location. |
 | `MEDAUTODATA_LOCK_PROJECT_PATHS` | No | `false` | Set to `true` to force new projects into the single configured `WORKSPACES_ROOT`. No username or user-id subfolder is added. |
 
 ### Integrations
@@ -93,32 +90,21 @@ The authenticated `/api/providers` backend manages Claude-compatible and OpenAI-
 
 ---
 
-## OSS Mode vs Platform Mode
+## Local single-user mode
 
-MedHelp® supports two authentication paths:
-
-| | OSS Mode (default) | Platform Mode |
-|---|---|---|
-| **Who uses it** | Individual developers running MedHelp® locally | Hosted / multi-tenant deployments |
-| **Auth flow** | Register/login with username + password; JWT issued per session | JWT auth bypassed; first DB user auto-selected |
-| **Enable** | Default — no extra config needed | Set `VITE_IS_PLATFORM=true` |
-| **`WORKSPACES_ROOT`** | Ignored | Defines the root directory for all project workspaces |
-
-> In OSS mode the `WORKSPACES_ROOT` variable is ignored — MedHelp® discovers projects from Claude Code / Cursor / Codex session directories under the user's home folder.
+AutoMeta opens directly into a local workspace. An internal local identity is maintained only to associate projects and sessions.
 
 ---
 
 ## Security Checklist
 
-Before deploying MedHelp® on a network (not just `localhost`), review the following:
+Before deploying AutoMeta on a network (not just `localhost`), review the following:
 
-1. **`JWT_SECRET`** — Replace the default with a strong random string. The default value is public and provides zero security.
-2. **`API_KEY`** — Consider setting an API key to add an extra authentication layer.
-3. **`HOST` + `CORS_ORIGINS`** — Keep `HOST=127.0.0.1` unless a reverse proxy needs backend access. If you expose it, set an exact `CORS_ORIGINS` allowlist.
-4. **`WORKSPACES_ROOT` + `MEDAUTODATA_LOCK_PROJECT_PATHS`** — Set a trusted shared `WORKSPACES_ROOT` and enable `MEDAUTODATA_LOCK_PROJECT_PATHS=true` so new projects always use that one default location.
-5. **`MEDAUTODATA_ENABLE_SYSTEM_UPDATE`** — Keep server-side self-update disabled unless this is a trusted single-user deployment.
-6. **`.gitignore`** — Verify that `.env` is listed in `.gitignore` (it is by default) so secrets are never committed.
-7. **HTTPS** — When exposing MedHelp® to the internet, place it behind a reverse proxy (e.g. Nginx, Caddy) with TLS termination.
+1. **`API_KEY`** — Consider setting an API key for non-local deployments.
+2. **`HOST` + `CORS_ORIGINS`** — Keep `HOST=127.0.0.1` unless a reverse proxy needs backend access. If exposed, set an exact CORS allowlist.
+3. **Workspace scope** — Restrict project paths in hosted environments.
+4. **`.gitignore`** — Keep `.env` ignored so secrets are never committed.
+5. **HTTPS** — Use a TLS-enabled reverse proxy when exposing AutoMeta to the internet.
 
 ---
 
@@ -126,4 +112,3 @@ Before deploying MedHelp® on a network (not just `localhost`), review the follo
 
 - Variable not taking effect? Check that there is no system environment variable with the same name overriding it.
 - Database errors? See [FAQ — SQLITE_CANTOPEN](./faq.md#8-database-permission-errors-sqlite_cantopen).
-- JWT issues? See [FAQ — JWT_SECRET security warning](./faq.md#11-jwt_secret-security-warning).

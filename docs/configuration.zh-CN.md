@@ -2,7 +2,7 @@
 
 # 配置参考
 
-MedHelp® 通过项目根目录下的 `.env` 文件中的环境变量进行配置。本指南记录了应用读取的所有变量。
+AutoMeta 通过项目根目录下的 `.env` 文件中的环境变量进行配置。本指南记录主要的运行变量。
 
 ## `.env` 加载机制
 
@@ -21,10 +21,10 @@ MedHelp® 通过项目根目录下的 `.env` 文件中的环境变量进行配�
 
 | 变量 | 是否必需 | 默认值 | 说明 |
 |------|---------|--------|------|
-| `HOST` | 否 | `127.0.0.1` | 服务器监听地址。仅在可信反向代理之后且已设置 `JWT_SECRET` 时，才设置为 `0.0.0.0`。 |
+| `HOST` | 否 | `127.0.0.1` | 服务器监听地址。仅在可信反向代理之后才设置为 `0.0.0.0`。 |
 | `PORT` | 否 | `3001` | Express API + WebSocket 服务器端口。 |
 | `VITE_PORT` | 否 | `5173` | Vite 开发服务器端口（仅开发模式）。 |
-| `CORS_ORIGINS` / `CORS_ORIGIN` | 否 | 仅允许本机来源 | 允许跨域访问 API 的浏览器来源，多个值用英文逗号分隔，例如 `https://medhelp.example.com`。 |
+| `CORS_ORIGINS` / `CORS_ORIGIN` | 否 | 仅允许本机来源 | 允许跨域访问 API 的浏览器来源，多个值用英文逗号分隔。 |
 | `CLAUDE_CLI_PATH` | 否 | `claude` | Claude Code 二进制文件的绝对或相对路径。如果 `claude` 不在你的 `PATH` 中，可在此处覆盖。 |
 | `CURSOR_CLI_PATH` | 否 | 自动探测（先 `cursor-agent`，再 `cursor agent`，最后 `agent`） | 覆盖 Cursor CLI 命令/二进制名。适用于你的环境只提供某一个别名的情况。 |
 | `GEMINI_CLI_PATH` | 否 | `gemini` | 覆盖 Gemini CLI 命令/二进制名。适用于通过自定义别名或路径安装 Gemini 的环境。 |
@@ -36,16 +36,13 @@ MedHelp® 通过项目根目录下的 `.env` 文件中的环境变量进行配�
 
 | 变量 | 是否必需 | 默认值 | 说明 |
 |------|---------|--------|------|
-| `DATABASE_PATH` | 否 | `server/database/auth.db` | SQLite 数据库文件的绝对路径。如果目录不存在会自动创建。 |
+| `DATABASE_PATH` | 否 | `~/.autometa/auth.db` | SQLite 数据库文件的绝对路径。如果目录不存在会自动创建。 |
 
-### 身份认证
-
-> 以下变量属于**安全敏感**配置。请参阅下方的[安全检查清单](#安全检查清单)。
+### 访问保护
 
 | 变量 | 是否必需 | 默认值 | 说明 |
 |------|---------|--------|------|
-| `JWT_SECRET` | **是**（生产环境） | `claude-ui-dev-secret-change-in-production` | 用于签名和验证 JWT 令牌的密钥。在将 MedHelp® 暴露到 localhost 以外之前**必须**更改。生成方法：`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `API_KEY` | 否 | *（无 — 跳过验证）* | 设置后，每个 HTTP 请求必须包含值为此密钥的 `X-Api-Key` 请求头。适用于托管部署中限制访问。 |
+| `API_KEY` | 否 | *（无）* | 非本机部署可设置此项，为 API 增加一层访问保护。 |
 
 ### 上下文窗口
 
@@ -60,8 +57,8 @@ MedHelp® 通过项目根目录下的 `.env` 文件中的环境变量进行配�
 
 | 变量 | 是否必需 | 默认值 | 说明 |
 |------|---------|--------|------|
-| `VITE_IS_PLATFORM` | 否 | `false` | 设为 `true` 以启用平台模式。在此模式下，JWT 身份认证被绕过，所有请求使用数据库中的第一个用户。 |
-| `WORKSPACES_ROOT` | 否 | 用户主目录（`os.homedir()`） | MedHelp® 查找和创建项目工作区的根目录。仅在 `VITE_IS_PLATFORM=true` 时有意义。 |
+| `VITE_IS_PLATFORM` | 否 | `false` | 设为 `true` 以启用平台部署相关行为。 |
+| `WORKSPACES_ROOT` | 否 | 平台相关的 `autometa_workspace` | AutoMeta 查找和创建项目工作区的默认根目录。用户仍可在应用中自定义。 |
 | `MEDAUTODATA_LOCK_PROJECT_PATHS` | 否 | `false` | 设为 `true` 后，新项目会统一创建到 `WORKSPACES_ROOT`，不会再追加用户名或 user-id 子目录。 |
 
 ### 集成
@@ -93,32 +90,21 @@ MedHelp® 通过项目根目录下的 `.env` 文件中的环境变量进行配�
 
 ---
 
-## OSS 模式 vs 平台模式
+## 本地单用户模式
 
-MedHelp® 支持两种身份认证路径：
-
-| | OSS 模式（默认） | 平台模式 |
-|---|---|---|
-| **适用场景** | 本地运行 MedHelp® 的个人开发者 | 托管 / 多租户部署 |
-| **认证流程** | 使用用户名 + 密码注册/登录；每次会话签发 JWT | 绕过 JWT 认证；自动选择数据库中的第一个用户 |
-| **启用方式** | 默认 — 无需额外配置 | 设置 `VITE_IS_PLATFORM=true` |
-| **`WORKSPACES_ROOT`** | 忽略 | 定义所有项目工作区的根目录 |
-
-> 在 OSS 模式下，`WORKSPACES_ROOT` 变量被忽略 — MedHelp® 从用户主目录下的 Claude Code / Cursor / Codex 会话目录中发现项目。
+AutoMeta 默认直接进入本地工作区。应用会在本地数据库中维护一个内部工作区身份，用于关联项目和会话。
 
 ---
 
 ## 安全检查清单
 
-在将 MedHelp® 部署到网络（而非仅 `localhost`）之前，请检查以下事项：
+在将 AutoMeta 部署到网络（而非仅 `localhost`）之前，请检查以下事项：
 
-1. **`JWT_SECRET`** — 将默认值替换为强随机字符串。默认值是公开的，不提供任何安全保障。
-2. **`API_KEY`** — 考虑设置 API 密钥以增加额外的认证层。
-3. **`HOST` + `CORS_ORIGINS`** — 除非反向代理需要访问后端，否则保持 `HOST=127.0.0.1`。如需暴露服务，请设置精确的 `CORS_ORIGINS` 白名单。
-4. **`WORKSPACES_ROOT` + `MEDAUTODATA_LOCK_PROJECT_PATHS`** — 设置可信的共享 `WORKSPACES_ROOT`，并启用 `MEDAUTODATA_LOCK_PROJECT_PATHS=true`，让新项目始终使用这一个默认位置。
-5. **`MEDAUTODATA_ENABLE_SYSTEM_UPDATE`** — 除可信单用户部署外，不要启用服务器自更新接口。
-6. **`.gitignore`** — 确认 `.env` 已列入 `.gitignore`（默认已包含），防止密钥被提交。
-7. **HTTPS** — 将 MedHelp® 暴露到公网时，请将其放在反向代理（如 Nginx、Caddy）后面，并启用 TLS。
+1. **`API_KEY`** — 非本机部署应考虑设置 API 密钥。
+2. **`HOST` + `CORS_ORIGINS`** — 除非反向代理需要访问后端，否则保持 `HOST=127.0.0.1`。如需暴露服务，请设置精确的 `CORS_ORIGINS` 白名单。
+3. **`WORKSPACES_ROOT` + `MEDAUTODATA_LOCK_PROJECT_PATHS`** — 托管环境应限制项目文件的可访问范围。
+4. **`.gitignore`** — 确认 `.env` 已列入 `.gitignore`，防止密钥被提交。
+5. **HTTPS** — 暴露到公网时，请使用带 TLS 的反向代理。
 
 ---
 
@@ -126,4 +112,3 @@ MedHelp® 支持两种身份认证路径：
 
 - 变量未生效？检查是否有同名的系统环境变量在覆盖它。
 - 数据库错误？请参阅 [FAQ — SQLITE_CANTOPEN](./faq.zh-CN.md#8-数据库权限错误sqlite_cantopen)。
-- JWT 问题？请参阅 [FAQ — JWT_SECRET 安全警告](./faq.zh-CN.md#11-jwt_secret-安全警告)。
