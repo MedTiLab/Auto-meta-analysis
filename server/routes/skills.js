@@ -68,7 +68,6 @@ const META_ONLY_SKILL_NAMES = new Set([
   'statistical-analysis',
   'statsmodels',
   'venue-templates',
-  'zotero-medautodata-library',
 ]);
 
 const router = express.Router();

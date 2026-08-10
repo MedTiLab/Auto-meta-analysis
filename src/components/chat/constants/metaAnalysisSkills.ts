@@ -46,7 +46,6 @@ export const META_ANALYSIS_STAGE_SKILLS = {
   pdfAcquisition: [
     'meta-analysis-workflow',
     'meta-zotero-fulltext-handoff',
-    'zotero-medautodata-library',
     'citation-management',
   ],
   titleAbstractFirstScreen: [
