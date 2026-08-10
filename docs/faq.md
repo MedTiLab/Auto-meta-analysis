@@ -2,7 +2,7 @@
 
 # FAQ — Troubleshooting
 
-Common installation and runtime problems with MedHelp®, in **Problem → Cause → Solution** format. See also the [README](../README.md) and [Configuration Reference](./configuration.md).
+Common installation and runtime problems with AutoMeta, in **Problem → Cause → Solution** format. See also the [README](../README.md) and [Configuration Reference](./configuration.md).
 
 ---
 
@@ -57,13 +57,13 @@ If the problem persists, perform a clean reinstall under Node 22.
 
 **Cause:** A runtime network lock may still be active for the current process. In particular, `CODEX_SANDBOX_NETWORK_DISABLED=1` can block network access even when the UI permission settings look correct.
 
-**Solution:** Check whether the environment variable is set, then remove or override it in the place where MedHelp® is started.
+**Solution:** Check whether the environment variable is set, then remove or override it in the place where AutoMeta is started.
 
 ```sh
 echo "${CODEX_SANDBOX_NETWORK_DISABLED:-0}"
 ```
 
-If the command prints `1`, remove or override the variable in your shell profile, systemd unit, Docker config, PM2 config, or other startup layer, then restart MedHelp®.
+If the command prints `1`, remove or override the variable in your shell profile, systemd unit, Docker config, PM2 config, or other startup layer, then restart AutoMeta.
 
 After that, confirm the provider-specific permissions are still enabled:
 

@@ -1,45 +1,16 @@
-# MedAutoData Meta-analysis Automation
+# AutoMeta 自动化工作流
 
-## What this adds
+AutoMeta 用一套固定的项目目录组织系统综述和 Meta 分析。工作流覆盖选题、方案制定、检索去重、筛选、全文管理、数据提取、质量评价、统计分析、结果展示和稿件交付。
 
-This patch adds a Meta-analysis guided prompt, a TaskMaster template, and two skills:
+## 使用方式
 
-1. `meta-analysis-workflow` — the orchestration skill for medical systematic reviews and Meta-analysis.
-2. `public-literature-download` — the missing legal public PDF acquisition skill.
-3. `medical-meta-analysis` TaskMaster template — a structured Auto Research entry point for PRISMA-style projects.
+1. 在 AutoMeta 中创建或打开研究项目。
+2. 明确研究问题、PICO/PECO、纳排标准和主要结局。
+3. 按编号目录逐阶段执行任务，并将可复核产物写入对应目录。
+4. 每个阶段完成后检查输入、输出和引用来源，再进入下一阶段。
+5. 在最终统计分析和稿件提交前进行人工复核。
 
-The chat composer has a Meta-analysis guided shortcut. Its "auto-select" prompt routes to the smallest necessary skill set instead of always invoking the entire Meta-analysis bundle. This does not introduce a new agent backend; it uses the current MedAutoData chat/Codex/Claude/Gemini execution layer.
-
-## Why this integration point
-
-The repository already supports:
-
-- global skill tree loading;
-- skill file read/write;
-- scanning and importing local skill directories;
-- uploading skill zips;
-- deleting global/project skills;
-- sending selected skills into project chat from the Skills panel.
-
-Therefore the safest first integration is a guided chat entry and a TaskMaster template instead of a separate router-heavy module or a large widget in the skills library.
-
-## Automation modes
-
-There are two supported automation entry points:
-
-1. **TaskMaster / Auto Research template**
-   - Use `medical-meta-analysis` when creating or bootstrapping a structured project plan.
-   - It generates `.pipeline/docs/research_brief.json` and task blueprints through the existing five-stage contract.
-   - It does not replace the current `literature -> ideation -> experiment -> publication -> promotion` state machine. Meta-analysis-specific work is represented inside those stages.
-
-2. **Chat skill shortcut**
-   - Use the Meta-analysis shortcut for ad hoc project continuation.
-   - It sends `/meta-analysis-workflow` prompts into the current project chat.
-   - It is better for continuing a partially completed review, summarizing current progress, or running one stage such as download-only or analysis-only.
-
-These modes can coexist. The template owns planning and task generation; the skill shortcut owns conversational execution and continuation.
-
-## Suggested project workflow
+## 项目结构
 
 ```text
 00_literature/
@@ -55,57 +26,24 @@ These modes can coexist. The template owns planning and task generation; the ski
 10_presentation/
 ```
 
-New Meta projects use the `clinical-meta-v2` numbered folder schema inside the user's research project workspace. Keep `.pipeline/` for MedAutoData task orchestration and use the numbered folders for review artifacts. `00_literature/` is the pre-protocol area for literature review, Meta topic selection, feasibility notes, seed references, and scoping-review route decisions; locked protocol artifacts start in `01_protocol/`. This separation avoids conflicts with existing Auto Research contracts, session memory, and project-level agent templates. Legacy Meta projects without `clinical-meta-v2` keep their existing folders and are not migrated automatically.
+- `00_literature/`：初步证据扫描、种子文献、选题和可行性评估。
+- `01_protocol/`：研究方案、PICO/PECO、纳排标准、结局指标和流程状态。
+- `02_search_dedupe/`：数据库检索记录、导入文献、去重结果和筛选输入。
+- `03_title_abstract_screening/`：标题摘要初筛、复筛及排除理由。
+- `04_full_text_review/`：全文文件、全文清单、解析结果和全文排除记录。
+- `05_data_extraction/`：提取表、研究特征和可用于分析的数据集。
+- `06_quality_assessment/`：偏倚风险、研究质量和证据确定性评价。
+- `07_data_analysis/`：分析代码、模型输入、运行结果和敏感性分析。
+- `08_results_figures/`：森林图、漏斗图、SROC、PRISMA 流程图和结果表。
+- `09_manuscript_submission/`：稿件、摘要、清单、附录和补充材料。
+- `10_presentation/`：幻灯片、海报、网页及其他传播材料。
 
-Use existing top-level project folders when they already exist:
+各阶段的具体文件和命名约定见[流水线产物说明](./pipeline-outputs.md)。
 
-- `00_literature/` is the literature review, topic-selection, seed-reference, and scoping-review route area.
-- `02_search_dedupe/` is the shared formal search/reference import area.
-- `07_data_analysis/` holds analysis scripts and model outputs.
-- `08_results_figures/` holds forest/funnel/SROC/PRISMA figures and result tables.
+## 执行原则
 
-The Meta workflow should still record the authoritative status and artifact map in `01_protocol/workflow_status.md` or the closest numbered workflow folder for the active step.
-
-## Download workflow
-
-Use the downloader conservatively:
-
-```bash
-python skills/public-literature-download/scripts/pmc_oa_downloader.py \
-  --input 03_title_abstract_screening/screening_decisions.csv \
-  --output-dir 04_full_text_review/fulltext \
-  --manifest 04_full_text_review/pdf_manifest.json \
-  --summary-csv 04_full_text_review/pdf_manifest.csv \
-  --reference-dir-layout \
-  --tool medautodata_meta \
-  --email YOUR_EMAIL@example.com \
-  --dry-run
-```
-
-After checking the manifest, rerun without `--dry-run`.
-
-## MinerU handoff
-
-The downstream MinerU step should read `04_full_text_review/pdf_manifest.json` and parse records with `status` equal to `downloaded` or `exists`. Parsed outputs should go to:
-
-```text
-04_full_text_review/fulltext/<reference-id-slug>/mineru/
-```
-
-Recommended parsed files:
-
-```text
-<paper-title>.md
-content.json
-tables.json
-figures/
-page_map.json
-```
-
-## Next development steps
-
-1. Keep the backend endpoint materializing the `clinical-meta-v2` numbered directory template for a selected project.
-2. Add a manifest-aware MinerU runner endpoint.
-3. Add a statistics runner that supports R `meta`/`metafor` when installed and Python fallbacks otherwise.
-4. Add artifact cards in the UI for PRISMA counts, PDF status, extraction status, and figure status.
-5. Add a final PRISMA audit action before DOCX generation.
+- 原始记录、筛选决定、提取数据和分析结果应能相互追溯。
+- 脚本放入对应阶段的 `code/` 子目录，不要覆盖原始数据。
+- 无法取得全文、无法提取数据或无法合并时，生成说明报告，不虚构结果。
+- 统计模型、效应量方向、亚组和敏感性分析必须经过人工确认。
+- 对外使用图表或稿件前，检查引用、数字和版本是否一致。

@@ -11,7 +11,7 @@ AutoMeta is configured through environment variables in a `.env` file at the pro
 2. **Frontend** — Vite loads `.env` automatically. Only variables prefixed with `VITE_` are exposed to browser code.
 3. **Precedence** — System env > `.env` file values.
 
-> **Quick start:** `cp .env.example .env` gives you sensible defaults. See the [Quickstart guide](./quickstart.md) for a step-by-step walkthrough.
+> **Quick start:** `cp .env.example .env` gives you sensible defaults. See the [README installation guide](../README.md#安装) for a step-by-step walkthrough.
 
 ---
 

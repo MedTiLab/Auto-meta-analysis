@@ -1,87 +1,66 @@
-# Pipeline Outputs
+# AutoMeta 流水线产物说明
 
-The research pipeline produces structured artifacts across five stages. Each stage writes to a dedicated directory created when the project is initialized.
+本文档对应当前 `meta-v2` 项目结构，说明每个阶段应保存的主要产物。实际项目可以增加文件，但应保留清晰、可追溯的输入输出关系。
 
-## Output Artifacts
+## 目录与产物
 
-| | Artifact | Location | Description |
-|---|---|---|---|
-| 📚 | Literature reports | `Literature/reports/` | Literature review summaries with citations, synthesized from arXiv, Semantic Scholar, and web sources |
-| 📄 | Reference papers | `Literature/references/` | Downloaded PDFs and structured notes (abstract, methodology, evaluation, knowledge graph entries) |
-| 💡 | Research ideas | `Ideation/ideas/` | Structured brainstorming outputs using creative frameworks (SCAMPER, SWOT, Mind Mapping) with multi-persona evaluation scores |
-| 📖 | Ideation references | `Ideation/references/` | Supporting materials and prior work collected during idea generation |
-| 🔬 | Experiment code | `Experiment/core_code/` | Implementation code produced by the plan → implement → judge loop |
-| 📦 | Datasets | `Experiment/datasets/` | Downloaded or generated datasets used in experiments |
-| 🧪 | Code references | `Experiment/code_references/` | Cloned GitHub repos and code survey outputs (architecture maps, dependency graphs) |
-| 📊 | Analysis results | `Experiment/analysis/` | Statistical analysis, tables, charts, and paper-ready figures from experiment runs |
-| 📝 | Manuscript draft | `Publication/manuscript/` | Academic manuscript drafts, abstracts, outlines, and manuscript change logs |
-| 🖼️ | Generated figures | `Publication/figures/` | AI-generated or script-generated publication figures, image panels, and figure legends |
-| 📋 | Publication tables | `Publication/tables/` | Manuscript tables and table source files |
-| 📎 | Supplementary materials | `Publication/supplementary/` | Supplementary files, reporting checklists, reviewer files, and supplemental tables or figures |
-| 🎞️ | Slide deck | `Promotion/slides/` | Academic presentation slides with narration scripts |
-| 🔊 | Audio narration | `Promotion/audio/` | TTS-generated audio for presentation delivery |
-| 🎬 | Demo video | `Promotion/video/` | Combined slides + audio demo video |
-| 🌐 | Project homepage | `Promotion/homepage/` | Generated project landing page for dissemination |
+| 目录 | 用途 | 典型产物 |
+|---|---|---|
+| `00_literature/` | 初步调研与选题 | `reports/`、`references/`、`topic_selection/`、`scoping_review/` |
+| `01_protocol/` | 研究方案 | 研究问题、PICO/PECO、纳排标准、结局定义、注册或方案文件、`workflow_status.md` |
+| `02_search_dedupe/` | 检索与去重 | `search/`、`search/imported_records/`、各数据库导出记录、去重日志、`screening_input.csv` |
+| `03_title_abstract_screening/` | 标题摘要筛选 | `01_ai_pre_screen/`、`02_agent_rescreen/`、`screening_decisions.csv` 或 `screening_decisions.json` |
+| `04_full_text_review/` | 全文获取与审查 | `fulltext_manifest.json`、`fulltext_manifest.csv`、`pdf_manifest.json`、`pdf_manifest.csv`、`fulltext/<reference-id>/`、全文排除记录 |
+| `05_data_extraction/` | 数据提取 | 提取表、研究特征表、效应量字段、`diagnostic_candidates.json`、`diagnostic_confirmed.json`、`diagnostic_dataset.csv` |
+| `06_quality_assessment/` | 质量评价 | RoB、QUADAS、NOS、GRADE 等评价表及依据说明 |
+| `07_data_analysis/` | 统计分析 | `code/`、`meta_input.csv`、运行目录中的 `input.csv` 与 `output.json`、合并效应、异质性、亚组和敏感性分析 |
+| `08_results_figures/` | 图表与结果汇总 | 森林图、漏斗图、SROC、PRISMA 流程图、证据图和结果表 |
+| `09_manuscript_submission/` | 稿件与投稿材料 | `manuscript.md`、分章节 Markdown、摘要、报告清单、附录、补充材料和数据可用性声明 |
+| `10_presentation/` | 展示与传播 | 幻灯片、海报、项目主页、音视频和交付材料 |
 
-## Report Persistence Convention
+## 关键文件
 
-Report-style chat outputs are treated as project artifacts, not transient conversation. Save them as Markdown files in the project's existing visible workflow folders so other AI sessions can resume from the saved record instead of reconstructing context from chat alone.
+- `instance.json`：项目元数据和目录结构版本标记。
+- `.pipeline/docs/research_brief.json`：供任务编排使用的结构化研究简报。
+- `.pipeline/tasks/tasks.json`：任务状态和执行队列。`.pipeline/` 属于内部运行状态，不应当作研究结果目录。
+- `02_search_dedupe/screening_input.csv`：标题摘要筛选的标准输入。
+- `03_title_abstract_screening/screening_decisions.csv`：筛选决定的标准表格产物；使用 JSON 时应保持同等字段和可追溯性。
+- `04_full_text_review/fulltext_manifest.json`：全文获取、解析和缺失状态的主清单。
+- `07_data_analysis/meta_input.csv`：进入统计模型前经确认的分析数据。
+- `09_manuscript_submission/manuscript.md`：完整稿件的主文件。
 
-- Literature reports: `Literature/reports/`
-- Ideation notes and summaries: `Ideation/ideas/`
-- Experiment analyses and change summaries: `Experiment/analysis/`
-- Publication reports, reviews, and change logs: `Publication/manuscript/`
-- Promotion asset reports and handoff notes: `Promotion/slides/`
-- When the stage is not explicit, infer the closest visible workflow directory from the content instead of using hidden folders.
-- If it is still ambiguous, use the current active stage's visible directory. Do not store routine chat reports under `.pipeline/docs/chat-reports/`.
-- Reuse any user-defined subfolder that already exists for the content. Do not create new visible provider-named subfolders such as `codex/`, `claude/`, `gemini/`, or `cursor/` unless the project already uses that convention and the user explicitly wants it.
+## 全文目录约定
 
-Prefer time- or version-based filenames like `YYYY-MM-DD-topic.md` or `YYYY-MM-DD-topic-v2.md`. Do not append provider names such as `claude`, `cursor`, `codex`, or `gemini` unless the user explicitly asks for that naming scheme.
+每篇文献使用稳定的引用 ID 建立目录：
 
-## Project Directory Structure
-
-When a project is created, the workspace initializes the following structure:
-
-```
-your-project/
-├── instance.json                    # Project config with absolute paths
-├── Literature/
-│   ├── references/                  # Downloaded papers and structured notes
-│   └── reports/                     # Literature review summaries
-├── Ideation/
-│   ├── ideas/                       # Generated and evaluated research ideas
-│   └── references/                  # Supporting materials for ideation
-├── Experiment/
-│   ├── code_references/             # Cloned repos and code survey outputs
-│   ├── datasets/                    # Experiment datasets
-│   ├── core_code/                   # Implementation code
-│   └── analysis/                    # Results, statistics, and figures
-├── Publication/
-│   ├── manuscript/                  # Manuscript drafts and manuscript reports
-│   ├── figures/                     # Publication figures and legends
-│   ├── tables/                      # Manuscript tables
-│   └── supplementary/               # Supplementary materials and checklists
-└── Promotion/
-    ├── homepage/                    # Project landing page
-    ├── slides/                      # Presentation deck
-    ├── audio/                       # TTS narration
-    └── video/                       # Demo video
+```text
+04_full_text_review/fulltext/<reference-id>/
+├── metadata.json
+├── source.pdf
+└── mineru/
+    ├── content.md
+    ├── tables.json
+    ├── page_map.json
+    └── parse_report.json
 ```
 
-## Pipeline Flow
+文件名可因解析工具而略有变化，但引用 ID、来源信息和页码映射必须保留。
 
-```
-Literature → Ideation → Experiment → Publication → Promotion
-```
+## 无法继续时的产物
 
-Each stage is powered by one or more [research skills](../skills/README.md). The agent reads and follows the corresponding `SKILL.md` to produce the artifacts above. Skills can be run independently (e.g., only paper writing) or as a full end-to-end pipeline.
+数据不足或阶段受阻时，应留下明确报告，不得补造记录或统计结果：
 
-## Stage → Skill Mapping
+- `02_search_dedupe/no_data_report.md`
+- `04_full_text_review/unavailable_full_text_report.md`
+- `05_data_extraction/cannot_extract_data_report.md`
+- `07_data_analysis/cannot_synthesize_report.md`
 
-| Stage | Skills Used | Key Outputs |
-|-------|------------|-------------|
-| **Literature** | `inno-prepare-resources`, `inno-code-survey`, `inno-deep-research`, `paper-analyzer`, `paper-finder` | Literature reports, reference notes, code survey maps |
-| **Ideation** | `inno-idea-generation`, `inno-idea-eval` | Ranked research ideas with multi-dimension scores |
-| **Experiment** | `inno-experiment-dev`, `inno-experiment-analysis` | Runnable code, results tables, statistical analysis |
-| **Publication** | `inno-paper-writing`, `inno-figure-gen`, `inno-paper-reviewer`, `inno-humanizer`, `inno-reference-audit`, `inno-rclone-to-overleaf` | Manuscript, figures, review feedback, Overleaf sync |
-| **Promotion** | `making-academic-presentations` | Slides, narration audio, demo video, homepage |
+报告至少说明缺少什么、已尝试的处理方式、影响范围以及建议的下一步。
+
+## 文件管理规则
+
+- 原始导入文件只读保存；清洗、去重和转换结果另存。
+- 分析脚本放在当前阶段的 `code/` 子目录，固定随机种子并记录软件版本。
+- 表格中的文献 ID 应在筛选、全文、提取、评价和分析阶段保持一致。
+- 文档内部优先使用项目相对路径，便于跨平台迁移。
+- 最终统计数据、图表和稿件在导出前必须人工复核。
