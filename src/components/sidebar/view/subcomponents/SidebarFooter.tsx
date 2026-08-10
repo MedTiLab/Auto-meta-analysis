@@ -37,7 +37,7 @@ export default function SidebarFooter({ onShowSettings, onOpenTrash, isTrashActi
         {t('actions.settings')}
       </button>
       <a
-        href="https://github.com/YzGLab/medautodata"
+        href="https://github.com/YzGLab/Auto-meta-analysis"
         target="_blank"
         rel="noreferrer"
         className="flex h-9 w-full items-center gap-2 px-2.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
