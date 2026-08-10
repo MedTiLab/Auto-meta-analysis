@@ -68,11 +68,10 @@ describe('project home-path migration', () => {
       },
     );
 
-    const claudeDir = path.join(tempRoot, '.claude');
-    const medHelpConfigPath = path.join(tempRoot, '.medhelp', 'project-config.json');
-    await mkdir(claudeDir, { recursive: true });
+    const medHelpConfigPath = path.join(tempRoot, '.autometa', 'project-config.json');
+    await mkdir(path.dirname(medHelpConfigPath), { recursive: true });
     await writeFile(
-      path.join(claudeDir, 'project-config.json'),
+      medHelpConfigPath,
       JSON.stringify({
         [projectName]: {
           originalPath: oldProjectPath,

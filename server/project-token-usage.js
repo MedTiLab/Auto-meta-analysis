@@ -2,6 +2,8 @@ import { promises as fs } from 'fs';
 import fsSync from 'fs';
 import os from 'os';
 import path from 'path';
+import { resolveDefaultWorkspacesRoot } from './utils/workspacePaths.js';
+import { isLegacyDataImportEnabled } from './utils/storagePaths.js';
 import readline from 'readline';
 
 import { encodeProjectPath } from './projects.js';
@@ -17,7 +19,7 @@ function createEmptyUsageTotals() {
   };
 }
 
-const CURRENT_DEFAULT_WORKSPACES_ROOT = path.join(os.homedir(), 'medautodata');
+const CURRENT_DEFAULT_WORKSPACES_ROOT = resolveDefaultWorkspacesRoot();
 const LEGACY_DEFAULT_WORKSPACES_ROOTS = [
   path.join(os.homedir(), 'dr-claw'),
   path.join(os.homedir(), 'vibelab'),
@@ -65,6 +67,10 @@ function addUsageForTimestamp(target, timestampMs, tokens, bounds) {
 }
 
 function remapCurrentProjectPathsToLegacy(projectPath) {
+  if (!isLegacyDataImportEnabled()) {
+    return [];
+  }
+
   if (!projectPath) {
     return [];
   }

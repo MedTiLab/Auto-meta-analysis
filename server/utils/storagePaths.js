@@ -4,10 +4,16 @@ import { promises as fsPromises } from 'fs';
 import os from 'os';
 import path from 'path';
 
-export const PROJECT_DATA_DIRNAME = '.medhelp';
+export const PROJECT_DATA_DIRNAME = '.autometa';
 const LEGACY_PROJECT_DATA_DIR_NAMES = ['.med-help'];
 const LEGACY_SHARED_DATA_DIR_NAMES = ['.med-help', '.medautodata', '.dr-claw', '.vibelab'];
 const PROJECT_SCOPED_DATA_DIRNAME = 'projects';
+
+export function isLegacyDataImportEnabled() {
+  return ['1', 'true', 'yes', 'on'].includes(
+    String(process.env.AUTOMETA_IMPORT_LEGACY_DATA || '').trim().toLowerCase()
+  );
+}
 
 function normalizeResolvedPath(targetPath) {
   if (!targetPath || typeof targetPath !== 'string') {
@@ -84,18 +90,30 @@ export function resolveProjectChatAttachmentsDir(projectPath) {
 }
 
 export function resolveLegacyProjectConfigPaths(homeDir = os.homedir()) {
+  if (!isLegacyDataImportEnabled()) {
+    return [];
+  }
+
   return uniqueResolvedPaths([
     path.join(homeDir, '.claude', 'project-config.json'),
   ]);
 }
 
 export function getLegacySharedDataRoots(homeDir = os.homedir()) {
+  if (!isLegacyDataImportEnabled()) {
+    return [];
+  }
+
   return uniqueResolvedPaths(
     LEGACY_SHARED_DATA_DIR_NAMES.map((dirName) => path.join(homeDir, dirName))
   );
 }
 
 export function getLegacyProjectDataRoots(projectPath) {
+  if (!isLegacyDataImportEnabled()) {
+    return [];
+  }
+
   const resolvedProjectPath = normalizeResolvedPath(projectPath);
   if (!resolvedProjectPath) {
     return [];

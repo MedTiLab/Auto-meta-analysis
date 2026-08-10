@@ -54,9 +54,11 @@ import {
   readExplicitSessionModeFromMetadata,
 } from './utils/sessionMode.js';
 import {
+  isLegacyDataImportEnabled,
   resolveLegacyProjectConfigPaths,
   resolveProjectConfigPath,
 } from './utils/storagePaths.js';
+import { resolveDefaultWorkspacesRoot } from './utils/workspacePaths.js';
 import {
   META_FOLDER_SCHEMA_VERSION,
   META_NUMBERED_STAGE_DIRS,
@@ -193,7 +195,7 @@ async function inferProjectKindForPath(projectPath, options = {}) {
   return 'meta';
 }
 
-const CURRENT_DEFAULT_WORKSPACES_ROOT = path.join(os.homedir(), 'medautodata');
+const CURRENT_DEFAULT_WORKSPACES_ROOT = resolveDefaultWorkspacesRoot();
 const LEGACY_DEFAULT_WORKSPACES_ROOTS = [
   path.join(os.homedir(), 'dr-claw'),
   path.join(os.homedir(), 'vibelab'),
@@ -591,7 +593,7 @@ async function loadProjectConfig() {
 }
 
 async function migrateLegacyDefaultWorkspacesRoot(targetRoot = CURRENT_DEFAULT_WORKSPACES_ROOT) {
-  if (targetRoot !== CURRENT_DEFAULT_WORKSPACES_ROOT) {
+  if (!isLegacyDataImportEnabled() || targetRoot !== CURRENT_DEFAULT_WORKSPACES_ROOT) {
     return targetRoot;
   }
 
@@ -663,7 +665,7 @@ async function getVisibleWorkspaceRoots(configRoot = null) {
       resolvedRoot === CURRENT_DEFAULT_WORKSPACES_ROOT ||
       LEGACY_DEFAULT_WORKSPACES_ROOTS.includes(resolvedRoot));
 
-  if (usesDefaultWorkspaceRoot) {
+  if (usesDefaultWorkspaceRoot && isLegacyDataImportEnabled()) {
     candidateRoots.push(...LEGACY_DEFAULT_WORKSPACES_ROOTS);
     candidateRoots.push(CURRENT_DEFAULT_WORKSPACES_ROOT);
   }

@@ -45,7 +45,7 @@ describe('trashed sessions stay out of active project lists', () => {
 
   it('excludes trashed Claude sessions from getProjects while keeping them in trash', async () => {
     const { projects, database } = await loadTestModules();
-    const projectPath = path.join(tempRoot, 'medautodata', 'workspace');
+    const projectPath = path.join(tempRoot, 'autometa_workspace', 'workspace');
     const projectName = '-Users-test-workspace';
     const activeSessionId = '019d5000-0000-7000-8000-000000000010';
     const trashedSessionId = '019d5000-0000-7000-8000-000000000011';
@@ -85,7 +85,7 @@ describe('trashed sessions stay out of active project lists', () => {
 
   it('clears trash-only project metadata when restoring a project', async () => {
     const { projects, database } = await loadTestModules();
-    const projectPath = path.join(tempRoot, 'medautodata', 'publication-paper');
+    const projectPath = path.join(tempRoot, 'autometa_workspace', 'publication-paper');
     const projectName = '-Users-test-publication-paper';
     const trashedAt = '2026-03-31T10:30:00.000Z';
 
@@ -108,11 +108,10 @@ describe('trashed sessions stay out of active project lists', () => {
       trash: trashMetadata,
     });
 
-    const claudeDir = path.join(tempRoot, '.claude');
-    const medHelpConfigPath = path.join(tempRoot, '.medhelp', 'project-config.json');
-    await mkdir(claudeDir, { recursive: true });
+    const medHelpConfigPath = path.join(tempRoot, '.autometa', 'project-config.json');
+    await mkdir(path.dirname(medHelpConfigPath), { recursive: true });
     await writeFile(
-      path.join(claudeDir, 'project-config.json'),
+      medHelpConfigPath,
       JSON.stringify({
         [projectName]: {
           originalPath: projectPath,

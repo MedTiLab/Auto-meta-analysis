@@ -40,10 +40,10 @@ describe('database default path', () => {
     }
   });
 
-  it('creates the default database under ~/.medhelp when DATABASE_PATH is unset', async () => {
+  it('creates the default database under ~/.autometa when DATABASE_PATH is unset', async () => {
     const database = await loadDatabaseModule();
     await database.initializeDatabase();
 
-    await expect(access(path.join(tempRoot, '.medhelp', 'auth.db'))).resolves.toBeUndefined();
+    await expect(access(path.join(tempRoot, '.autometa', 'auth.db'))).resolves.toBeUndefined();
   });
 });

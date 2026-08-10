@@ -31,7 +31,7 @@ const ProjectCreationWizard = ({ onClose, onProjectCreated }) => {
   const [showNewFolderInput, setShowNewFolderInput] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [creatingFolder, setCreatingFolder] = useState(false);
-  const [workspaceRoot, setWorkspaceRoot] = useState('~/medautodata');
+  const [workspaceRoot, setWorkspaceRoot] = useState('~/autometa_workspace');
   const [workspaceRootLocked, setWorkspaceRootLocked] = useState(false);
   const autoFillKeyRef = useRef('');
   const generatedWorkspacePathRef = useRef('');
@@ -85,13 +85,13 @@ const ProjectCreationWizard = ({ onClose, onProjectCreated }) => {
 
   const getNewWorkspaceParentPath = () => {
     if (workspaceRootLocked) {
-      return workspaceRoot || '~/medautodata';
+      return workspaceRoot || '~/autometa_workspace';
     }
 
     const trimmedWorkspacePath = workspacePath.trim();
     return trimmedWorkspacePath
       ? getParentDirectoryPath(trimmedWorkspacePath)
-      : workspaceRoot || '~/medautodata';
+      : workspaceRoot || '~/autometa_workspace';
   };
 
   const applyGeneratedWorkspaceName = (parentPath, nextName) => {
@@ -134,13 +134,13 @@ const ProjectCreationWizard = ({ onClose, onProjectCreated }) => {
     try {
       const response = await api.getWorkspaceRoot();
       const data = await response.json();
-      const resolvedRoot = data.path || data.defaultPath || '~/medautodata';
+      const resolvedRoot = data.path || data.defaultPath || '~/autometa_workspace';
       setWorkspaceRoot(resolvedRoot);
       setWorkspaceRootLocked(Boolean(data.lockedToDefault ?? data.lockedToUser));
       return resolvedRoot;
     } catch (error) {
       console.error('Error loading workspace root:', error);
-      return workspaceRoot || '~/medautodata';
+      return workspaceRoot || '~/autometa_workspace';
     }
   };
 
@@ -171,7 +171,7 @@ const ProjectCreationWizard = ({ onClose, onProjectCreated }) => {
       return;
     }
 
-    const resolvedRoot = workspaceRoot || '~/medautodata';
+    const resolvedRoot = workspaceRoot || '~/autometa_workspace';
     const autoFillKey = `${workspaceRootLocked ? 'locked' : 'wizard'}:${resolvedRoot}`;
     if (autoFillKeyRef.current === autoFillKey) {
       return;
@@ -280,7 +280,7 @@ const ProjectCreationWizard = ({ onClose, onProjectCreated }) => {
       if (useServerManagedNewPath) {
         if (!projectName.trim()) {
           const fallbackName = generateWorkspaceName([]);
-          applyGeneratedWorkspaceName(workspaceRoot || '~/medautodata', fallbackName);
+          applyGeneratedWorkspaceName(workspaceRoot || '~/autometa_workspace', fallbackName);
         }
         setStep(3);
         return;
@@ -603,7 +603,7 @@ const ProjectCreationWizard = ({ onClose, onProjectCreated }) => {
                       {t('projectWizard.lockedWorkspace.locationLabel')}
                     </p>
                     <code className="mt-1 block break-all rounded bg-white px-3 py-2 text-xs text-gray-900 dark:bg-gray-900 dark:text-white">
-                      {workspaceRoot || '~/medautodata'}
+                      {workspaceRoot || '~/autometa_workspace'}
                     </code>
                   </div>
                 </div>
@@ -691,7 +691,7 @@ const ProjectCreationWizard = ({ onClose, onProjectCreated }) => {
                     <div className="flex justify-between gap-4 text-sm">
                       <span className="text-gray-600 dark:text-gray-400">{t('projectWizard.lockedWorkspace.locationLabel')}</span>
                       <span className="font-mono text-xs text-gray-900 dark:text-white break-all text-right">
-                        {workspaceRoot || '~/medautodata'}
+                        {workspaceRoot || '~/autometa_workspace'}
                       </span>
                     </div>
                   ) : (

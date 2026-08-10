@@ -5,6 +5,8 @@ import path from 'path';
 import { spawn } from 'child_process';
 import os from 'os';
 import { addProjectManually, extractProjectDirectory, getWorkspaceRootFromConfig, setWorkspaceRootInConfig } from '../projects.js';
+import { resolveDefaultWorkspacesRoot } from '../utils/workspacePaths.js';
+import { isLegacyDataImportEnabled } from '../utils/storagePaths.js';
 import { IS_PLATFORM } from '../constants/config.js';
 import {
   META_FOLDER_SCHEMA_VERSION,
@@ -555,8 +557,8 @@ export async function addWorkspaceArchiveEntries(archive, absoluteDirPath, relat
   }
 }
 
-// Default workspace root: ~/medautodata
-const DEFAULT_WORKSPACES_ROOT = path.join(os.homedir(), 'medautodata');
+// User-configurable workspace root with a platform-aware AutoMeta default.
+const DEFAULT_WORKSPACES_ROOT = resolveDefaultWorkspacesRoot();
 const LEGACY_DEFAULT_WORKSPACES_ROOTS = [
   path.join(os.homedir(), 'dr-claw'),
   path.join(os.homedir(), 'vibelab'),
@@ -623,7 +625,11 @@ function getCompatibleWorkspaceRootSync() {
     return DEFAULT_WORKSPACES_ROOT;
   }
 
-  return LEGACY_DEFAULT_WORKSPACES_ROOTS.find((legacyRoot) => fsSync.existsSync(legacyRoot)) || DEFAULT_WORKSPACES_ROOT;
+  if (isLegacyDataImportEnabled()) {
+    return LEGACY_DEFAULT_WORKSPACES_ROOTS.find((legacyRoot) => fsSync.existsSync(legacyRoot)) || DEFAULT_WORKSPACES_ROOT;
+  }
+
+  return DEFAULT_WORKSPACES_ROOT;
 }
 
 function expandWorkspaceRootInput(inputPath) {
