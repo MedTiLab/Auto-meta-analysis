@@ -17,13 +17,13 @@
     "NOTICE",
     "LICENSE"
   ],
-  "homepage": "https://github.com/YzGLab/medautodata",
+  "homepage": "https://github.com/medicinehelp/Auto-meta-analysis",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YzGLab/medautodata.git"
+    "url": "git+https://github.com/medicinehelp/Auto-meta-analysis.git"
   },
   "bugs": {
-    "url": "https://github.com/YzGLab/medautodata/issues"
+    "url": "https://github.com/medicinehelp/Auto-meta-analysis/issues"
   },
   "scripts": {
     "dev": "concurrently --kill-others \"npm run server:watch\" \"npm run client\"",

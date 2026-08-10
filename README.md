@@ -29,7 +29,7 @@ AutoMeta 是一个面向医学研究与系统综述的本地优先 AI 工作台�
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/YzGLab/Auto-meta-analysis.git
+git clone https://github.com/medicinehelp/Auto-meta-analysis.git
 cd Auto-meta-analysis
 ```
 
