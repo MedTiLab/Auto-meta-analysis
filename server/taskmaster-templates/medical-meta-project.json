@@ -1,0 +1,688 @@
+{
+  "id": "medical-meta-project",
+  "name": "Meta Project",
+  "description": "Systematic review and Meta-analysis project template with PRISMA-oriented numbered workflow folders: literature review/topic selection, protocol, search/dedupe, title/abstract screening, full-text review, data extraction, quality assessment, data analysis, result figures, manuscript submission, and presentation outputs. New projects use the meta-v2 folder schema and must not create generic Experiment/analysis Meta outputs, Survey/meta-analysis, or a meta-analysis subfolder.",
+  "domain": "medical-research",
+  "category": "medical-research",
+  "listPriority": 0,
+  "format": "research-brief-json",
+  "fileName": "research_brief.json",
+  "metaFields": [
+    {
+      "key": "title",
+      "label": "Review title",
+      "path": "meta.title",
+      "placeholder": "Systematic review / Meta-analysis title"
+    },
+    {
+      "key": "lead_author",
+      "label": "Lead author",
+      "path": "meta.lead_author",
+      "placeholder": "Lead author or team"
+    },
+    {
+      "key": "target_venue",
+      "label": "Target venue",
+      "path": "meta.target_venue",
+      "placeholder": "Journal, preprint, thesis, or internal report"
+    },
+    {
+      "key": "review_type",
+      "label": "Review type",
+      "path": "meta.review_type",
+      "placeholder": "diagnostic | intervention | prognostic | prevalence | network | scoping"
+    },
+    {
+      "key": "registration_reference",
+      "label": "Registration / protocol reference",
+      "path": "meta.registration_reference",
+      "placeholder": "Optional: PROSPERO / OSF / protocol DOI. If unavailable, write registration guidance only."
+    }
+  ],
+  "sectionFields": {
+    "literature": [
+      {
+        "key": "core_research_question",
+        "label": "Primary review question",
+        "path": "sections.literature.core_research_question",
+        "placeholder": "Population, intervention/exposure/index test, comparator, outcomes"
+      },
+      {
+        "key": "literature_scope",
+        "label": "Evidence scope",
+        "path": "sections.literature.literature_scope",
+        "placeholder": "Databases, years, languages, study designs, topic boundary"
+      },
+      {
+        "key": "search_plan",
+        "label": "Search plan",
+        "path": "sections.literature.search_plan",
+        "placeholder": "PubMed/MEDLINE strategy, optional sources, citation chasing, registry checks"
+      },
+      {
+        "key": "seed_references",
+        "label": "Seed references",
+        "path": "sections.literature.seed_references",
+        "type": "array",
+        "placeholder": "One seed paper, guideline, or prior review per line"
+      },
+      {
+        "key": "evidence_gap",
+        "label": "Evidence gap",
+        "path": "sections.literature.evidence_gap",
+        "placeholder": "Why this review is needed and what uncertainty it resolves"
+      },
+      {
+        "key": "topic_selection_rationale",
+        "label": "Meta topic selection",
+        "path": "sections.literature.topic_selection_rationale",
+        "placeholder": "Scientific relevance, evidence volume, heterogeneity risk, extractable effect sizes, and submission value"
+      },
+      {
+        "key": "scoping_review_route",
+        "label": "Scoping / systematic review route",
+        "path": "sections.literature.scoping_review_route",
+        "placeholder": "Whether this should remain scoping/narrative/systematic review or proceed to quantitative Meta-analysis"
+      }
+    ],
+    "ideation": [
+      {
+        "key": "review_objective",
+        "label": "Review objective",
+        "path": "sections.ideation.review_objective",
+        "placeholder": "Primary objective and intended decision value"
+      },
+      {
+        "key": "pico_or_peco",
+        "label": "PICO / PECO",
+        "path": "sections.ideation.pico_or_peco",
+        "placeholder": "Population; intervention/exposure/index test; comparator; outcomes"
+      },
+      {
+        "key": "eligibility_criteria",
+        "label": "Eligibility criteria",
+        "path": "sections.ideation.eligibility_criteria",
+        "placeholder": "Inclusion and exclusion criteria for screening"
+      },
+      {
+        "key": "protocol_plan",
+        "label": "Protocol plan",
+        "path": "sections.ideation.protocol_plan",
+        "placeholder": "Protocol decisions, PRISMA logic, AI first/second-screen gates, and explicit user override handling"
+      }
+    ],
+    "experiment": [
+      {
+        "key": "screening_plan",
+        "label": "Screening plan",
+        "path": "sections.experiment.screening_plan",
+        "placeholder": "AI pre-screen scoring, Claude second-pass review, optional catch-up audit, full-text gates, final decisions, conflict handling"
+      },
+      {
+        "key": "pdf_and_parse_plan",
+        "label": "Full-text / parse plan",
+        "path": "sections.experiment.pdf_and_parse_plan",
+        "placeholder": "Legal full-text sources for explicit fulltext_manifest needs_full_text queue records, PDF/Markdown/HTML/text assets, MinerU or direct conversion, parse-quality triage"
+      },
+      {
+        "key": "extraction_plan",
+        "label": "Extraction / quality plan",
+        "path": "sections.experiment.extraction_plan",
+        "placeholder": "Candidate extraction fields, evidence links, confidence, user authorization or agent review, RoB/QUADAS/NOS/GRADE plan"
+      },
+      {
+        "key": "analysis_plan",
+        "label": "Synthesis plan",
+        "path": "sections.experiment.analysis_plan",
+        "placeholder": "Effect measure, model, heterogeneity, subgroup/sensitivity, bias checks"
+      }
+    ],
+    "publication": [
+      {
+        "key": "manuscript_outline",
+        "label": "PRISMA manuscript outline",
+        "path": "sections.publication.manuscript_outline",
+        "placeholder": "Abstract, introduction, methods, results, discussion, limitations, conclusion"
+      },
+      {
+        "key": "figures_tables_plan",
+        "label": "Figures / tables plan",
+        "path": "sections.publication.figures_tables_plan",
+        "placeholder": "PRISMA flow, study characteristics, RoB, forest, funnel, evidence certainty"
+      },
+      {
+        "key": "submission_checklist",
+        "label": "Submission checklist",
+        "path": "sections.publication.submission_checklist",
+        "type": "array",
+        "placeholder": "PRISMA checklist, supplements, data availability, conflicts, funding"
+      }
+    ],
+    "promotion": [
+      {
+        "key": "slide_outline",
+        "label": "Slide outline",
+        "path": "sections.promotion.slide_outline",
+        "placeholder": "Question, methods, PRISMA flow, evidence profile, main result, limitations"
+      },
+      {
+        "key": "homepage_plan",
+        "label": "Public summary plan",
+        "path": "sections.promotion.homepage_plan",
+        "placeholder": "Plain-language summary and artifact links, if needed"
+      },
+      {
+        "key": "delivery_assets",
+        "label": "Delivery assets",
+        "path": "sections.promotion.delivery_assets",
+        "placeholder": "Slides, homepage, audio, video, poster, or journal club package"
+      }
+    ]
+  },
+  "pipeline": {
+    "version": "1.1",
+    "mode": "meta",
+    "startStage": "literature",
+    "stages": {
+      "literature": {
+        "required_elements": [
+          "sections.literature.core_research_question",
+          "sections.literature.literature_scope",
+          "sections.literature.search_plan"
+        ],
+        "quality_gate": [
+          "The review question is specific enough for reproducible search",
+          "Search scope and seed references are recorded",
+          "Literature review, topic selection, and scoping route artifacts use 00_literature/ before protocol files are created",
+          "Project startup and pipeline bootstrap reports, when produced, are saved under 01_protocol/project_startup_report.md or a timestamped variant.",
+          "If evidence is insufficient for the requested route, write a feasibility or no-data report instead of inventing records."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_literature_scope",
+            "title": "Run literature review, topic selection, and scoping route check",
+            "description": "Create evidence-gap rationale, seed references, candidate review question, Meta topic feasibility notes, and scoping/systematic review route decisions under 00_literature/. Do not write locked protocol files yet.",
+            "taskType": "exploration",
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "literature-review",
+              "pubmed-search-strategy",
+              "pubmed-database",
+              "citation-management",
+              "scientific-critical-thinking"
+            ]
+          },
+          {
+            "id": "meta_reference_dedupe_plan",
+            "title": "Prepare search records and dedupe plan",
+            "description": "Convert the selected question into formal search exports, import logs, and dedupe rules under 02_search_dedupe/ without creating Survey/meta-analysis or meta-analysis subfolders.",
+            "taskType": "analysis",
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "pubmed-search-strategy",
+              "citation-management",
+              "pubmed-database"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "literature-review",
+          "pubmed-search-strategy",
+          "pubmed-database",
+          "citation-management",
+          "scientific-critical-thinking"
+        ]
+      },
+      "protocol": {
+        "required_elements": [
+          "sections.ideation.review_objective",
+          "sections.ideation.pico_or_peco",
+          "sections.ideation.eligibility_criteria"
+        ],
+        "quality_gate": [
+          "PICO/PECO and eligibility criteria are operational for AI first/second screening and explicit user overrides",
+          "Protocol decisions identify the review type and synthesis family",
+          "Protocol artifacts use 01_protocol/",
+          "Project startup and task-queue reports are saved under 01_protocol/project_startup_report.md or a timestamped variant.",
+          "Human review confirms protocol lock, PICO/PECO, eligibility criteria, and review type before search/screening automation proceeds."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_project_startup_report",
+            "title": "Write Meta project startup report and skill-routed task queue",
+            "description": "Use meta-pipeline-planner first and meta-analysis-workflow for cross-stage orchestration. Summarize current stage, missing artifacts, selected or pending review type, human review gates, and the skill list for each automatic step. Save the startup or task-queue report under 01_protocol/project_startup_report.md or a timestamped variant.",
+            "taskType": "implementation",
+            "recommended_skills": [
+              "meta-pipeline-planner",
+              "meta-analysis-workflow"
+            ]
+          },
+          {
+            "id": "meta_protocol_lock",
+            "title": "Lock protocol, PICO/PECO, and eligibility criteria",
+            "description": "Write protocol drafts, review-type rationale, PICO/PECO, outcomes, and inclusion/exclusion criteria under 01_protocol/.",
+            "taskType": "analysis",
+            "recommended_skills": [
+              "meta-pipeline-planner",
+              "meta-analysis-workflow",
+              "literature-review",
+              "scientific-critical-thinking",
+              "citation-management"
+            ]
+          },
+          {
+            "id": "meta_scoping_systematic_route",
+            "title": "Decide scoping / systematic review route",
+            "description": "If the project is a scoping or non-quantitative systematic review, keep route rationale and evidence mapping design under 00_literature/scoping_review/, then plan PRISMA counts and narrative synthesis under 01_protocol/, 03_title_abstract_screening/, 04_full_text_review/, and 09_manuscript_submission/ without forcing statistical pooling.",
+            "taskType": "analysis",
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "literature-review",
+              "pubmed-search-strategy",
+              "pubmed-database",
+              "citation-management",
+              "scientific-critical-thinking"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-pipeline-planner",
+          "meta-analysis-workflow",
+          "literature-review",
+          "scientific-critical-thinking",
+          "citation-management"
+        ]
+      },
+      "search_dedupe": {
+        "required_elements": [
+          "sections.literature.search_plan"
+        ],
+        "quality_gate": [
+          "Search strategy, raw exports, import logs, and dedupe decisions are reproducible",
+          "All search and dedupe artifacts use 02_search_dedupe/",
+          "Do not create Survey/meta-analysis or meta-analysis subfolders",
+          "Human review or explicit signoff checks final search/dedupe input before screening.",
+          "If no usable search data or imports exist, write 02_search_dedupe/no_data_report.md instead of inventing records.",
+          "Any search normalization code is stored under 02_search_dedupe/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_reference_dedupe_plan",
+            "title": "Prepare search records and dedupe plan",
+            "description": "Convert the selected question into formal search exports, import logs, and dedupe rules under 02_search_dedupe/ without creating Survey/meta-analysis or meta-analysis subfolders.",
+            "taskType": "analysis",
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "pubmed-search-strategy",
+              "citation-management",
+              "pubmed-database"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "pubmed-search-strategy",
+          "citation-management",
+          "pubmed-database"
+        ]
+      },
+      "title_abstract_screening": {
+        "required_elements": [
+          "sections.experiment.screening_plan"
+        ],
+        "quality_gate": [
+          "Title/abstract screening has first-screen and second-screen passes after search/dedupe: audit files go under 03_title_abstract_screening/01_ai_pre_screen/ and 03_title_abstract_screening/02_agent_rescreen/, with synchronized stage=title_abstract decisions in 03_title_abstract_screening/screening_decisions.json",
+          "Named-agent-reviewed title/abstract include/maybe records, plus explicit user overrides, are eligible for a missing-full-text queue; two human reviewers are not required",
+          "Markdown is explanatory only; screening_decisions.json is the synchronization source",
+          "Low-confidence or conflicting screening decisions are collected for targeted human review, not a broad default user backlog."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_title_abstract_screening",
+            "title": "Run title/abstract first and second screening",
+            "description": "After search/dedupe, use AI for title/abstract first-screen include/exclude/maybe recommendations, then run a named Claude second-screen reviewer. Use explicit user decisions only as overrides or spot checks, not a routine final gate. Write first-screen audit files under 03_title_abstract_screening/01_ai_pre_screen/ and second-screen queues, reports, decisions, and conflicts under 03_title_abstract_screening/02_agent_rescreen/. Also write/update 03_title_abstract_screening/screening_decisions.json using schemaVersion meta-screening-v1 and stage=title_abstract so the intelligent screening page can sync the records; Markdown is explanatory only.",
+            "taskType": "analysis",
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "meta-screening-rescreen",
+              "citation-management",
+              "peer-review"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "meta-screening-rescreen",
+          "citation-management",
+          "peer-review"
+        ]
+      },
+      "full_text_review": {
+        "required_elements": [
+          "sections.experiment.pdf_and_parse_plan"
+        ],
+        "quality_gate": [
+          "Run lawful full-text download/acquisition first for queued records, using existing project assets, user uploads, PMC/OA, and other documented public sources; only remaining incomplete records should proceed to Zotero handoff",
+          "Only incomplete records written to fulltext_manifest.json/csv with needs_full_text=true are pushed to Zotero",
+          "Full-text screening repeats the same first-screen and second-screen passes after Zotero attachments are synced back: write synchronized stage=full_text decisions in 03_title_abstract_screening/screening_decisions.json, and keep full-text assets, parse outputs, unavailable lists, and concise audit logs under 04_full_text_review/ or 04_full_text_review/fulltext/ without creating 01_ai_pre_screen/ or 02_agent_rescreen/ subfolders",
+          "Missing full text is pushed to Zotero for PDF retrieval/attachment; do not run broad in-app web downloads or generate large manual import files",
+          "MinerU parsing outputs include parse-quality flags and escalates only low-quality or conflicted records for user confirmation",
+          "If a lawful PDF/full text cannot be located or parsed, write 04_full_text_review/unavailable_full_text_report.md and keep the record blocked instead of inventing text.",
+          "Human review checks full-text license/availability and parse quality before extraction proceeds.",
+          "Any download, parse, or sync code is stored under 04_full_text_review/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_full_text_pdf_mineru",
+            "title": "Download lawful full text, hand remaining missing items to Zotero, then run full-text screening",
+            "description": "Use title/abstract Claude-reviewed include/maybe records plus explicit user overrides only as eligibility, then write only incomplete records to fulltext_manifest.json/csv with needs_full_text=true. First run lawful full-text download/acquisition with existing project assets, user uploads, PMC/OA, and other documented public sources; record downloaded/exists/manual_upload_required/no_oa_pdf/failed status. Then push only records that are still incomplete to Zotero for PDF retrieval/attachment. After Zotero attachments are synced back, repeat first-screen/second-screen review for full text. Write/update 03_title_abstract_screening/screening_decisions.json with stage=full_text, and keep full-text screening audit logs, Zotero handoff/sync status, unavailable full text, MinerU/direct-conversion outputs, parse-quality flags, and issues requiring re-read under 04_full_text_review/ or 04_full_text_review/fulltext/ without creating 01_ai_pre_screen/ or 02_agent_rescreen/ subfolders.",
+            "taskType": "implementation",
+            "dependencies": [
+              "meta_title_abstract_screening"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "legal-pdf-acquisition",
+              "public-literature-download",
+              "meta-zotero-fulltext-handoff",
+              "zotero-medautodata-library",
+              "meta-screening-rescreen",
+              "citation-management",
+              "mineru-pdf-parser",
+              "data-transform",
+              "peer-review"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "legal-pdf-acquisition",
+          "public-literature-download",
+          "meta-zotero-fulltext-handoff",
+          "zotero-medautodata-library",
+          "meta-screening-rescreen",
+          "citation-management",
+          "mineru-pdf-parser",
+          "data-transform",
+          "peer-review"
+        ]
+      },
+      "data_extraction": {
+        "required_elements": [
+          "sections.experiment.extraction_plan"
+        ],
+        "quality_gate": [
+          "Extraction rows preserve source evidence, page/table provenance, confidence, parse-quality caveats, and review status",
+          "Candidate rows must be user-authorized or confirmed before final statistics",
+          "If required fields cannot be extracted from source evidence, write 05_data_extraction/cannot_extract_data_report.md instead of filling values from assumptions.",
+          "Human review confirms extraction rows before final statistics.",
+          "Any extraction code is stored under 05_data_extraction/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_data_extraction",
+            "title": "Build data extraction tables",
+            "description": "Create candidate study characteristics, outcome fields, effect-size fields, and meta-ready extraction datasets under 05_data_extraction/ with source evidence, confidence, parse-quality caveats, and review status. Candidate rows must be user-authorized or confirmed before final statistics.",
+            "taskType": "analysis",
+            "dependencies": [
+              "meta_full_text_pdf_mineru"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "meta-extraction",
+              "pdf-evidence-extraction",
+              "diagnostic-data-extraction",
+              "data-transform",
+              "scientific-critical-thinking",
+              "peer-review"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "meta-extraction",
+          "pdf-evidence-extraction",
+          "diagnostic-data-extraction",
+          "data-transform",
+          "scientific-critical-thinking",
+          "peer-review"
+        ]
+      },
+      "quality_assessment": {
+        "required_elements": [
+          "sections.experiment.extraction_plan"
+        ],
+        "quality_gate": [
+          "Quality appraisal uses the review-type appropriate tool: RoB, QUADAS, NOS, GRADE, or an explicitly justified alternative",
+          "Quality and risk-of-bias outputs preserve source evidence, confidence, and review status",
+          "Human review checks quality/risk-of-bias judgments before statistics.",
+          "Any quality assessment code is stored under 06_quality_assessment/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_quality_assessment",
+            "title": "Complete quality and risk-of-bias assessment",
+            "description": "Choose the appropriate RoB/QUADAS/NOS/GRADE route for the review type and write quality appraisal tables, evidence notes, and Claude review flags under 06_quality_assessment/.",
+            "taskType": "analysis",
+            "dependencies": [
+              "meta_data_extraction"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "scientific-critical-thinking",
+              "peer-review",
+              "data-transform",
+              "scholar-evaluation"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "scientific-critical-thinking",
+          "peer-review",
+          "data-transform",
+          "scholar-evaluation"
+        ]
+      },
+      "data_analysis": {
+        "required_elements": [
+          "sections.experiment.analysis_plan"
+        ],
+        "quality_gate": [
+          "Only user-authorized or confirmed extraction rows can feed 07_data_analysis/",
+          "Synthesis route matches the review type and available effect fields",
+          "Statistical scripts, model inputs, diagnostics, and machine-readable outputs are saved under 07_data_analysis/",
+          "If synthesis eligibility is not met, write 07_data_analysis/cannot_synthesize_report.md instead of forcing a model.",
+          "Human review confirms statistical inputs and synthesis route before manuscript claims are written.",
+          "Any statistical code is stored under 07_data_analysis/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_statistics",
+            "title": "Gate synthesis and run data analysis",
+            "description": "First check that included studies, effect fields, variance or convertible data, heterogeneity sources, quality appraisal, full-text/parse authorization, and extraction rows are user-authorized or confirmed. Then route diagnostic, intervention/effect-size, prognostic HR, prevalence/single-arm, or network Meta planning with the appropriate skills. Save scripts and outputs to 07_data_analysis/ and result figures/tables to 08_results_figures/.",
+            "taskType": "analysis",
+            "dependencies": [
+              "meta_quality_assessment"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "diagnostic-meta-analysis",
+              "meta-statistics-r",
+              "statistical-analysis",
+              "data-stats-analysis",
+              "statsmodels",
+              "data-transform"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "diagnostic-meta-analysis",
+          "meta-statistics-r",
+          "statistical-analysis",
+          "data-stats-analysis",
+          "statsmodels",
+          "data-transform"
+        ]
+      },
+      "results_figures": {
+        "required_elements": [
+          "sections.publication.figures_tables_plan"
+        ],
+        "quality_gate": [
+          "Result figures and tables are under 08_results_figures/",
+          "Figure legends and table notes match extraction, quality appraisal, and analysis outputs",
+          "PRISMA flow counts are consistent with search, screening, and full-text decisions",
+          "Human review checks figures, legends, and PRISMA counts against source artifacts before manuscript integration.",
+          "Any plotting code is stored under 08_results_figures/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_results_figures",
+            "title": "Generate result figures and tables",
+            "description": "Create PRISMA flow, study characteristics, quality/risk-of-bias summaries, forest/funnel/SROC or route-appropriate result figures, table notes, and export-ready legends under 08_results_figures/.",
+            "taskType": "analysis",
+            "dependencies": [
+              "meta_statistics"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "data-visualization-biomedical",
+              "scientific-visualization",
+              "data-viz-plots",
+              "matplotlib",
+              "seaborn",
+              "plotly",
+              "scientific-schematics"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "data-visualization-biomedical",
+          "scientific-visualization",
+          "data-viz-plots",
+          "matplotlib",
+          "seaborn",
+          "plotly",
+          "scientific-schematics"
+        ]
+      },
+      "manuscript_submission": {
+        "required_elements": [
+          "sections.publication.manuscript_outline",
+          "sections.publication.submission_checklist"
+        ],
+        "quality_gate": [
+          "PRISMA manuscript and supplementary files are under 09_manuscript_submission/",
+          "Claims match the included studies, extraction table, and synthesis outputs",
+          "Reporting checklist and search appendix are complete",
+          "Human review checks PRISMA compliance, references, and data availability before submission files are finalized.",
+          "Any manuscript automation code is stored under 09_manuscript_submission/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_prisma_manuscript",
+            "title": "Draft PRISMA manuscript and submission package",
+            "description": "Write manuscript sections, abstract, PRISMA checklist, search appendix, supplements, and data availability files to 09_manuscript_submission/; reuse result figures/tables from 08_results_figures/.",
+            "taskType": "writing",
+            "dependencies": [
+              "meta_results_figures"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "prisma-manuscript-writer",
+              "manuscript-editor",
+              "inno-paper-writing",
+              "scientific-writing",
+              "citation-management",
+              "venue-templates",
+              "docx",
+              "peer-review"
+            ]
+          },
+          {
+            "id": "meta_submission_audit",
+            "title": "Audit PRISMA compliance and reproducibility",
+            "description": "Check search logs, PRISMA counts, extraction sheets, statistics, figures, references, supplements, and data availability.",
+            "taskType": "analysis",
+            "dependencies": [
+              "meta_prisma_manuscript"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "peer-review",
+              "scientific-critical-thinking",
+              "citation-management"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "prisma-manuscript-writer",
+          "manuscript-editor",
+          "inno-paper-writing",
+          "scientific-writing",
+          "citation-management",
+          "venue-templates",
+          "docx",
+          "peer-review"
+        ]
+      },
+      "presentation": {
+        "required_elements": [
+          "sections.promotion.slide_outline"
+        ],
+        "quality_gate": [
+          "Presentation claims do not exceed the certainty of evidence",
+          "Slides, homepage, audio, and video use 10_presentation/",
+          "Human review checks public-facing claims against evidence certainty before release.",
+          "Any presentation or homepage code is stored under 10_presentation/code/."
+        ],
+        "task_blueprints": [
+          {
+            "id": "meta_presentation_storyline",
+            "title": "Build Meta project presentation storyline",
+            "description": "Create slide flow covering question, methods, PRISMA flow, evidence profile, pooled effects, limitations, and implications under 10_presentation/.",
+            "taskType": "scripting",
+            "dependencies": [
+              "meta_submission_audit"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "scientific-slides",
+              "making-academic-presentations",
+              "paper-2-web",
+              "pptx-posters"
+            ]
+          },
+          {
+            "id": "meta_delivery_assets",
+            "title": "Prepare promotion and delivery assets",
+            "description": "Package slides, homepage copy, optional audio, optional video, and handoff notes into 10_presentation/.",
+            "taskType": "delivery",
+            "dependencies": [
+              "meta_presentation_storyline"
+            ],
+            "recommended_skills": [
+              "meta-analysis-workflow",
+              "scientific-slides",
+              "making-academic-presentations",
+              "paper-2-web",
+              "pptx-posters"
+            ]
+          }
+        ],
+        "recommended_skills": [
+          "meta-analysis-workflow",
+          "scientific-slides",
+          "making-academic-presentations",
+          "paper-2-web",
+          "pptx-posters"
+        ]
+      }
+    }
+  }
+}

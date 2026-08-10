@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagnostic Data Extraction"
+  short_description: "Extract TP FP FN TN diagnostic data"
+  default_prompt: "Use $diagnostic-data-extraction to extract diagnostic 2x2 data. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

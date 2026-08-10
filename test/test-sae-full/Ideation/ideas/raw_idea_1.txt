@@ -1,0 +1,602 @@
+================================================================================
+RESEARCH IDEA: Safety-Anchored Contrastive Sparse Autoencoders (SACSA)
+================================================================================
+
+Title: Safety-Anchored Contrastive Sparse Autoencoders: Jointly Learning
+Interpretable and Safety-Guaranteed Feature Decompositions via Contrastive
+Anchoring and Hierarchical Consistency Regularization
+
+================================================================================
+1. PROBLEM STATEMENT
+================================================================================
+
+Sparse Autoencoders (SAEs) have emerged as the primary tool for decomposing
+neural network activations into interpretable features (Bricken et al., 2023;
+Cunningham et al., 2023). When scaled to production models, SAEs discover
+safety-relevant features such as deception, sycophancy, and dangerous content
+(Templeton et al., 2024). However, three critical and interacting failures
+prevent SAEs from being reliably deployed for safety monitoring:
+
+(F1) FEATURE ABSORPTION: When features form natural hierarchies (e.g.,
+"harmful content" > "bioweapons" > "synthesis instructions"), sparsity
+optimization causes parent features to be absorbed into child features,
+making general safety-relevant features unreliable classifiers (Chanin
+et al., 2024). A "deception" feature may fail to activate on novel
+deception types that happen to co-occur with more specific features.
+
+(F2) NON-CANONICAL DECOMPOSITION: SAEs of different sizes produce
+fundamentally different feature dictionaries with no convergence to a
+canonical set (Leask et al., ICLR 2025). Features are neither complete
+(smaller SAEs miss information) nor atomic (larger SAE features decompose
+into meta-latents). This means safety-critical features discovered at one
+scale may vanish or fragment at another.
+
+(F3) SAFETY-AGNOSTIC TRAINING: Standard SAE objectives (reconstruction +
+sparsity) are entirely unsupervised and safety-unaware. There is no
+mechanism to ensure that safety-relevant directions in activation space
+receive preferential treatment in the learned dictionary. Features
+capturing "refusal behavior" or "situational awareness" may be poorly
+represented or split across many latents, reducing their utility for
+safety monitoring.
+
+These problems compound: a safety-relevant feature that is absorbed,
+non-canonical, AND poorly prioritized by the loss function is essentially
+invisible to any downstream safety monitoring system.
+
+The core research question is: Can we design an SAE training framework that
+jointly optimizes for (a) standard reconstruction quality, (b) hierarchically
+consistent safety feature decomposition, and (c) guaranteed representation of
+known safety-relevant directions, while maintaining the unsupervised discovery
+of novel features?
+
+================================================================================
+2. PROPOSED METHOD: Safety-Anchored Contrastive Sparse Autoencoders (SACSA)
+================================================================================
+
+SACSA introduces three synergistic innovations: (i) contrastive safety anchoring,
+(ii) anti-absorption hierarchical consistency regularization, and (iii) an
+adaptive dictionary partitioning scheme. We describe each in full mathematical
+detail.
+
+--------------------------------------------------------------------------------
+2.1 Notation and Base Architecture
+--------------------------------------------------------------------------------
+
+Let x in R^d denote an activation vector at a specific layer of the target
+model, drawn from data distribution D. We use a Gated SAE (Rajamanoharan
+et al., 2024) as our base architecture for its superior handling of shrinkage:
+
+  Gating:       pi(x) = sigma(W_gate (x - b_pre) + b_gate)       in R^n
+  Magnitude:    mu(x) = ReLU(W_mag (x - b_pre) + b_mag)          in R^n
+  Latent code:  z(x) = pi(x) * mu(x)                             in R^n
+  Decoder:      x_hat = W_dec z(x) + b_dec                       in R^d
+
+where sigma is the element-wise sigmoid, * is element-wise multiplication,
+W_gate, W_mag in R^{n x d}, W_dec in R^{d x n}, b_pre in R^d, b_gate,
+b_mag in R^n, b_dec in R^d are learnable parameters, and n >> d is the
+dictionary size (expansion factor).
+
+We partition the n dictionary features into two sets:
+  - Anchored features A with |A| = n_a: reserved for safety-relevant concepts
+  - Free features F with |F| = n - n_a: discovered via standard unsupervised
+    learning
+
+So z(x) = [z_A(x); z_F(x)] and W_dec = [W_dec^A; W_dec^F] accordingly.
+
+Denote the i-th decoder column (feature direction) as d_i = W_dec[:, i].
+
+--------------------------------------------------------------------------------
+2.2 Contrastive Safety Anchoring (CSA)
+--------------------------------------------------------------------------------
+
+The key idea is to use contrastively constructed safety directions as
+"anchors" that constrain a subset of dictionary features to align with
+known safety-relevant concepts, while leaving the majority of the dictionary
+free for unsupervised discovery.
+
+STEP 1: Construct Safety Direction Bank.
+
+Following Representation Engineering (Zou et al., 2023), we construct K
+safety-relevant contrast pairs. For each safety concept k in {1,...,K}
+(e.g., deception, power-seeking, harmful content, sycophancy, situational
+awareness), we construct:
+
+  v_k = E_{x ~ D_k^+}[x] - E_{x ~ D_k^-}[x]
+
+where D_k^+ and D_k^- are distributions over activations from prompts that
+elicit vs. do not elicit concept k. We normalize: v_k <- v_k / ||v_k||_2.
+
+To handle the multi-dimensional nature of safety concepts, we also compute
+a low-rank subspace via PCA on the positive-negative activation differences:
+
+  Delta_k = {x_i^+ - x_i^- : i = 1,...,m_k}
+  U_k = top-r SVD(Delta_k) in R^{d x r}
+
+where r is the subspace rank (typically r = 3-5).
+
+STEP 2: Anchor Assignment.
+
+For each safety concept k, we reserve r_k anchored features. The total
+anchor count is n_a = sum_{k=1}^{K} r_k. We define an assignment function
+alpha: A -> {1,...,K} mapping each anchored index to its safety concept.
+
+STEP 3: Contrastive Anchoring Loss.
+
+For each anchored feature i in A with alpha(i) = k, the decoder direction
+d_i must align with the safety subspace U_k. We define:
+
+  L_anchor = sum_{i in A} (1 - ||U_{alpha(i)}^T d_i||_2^2 / ||d_i||_2^2)
+           = sum_{i in A} (1 - cos^2_sub(d_i, U_{alpha(i)}))
+
+where cos^2_sub measures the squared cosine similarity between d_i and its
+projection onto the safety subspace. This is 0 when d_i lies entirely in the
+subspace and 1 when d_i is orthogonal to it.
+
+We additionally encourage the anchored features for the same concept to span
+the subspace rather than collapse:
+
+  L_span = sum_{k=1}^{K} max(0, r_k - rank_epsilon(D_k^anchor))
+
+where D_k^anchor = [d_i : alpha(i) = k] in R^{d x r_k} and rank_epsilon
+counts singular values above threshold epsilon. In practice, we use a
+differentiable relaxation:
+
+  L_span = -sum_{k=1}^{K} sum_{j=1}^{r_k} log(sigma_j(D_k^anchor) + eps)
+
+where sigma_j are the singular values.
+
+STEP 4: Contrastive Activation Loss.
+
+To ensure anchored features activate correctly, we add a contrastive
+activation loss using matched positive/negative pairs:
+
+  L_contrast = -sum_{k=1}^{K} E_{(x^+, x^-) ~ P_k} [
+    sum_{i: alpha(i)=k} log sigma(z_i(x^+) - z_i(x^-))
+  ]
+
+where P_k is a distribution of (positive, negative) activation pairs for
+concept k, and sigma is the sigmoid. This loss encourages anchored features
+to have higher activations on safety-relevant inputs than on matched controls.
+
+--------------------------------------------------------------------------------
+2.3 Anti-Absorption Hierarchical Consistency Regularization (AHCR)
+--------------------------------------------------------------------------------
+
+Feature absorption occurs when the sparsity penalty causes a parent feature
+(e.g., "deception") to become inactive when a child feature (e.g., "lying
+about capabilities") is active, despite both being semantically applicable.
+We propose a regularizer that explicitly counteracts this.
+
+STEP 1: Define Feature Hierarchy.
+
+We define a partial order on features via a learned adjacency matrix
+H in [0,1]^{n x n}, where H_{ij} represents the probability that feature j
+is a child of feature i. We learn H jointly with the SAE via:
+
+  H_{ij} = sigma(h_{ij})    where h_{ij} is a learnable scalar
+
+with the constraint that H is a DAG (enforced via NOTEARS-style
+regularization):
+
+  L_DAG = tr(e^{H * H}) - n
+
+where * denotes element-wise product and the matrix exponential is computed
+via truncated Taylor series. This equals 0 iff H encodes a DAG.
+
+STEP 2: Hierarchy Discovery.
+
+To initialize and guide H, we use activation co-occurrence statistics:
+
+  C_{ij} = P(z_i > 0 AND z_j > 0) / P(z_i > 0)
+
+A high C_{ij} with C_{ji} < C_{ij} suggests i is a parent of j (the parent
+fires in a superset of contexts). We use C to warm-start h:
+
+  h_{ij}^{init} = beta * (C_{ij} - C_{ji}) * I[C_{ij} > tau]
+
+where beta is a scaling factor, tau is a co-occurrence threshold, and I is
+the indicator function.
+
+STEP 3: Anti-Absorption Loss.
+
+The key regularizer penalizes violations of hierarchical consistency: if
+a child feature is active, its parent should also be active (with nonzero
+probability).
+
+  L_anti_abs = sum_{i,j: H_{ij} > delta} H_{ij} * E_x [
+    max(0, z_j(x) * (t_i - z_i(x)))
+  ]
+
+where t_i is a learnable threshold for parent feature i, and delta is a
+pruning threshold for the hierarchy. Intuitively: whenever child j activates
+(z_j > 0) but parent i is below its activation threshold t_i, we incur a
+penalty proportional to the hierarchy strength H_{ij} and the child's
+activation magnitude z_j(x).
+
+This directly counteracts the sparsity penalty's tendency to suppress parent
+features when children are active.
+
+STEP 4: Hierarchical Sparsity Reweighting.
+
+Instead of applying uniform L1/L0 sparsity, we use a hierarchy-aware
+sparsity penalty:
+
+  L_sparse = sum_{i=1}^{n} w_i * I[z_i(x) > 0]
+
+where the weight w_i is adjusted based on hierarchical depth:
+
+  w_i = lambda_0 * gamma^{depth(i)}
+
+with gamma < 1 (e.g., 0.7), so that features deeper in the hierarchy
+(more specific) receive stronger sparsity pressure, while general/parent
+features receive weaker sparsity pressure. depth(i) is computed from H:
+
+  depth(i) = max_{j: H_{ji} > delta} (depth(j) + 1),   depth(root) = 0
+
+This creates a natural inductive bias: general safety features are
+encouraged to remain active alongside more specific ones.
+
+--------------------------------------------------------------------------------
+2.4 Adaptive Dictionary Partitioning
+--------------------------------------------------------------------------------
+
+The partition into anchored (A) and free (F) features should not be rigid.
+We introduce a soft mechanism that allows features to graduate between pools.
+
+STEP 1: Safety Relevance Score.
+
+For each feature i, compute a running safety relevance score:
+
+  s_i = max_{k=1,...,K} cos^2_sub(d_i, U_k)
+
+STEP 2: Soft Partition.
+
+Instead of a hard A/F split, we use a continuous weighting:
+
+  w_i^{anchor} = sigma((s_i - s_thresh) / temperature)
+
+The total loss applied to feature i interpolates between anchored and free
+objectives:
+
+  L_i = w_i^{anchor} * L_i^{anchored} + (1 - w_i^{anchor}) * L_i^{free}
+
+This allows the model to discover that a free feature has become safety-
+relevant during training and gradually subject it to anchoring constraints,
+or conversely, to release an anchored feature that turns out not to align
+with any safety concept.
+
+STEP 3: Novel Safety Feature Detection.
+
+For free features that develop high safety relevance scores without being
+anchored, we flag them as "emergent safety features" and create new safety
+concept slots:
+
+  If s_i > s_novel_thresh for some free feature i, and
+  max_k cos_sub(d_i, U_k) < s_known_thresh (i.e., it doesn't match known
+  concepts), then:
+  - Extract a new safety direction v_{K+1} = d_i / ||d_i||
+  - Compute a new subspace U_{K+1} via local PCA on activations where z_i
+    is highly active
+  - Add concept K+1 to the safety bank
+  - Log for human review
+
+This provides an automated pipeline for discovering novel safety-relevant
+features that were not in the initial concept bank.
+
+--------------------------------------------------------------------------------
+2.5 Full SACSA Training Objective
+--------------------------------------------------------------------------------
+
+The complete SACSA loss is:
+
+  L_SACSA = L_recon + lambda_s * L_sparse + lambda_a * L_anchor
+          + lambda_sp * L_span + lambda_c * L_contrast
+          + lambda_h * L_anti_abs + lambda_d * L_DAG
+
+where:
+
+  L_recon = E_x [||x - x_hat||_2^2]                     (reconstruction)
+  L_sparse = E_x [sum_i w_i * I[z_i(x) > 0]]           (hierarchy-aware sparsity)
+  L_anchor = defined in Section 2.2                       (directional alignment)
+  L_span = defined in Section 2.2                         (subspace spanning)
+  L_contrast = defined in Section 2.2                     (activation contrast)
+  L_anti_abs = defined in Section 2.3                     (anti-absorption)
+  L_DAG = defined in Section 2.3                          (acyclicity)
+
+Hyperparameters:
+  lambda_s:  sparsity weight (tuned via L0 target, following Gao et al., 2024)
+  lambda_a:  anchor alignment weight (0.1)
+  lambda_sp: span weight (0.01)
+  lambda_c:  contrastive weight (0.5)
+  lambda_h:  anti-absorption weight (0.3)
+  lambda_d:  DAG regularization weight (0.1)
+  gamma:     hierarchical sparsity decay (0.7)
+  r:         safety subspace rank (3-5)
+  K:         number of initial safety concepts (10-20)
+
+Training procedure:
+  1. Pre-train standard Gated SAE for T_warmup steps (standard L_recon + L_sparse)
+  2. Compute safety directions {v_k, U_k}_{k=1}^K from contrast pairs
+  3. Initialize hierarchy H from co-occurrence statistics
+  4. Fine-tune with full L_SACSA for T_main steps
+  5. Every T_check steps, run novel safety feature detection (Section 2.4)
+  6. Anneal lambda_a, lambda_c from high to moderate values to allow
+     initial strong anchoring followed by relaxation
+
+Optimizer: Adam with lr=3e-4, linear warmup for 1000 steps, cosine decay.
+Batch size: 4096 activation vectors.
+Dictionary size: 32x expansion (n = 32d).
+Anchored features: n_a = K * r (typically 50-100 out of ~50,000).
+
+================================================================================
+3. EXPERIMENTAL DESIGN
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1 Models and Datasets
+--------------------------------------------------------------------------------
+
+Target models (in order of scale):
+  - Pythia-70M, Pythia-410M (open, reproducible baselines)
+  - Gemma-2-2B (medium-scale open model)
+  - Llama-3-8B (large-scale open model)
+
+Activation extraction layers:
+  - Residual stream at layers L/4, L/2, 3L/4 for each model (following
+    standard practice from Bricken et al., 2023)
+
+Training data:
+  - 500M tokens from The Pile (general activations)
+  - 50M tokens from safety-relevant datasets:
+    - TruthfulQA prompts + completions (deception/honesty)
+    - HarmBench prompts (harmful content requests)
+    - Sycophancy datasets from Anthropic
+    - Power-seeking scenarios from MACHIAVELLI benchmark
+    - Situational awareness probes (custom-constructed)
+
+Contrastive pairs for safety anchoring:
+  - For each safety concept k, 5000 matched (positive, negative) prompt pairs
+  - Positive: prompts where the model exhibits the safety-relevant behavior
+  - Negative: semantically similar prompts without the safety behavior
+  - Example for deception: model outputs known to be deceptive vs. truthful
+    responses to the same questions
+
+--------------------------------------------------------------------------------
+3.2 Baselines
+--------------------------------------------------------------------------------
+
+  B1: Standard SAE (Bricken et al., 2023) — vanilla ReLU SAE with L1
+  B2: Gated SAE (Rajamanoharan et al., 2024) — gated architecture, no safety
+  B3: TopK SAE (Gao et al., 2024) — TopK activation function
+  B4: Hierarchical SAE (HSAE) — from "Atoms to Trees" (2025)
+  B5: Post-hoc probing — train linear probes on standard SAE features for
+      safety concept detection
+  B6: RepE directions — directly use Zou et al.'s representation engineering
+      directions without SAE decomposition
+  B7: SACSA-ablated — ablations removing each component:
+      (a) No anchoring (lambda_a = lambda_c = 0)
+      (b) No anti-absorption (lambda_h = 0)
+      (c) No hierarchy (lambda_d = 0, uniform sparsity)
+      (d) Hard partition (no adaptive partitioning)
+
+All baselines use the same dictionary size (32x expansion) and target the
+same L0 sparsity for fair comparison.
+
+--------------------------------------------------------------------------------
+3.3 Evaluation Metrics
+--------------------------------------------------------------------------------
+
+CATEGORY A: Standard SAE Quality Metrics
+
+  A1. Reconstruction MSE: ||x - x_hat||_2^2 / ||x||_2^2 (normalized)
+  A2. L0 sparsity: average number of active features per input
+  A3. CE loss degradation: increase in cross-entropy loss when replacing
+      original activations with SAE reconstructions in the target model
+  A4. Dead feature fraction: percentage of features never activating over
+      10M tokens
+  A5. Feature density distribution: histogram of activation frequencies
+
+CATEGORY B: Safety Feature Quality Metrics
+
+  B1. Safety concept AUROC: for each safety concept k, train a linear
+      classifier on anchored feature activations to distinguish D_k^+ from
+      D_k^-, report AUROC. Compare against classifiers trained on all
+      features (should be comparable, showing anchored features capture the
+      information).
+
+  B2. Safety concept completeness: fraction of the variance in the safety
+      subspace U_k explained by the anchored features:
+        Completeness_k = ||Proj_{span(D_k^anchor)} U_k||_F^2 / ||U_k||_F^2
+
+  B3. Cross-prompt generalization: AUROC on held-out safety prompts not
+      seen during contrastive pair construction.
+
+  B4. Novel safety feature discovery rate: number of flagged emergent
+      safety features that pass human evaluation as genuinely safety-relevant.
+
+CATEGORY C: Anti-Absorption Metrics (following Chanin et al., 2024)
+
+  C1. Absorption rate: for each parent-child pair in the learned hierarchy,
+      measure the fraction of inputs where the child is active but the
+      parent is incorrectly inactive:
+        AbsRate(i,j) = P(z_j > 0 AND z_i = 0) / P(z_j > 0)
+      Lower is better.
+
+  C2. Hierarchical consistency score:
+        HCS = 1 - (1/|E|) sum_{(i,j) in E} AbsRate(i,j)
+      where E is the set of edges in the learned hierarchy with H_{ij} > delta.
+
+  C3. Spelling task absorption (direct replication of Chanin et al.):
+      measure if "starts with letter X" features correctly fire even when
+      more specific token features are active.
+
+CATEGORY D: Interpretability Metrics
+
+  D1. Autointerp score (Bills et al., 2023): automated interpretability
+      scoring via LLM-generated descriptions.
+  D2. Feature monosemanticity: measured by activation pattern clustering
+      (lower entropy of top-activating contexts = more monosemantic).
+  D3. Human evaluation: expert raters evaluate random samples of features
+      for interpretability on a 1-5 Likert scale.
+
+CATEGORY E: Downstream Safety Application Metrics
+
+  E1. Steering effectiveness: measure KL divergence between steered and
+      unsteered model when clamping safety-anchored features:
+        KL(p_steered || p_unsteered) for targeted behavior change
+      Higher is better (more effective steering).
+
+  E2. Steering precision: measure unintended behavior changes when steering:
+        KL(p_steered || p_original) on held-out non-safety tasks
+      Lower is better (minimal collateral damage).
+
+  E3. Safety monitoring latency: time to compute safety feature activations
+      for a single forward pass (must be <10% overhead for practical deployment).
+
+  E4. Safety alarm recall/precision: use anchored features as a safety
+      classifier and measure performance on held-out red-teaming datasets:
+      - HarmBench (harmful content detection)
+      - TruthfulQA (deception detection)
+      - Sleeper agents benchmark (backdoor detection)
+
+--------------------------------------------------------------------------------
+3.4 Key Experiments
+--------------------------------------------------------------------------------
+
+Experiment 1: Pareto Frontier Analysis
+  Compare SACSA vs. all baselines on the reconstruction quality (CE loss
+  degradation) vs. sparsity (L0) Pareto frontier. SACSA should achieve
+  comparable Pareto performance to Gated SAE / TopK SAE, demonstrating that
+  safety anchoring does not significantly degrade general reconstruction.
+
+Experiment 2: Safety Feature Reliability
+  For each safety concept, compare AUROC, completeness, and cross-prompt
+  generalization across methods. Key hypothesis: SACSA's anchored features
+  provide >0.9 AUROC on safety classification while post-hoc probing on
+  standard SAEs achieves only 0.7-0.85 due to feature fragmentation.
+
+Experiment 3: Absorption Resistance
+  Replicate the spelling task from Chanin et al. (2024) and extend to
+  safety-relevant hierarchies (e.g., "harmful" > "violent" > "weapon
+  instructions"). Measure absorption rate for each method. Key hypothesis:
+  SACSA's anti-absorption regularizer reduces absorption rate by >50%
+  compared to standard SAEs.
+
+Experiment 4: Scaling Behavior
+  Train SACSA at dictionary sizes 8x, 16x, 32x, 64x, 128x expansion.
+  Measure whether anchored safety features remain stable across scales
+  (addressing F2). Compare feature similarity across scales using CKA
+  (Centered Kernel Alignment) on the anchored feature subspace.
+
+Experiment 5: Steering Quality
+  Use SACSA features to steer model behavior on safety-critical tasks.
+  Compare against RepE (Zou et al., 2023) and standard SAE feature steering.
+  Measure both effectiveness (behavior change on targeted concept) and
+  precision (minimal change on unrelated behaviors). Use activation patching
+  methodology from Meng et al. (2022).
+
+Experiment 6: Novel Safety Feature Discovery
+  Train SACSA with K=10 initial safety concepts. Evaluate the emergent
+  safety features discovered via the adaptive partitioning mechanism
+  (Section 2.4). Have human experts rate discovered features and compare
+  against features found by standard SAE + post-hoc safety probing.
+
+Experiment 7: Ablation Study
+  Systematically ablate each component of SACSA (using B7 ablations) and
+  measure the impact on all metric categories. This identifies the marginal
+  contribution of each innovation.
+
+Experiment 8: Real-time Safety Monitoring
+  Deploy SACSA on Llama-3-8B and run inference on 10K red-teaming prompts.
+  Measure (a) safety alarm precision/recall, (b) computational overhead,
+  (c) comparison against dedicated safety classifiers (Llama Guard, etc.).
+  This tests practical deployment viability.
+
+================================================================================
+4. EXPECTED CONTRIBUTIONS
+================================================================================
+
+(C1) METHODOLOGICAL: A novel SAE training framework (SACSA) that integrates
+     contrastive safety anchoring, anti-absorption regularization, and
+     adaptive dictionary partitioning into a unified objective. This is the
+     first SAE architecture designed to jointly optimize for interpretability
+     AND safety-relevant feature quality.
+
+(C2) THEORETICAL: A formal analysis of why feature absorption is
+     particularly dangerous for safety monitoring (absorption causes
+     safety-relevant parent features to go silent), and a principled
+     regularizer (AHCR) grounded in hierarchy-aware sparsity reweighting
+     that provably reduces absorption in the linear feature regime.
+
+(C3) EMPIRICAL: Comprehensive evaluation across 4 model scales and 5
+     safety concepts, demonstrating:
+     (a) SACSA matches standard SAE reconstruction quality (Pareto-comparable)
+     (b) >50% reduction in feature absorption rate on hierarchical features
+     (c) >0.9 AUROC on safety concept detection via anchored features
+     (d) Stable safety features across 5 dictionary scales
+     (e) More effective and precise model steering than RepE or vanilla SAEs
+
+(C4) PRACTICAL: An automated pipeline for discovering novel safety-relevant
+     features during SAE training (emergent safety feature detection),
+     providing a scalable mechanism for ongoing safety monitoring as models
+     and threat landscapes evolve.
+
+(C5) OPEN-SOURCE DELIVERABLES:
+     - SACSA training code (compatible with TransformerLens / SAELens)
+     - Pre-trained SACSA dictionaries for Pythia, Gemma-2, and Llama-3
+     - Safety contrast pair datasets for 10+ safety concepts
+     - Evaluation suite for safety-aware SAE benchmarking
+
+================================================================================
+5. RELATED WORK AND POSITIONING
+================================================================================
+
+SACSA bridges three previously separate research threads:
+
+(a) SAE architecture innovations (Gated SAEs, TopK SAEs, crosscoders) that
+    improve reconstruction-sparsity trade-offs but are safety-agnostic.
+
+(b) Representation Engineering (Zou et al., 2023) that provides safety
+    directions but lacks the fine-grained feature decomposition of SAEs.
+
+(c) Feature absorption analysis (Chanin et al., 2024) that identifies the
+    problem but does not propose a training-time solution.
+
+The closest concurrent work is HSAE (2025), which learns hierarchical
+structure but (i) does not incorporate safety signals, (ii) uses a
+different anti-absorption mechanism (random perturbation rather than
+explicit hierarchical consistency), and (iii) does not provide the
+contrastive anchoring that guarantees safety feature representation.
+
+SACSA is also related to the "specialized SAEs for rare concepts" approach
+(NAACL 2025), but differs by integrating safety specialization into the
+main SAE training objective rather than post-hoc fine-tuning.
+
+================================================================================
+6. RISK ANALYSIS AND MITIGATION
+================================================================================
+
+Risk 1: Safety anchoring degrades reconstruction quality.
+Mitigation: The anchored features are a small fraction (<0.2%) of the
+dictionary. Ablation studies will quantify the exact trade-off. The adaptive
+partitioning mechanism prevents over-constraining.
+
+Risk 2: Contrastive pairs introduce human bias about what is "safety-relevant."
+Mitigation: The novel safety feature detection mechanism (Section 2.4)
+provides an unsupervised counterbalance, discovering safety-relevant features
+not in the initial concept bank.
+
+Risk 3: DAG regularization makes optimization difficult.
+Mitigation: We use warm-starting from co-occurrence statistics and a phased
+training schedule. The NOTEARS constraint is well-studied and adds modest
+computational overhead.
+
+Risk 4: The method may not scale beyond Llama-3-8B.
+Mitigation: The computational overhead per feature is O(1) — the anchoring
+and hierarchy losses are computed only on the feature activations, not on the
+full activation space. The bottleneck is the same as standard SAE training
+(activation extraction and dictionary multiplication).
+
+================================================================================
+END OF PROPOSAL
+================================================================================

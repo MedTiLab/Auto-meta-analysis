@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clinical & Epi Pre-Analysis"
+  short_description: "Run a go/no-go pilot analysis with clinical and epidemiologic screening"
+  default_prompt: "Use $clinical-preanalysis before $baseline-table or full formal modeling to verify that the key exposure, core outcome, time variables, and essential covariates are actually usable in the current clinical database dataset, then run a focused pre-analysis battery that combines clinical screening with epidemiologic checks such as prevalence or incidence summaries, person-time when relevant, crude and adjusted effect measures, overlap, and confounding signals, and decide whether to continue, pause, or revise the design without inventing any data. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

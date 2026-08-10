@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta Staged Screening"
+  short_description: "Title/abstract and full-text first/second screening"
+  default_prompt: "Use $meta-screening-rescreen for the current Meta screening gate, write the matching first-screen or second-screen audit folder, and update screening_decisions.csv/json with the correct stage without overwriting user decisions. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

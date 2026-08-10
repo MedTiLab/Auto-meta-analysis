@@ -1,0 +1,516 @@
+{
+  "literature": {
+    "base": [
+      "meta-analysis-workflow",
+      "literature-review",
+      "pubmed-search-strategy",
+      "pubmed-database",
+      "citation-management",
+      "scientific-critical-thinking",
+      "zotero-medautodata-library"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-analysis-workflow",
+        "literature-review",
+        "citation-management",
+        "scientific-critical-thinking",
+        "research-lookup"
+      ],
+      "exploration": [
+        "meta-analysis-workflow",
+        "literature-review",
+        "pubmed-search-strategy",
+        "pubmed-database",
+        "research-lookup",
+        "citation-management"
+      ]
+    }
+  },
+  "ideation": {
+    "base": [
+      "meta-pipeline-planner",
+      "meta-analysis-workflow",
+      "scientific-brainstorming",
+      "hypothesis-generation",
+      "scientific-critical-thinking",
+      "literature-review",
+      "pubmed-search-strategy",
+      "pubmed-database"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-pipeline-planner",
+        "meta-analysis-workflow",
+        "scientific-critical-thinking",
+        "literature-review"
+      ],
+      "exploration": [
+        "meta-analysis-workflow",
+        "scientific-brainstorming",
+        "hypothesis-generation",
+        "literature-review",
+        "pubmed-search-strategy",
+        "pubmed-database"
+      ],
+      "implementation": [
+        "meta-pipeline-planner",
+        "meta-analysis-workflow"
+      ]
+    }
+  },
+  "protocol": {
+    "base": [
+      "meta-pipeline-planner",
+      "meta-analysis-workflow",
+      "literature-review",
+      "scientific-critical-thinking",
+      "citation-management"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-pipeline-planner",
+        "meta-analysis-workflow",
+        "literature-review",
+        "scientific-critical-thinking"
+      ],
+      "implementation": [
+        "meta-pipeline-planner",
+        "meta-analysis-workflow",
+        "citation-management",
+        "literature-review"
+      ]
+    }
+  },
+  "search_dedupe": {
+    "base": [
+      "meta-analysis-workflow",
+      "pubmed-search-strategy",
+      "citation-management",
+      "pubmed-database"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-analysis-workflow",
+        "pubmed-search-strategy",
+        "citation-management",
+        "literature-review"
+      ],
+      "exploration": [
+        "meta-analysis-workflow",
+        "pubmed-search-strategy",
+        "pubmed-database",
+        "citation-management"
+      ]
+    }
+  },
+  "title_abstract_screening": {
+    "base": [
+      "meta-analysis-workflow",
+      "meta-screening-rescreen",
+      "citation-management",
+      "peer-review"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-analysis-workflow",
+        "meta-screening-rescreen",
+        "citation-management",
+        "peer-review"
+      ]
+    }
+  },
+  "full_text_review": {
+    "base": [
+      "meta-analysis-workflow",
+      "legal-pdf-acquisition",
+      "public-literature-download",
+      "meta-zotero-fulltext-handoff",
+      "zotero-medautodata-library",
+      "meta-screening-rescreen",
+      "citation-management",
+      "mineru-pdf-parser",
+      "data-transform",
+      "peer-review"
+    ],
+    "byTaskType": {
+      "implementation": [
+        "meta-analysis-workflow",
+        "legal-pdf-acquisition",
+        "public-literature-download",
+        "meta-zotero-fulltext-handoff",
+        "zotero-medautodata-library",
+        "mineru-pdf-parser",
+        "data-transform",
+        "citation-management"
+      ],
+      "analysis": [
+        "meta-analysis-workflow",
+        "meta-screening-rescreen",
+        "peer-review",
+        "scientific-critical-thinking",
+        "citation-management"
+      ]
+    }
+  },
+  "data_extraction": {
+    "base": [
+      "meta-analysis-workflow",
+      "meta-extraction",
+      "pdf-evidence-extraction",
+      "diagnostic-data-extraction",
+      "data-transform",
+      "scientific-critical-thinking",
+      "peer-review"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-analysis-workflow",
+        "meta-extraction",
+        "pdf-evidence-extraction",
+        "diagnostic-data-extraction",
+        "data-transform",
+        "scientific-critical-thinking",
+        "peer-review"
+      ]
+    }
+  },
+  "quality_assessment": {
+    "base": [
+      "meta-analysis-workflow",
+      "scientific-critical-thinking",
+      "peer-review",
+      "data-transform",
+      "scholar-evaluation"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-analysis-workflow",
+        "scientific-critical-thinking",
+        "peer-review",
+        "data-transform",
+        "scholar-evaluation"
+      ]
+    }
+  },
+  "data_analysis": {
+    "base": [
+      "meta-analysis-workflow",
+      "diagnostic-meta-analysis",
+      "meta-statistics-r",
+      "statistical-analysis",
+      "data-stats-analysis",
+      "statsmodels",
+      "data-transform"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-analysis-workflow",
+        "diagnostic-meta-analysis",
+        "meta-statistics-r",
+        "statistical-analysis",
+        "data-stats-analysis",
+        "statsmodels",
+        "data-transform"
+      ],
+      "implementation": [
+        "meta-analysis-workflow",
+        "meta-statistics-r",
+        "statistical-analysis",
+        "statsmodels",
+        "data-transform"
+      ]
+    }
+  },
+  "results_figures": {
+    "base": [
+      "meta-analysis-workflow",
+      "data-visualization-biomedical",
+      "scientific-visualization",
+      "data-viz-plots",
+      "matplotlib",
+      "seaborn",
+      "plotly",
+      "scientific-schematics"
+    ],
+    "byTaskType": {
+      "analysis": [
+        "meta-analysis-workflow",
+        "data-visualization-biomedical",
+        "scientific-visualization",
+        "matplotlib",
+        "scientific-schematics"
+      ],
+      "rendering": [
+        "meta-analysis-workflow",
+        "scientific-visualization",
+        "data-visualization-biomedical",
+        "data-viz-plots",
+        "matplotlib",
+        "seaborn",
+        "plotly"
+      ]
+    }
+  },
+  "manuscript_submission": {
+    "base": [
+      "meta-analysis-workflow",
+      "prisma-manuscript-writer",
+      "manuscript-editor",
+      "inno-paper-writing",
+      "scientific-writing",
+      "citation-management",
+      "venue-templates",
+      "docx",
+      "peer-review"
+    ],
+    "byTaskType": {
+      "writing": [
+        "meta-analysis-workflow",
+        "prisma-manuscript-writer",
+        "manuscript-editor",
+        "inno-paper-writing",
+        "scientific-writing",
+        "citation-management",
+        "venue-templates",
+        "docx"
+      ],
+      "analysis": [
+        "meta-analysis-workflow",
+        "peer-review",
+        "scientific-critical-thinking",
+        "citation-management"
+      ]
+    }
+  },
+  "presentation": {
+    "base": [
+      "meta-analysis-workflow",
+      "scientific-slides",
+      "making-academic-presentations",
+      "paper-2-web",
+      "pptx-posters"
+    ],
+    "byTaskType": {
+      "scripting": [
+        "meta-analysis-workflow",
+        "scientific-slides",
+        "making-academic-presentations",
+        "scientific-writing"
+      ],
+      "rendering": [
+        "meta-analysis-workflow",
+        "making-academic-presentations",
+        "scientific-slides"
+      ],
+      "narration": [
+        "meta-analysis-workflow",
+        "making-academic-presentations",
+        "scientific-slides"
+      ],
+      "delivery": [
+        "meta-analysis-workflow",
+        "scientific-slides",
+        "making-academic-presentations",
+        "paper-2-web",
+        "pptx-posters"
+      ]
+    }
+  },
+  "experiment": {
+    "base": [
+      "meta-analysis-workflow",
+      "data-transform",
+      "scientific-critical-thinking",
+      "statistical-analysis",
+      "data-stats-analysis",
+      "statsmodels"
+    ],
+    "byTaskType": {
+      "implementation": [
+        "meta-analysis-workflow",
+        "data-transform",
+        "legal-pdf-acquisition",
+        "public-literature-download",
+        "meta-zotero-fulltext-handoff",
+        "mineru-pdf-parser"
+      ],
+      "analysis": [
+        "meta-analysis-workflow",
+        "statistical-analysis",
+        "data-stats-analysis",
+        "statsmodels",
+        "scientific-critical-thinking"
+      ],
+      "exploration": [
+        "meta-analysis-workflow",
+        "literature-review",
+        "scientific-critical-thinking"
+      ]
+    }
+  },
+  "publication": {
+    "base": [
+      "meta-analysis-workflow",
+      "prisma-manuscript-writer",
+      "manuscript-editor",
+      "inno-paper-writing",
+      "scientific-writing",
+      "citation-management",
+      "venue-templates",
+      "docx"
+    ],
+    "byTaskType": {
+      "writing": [
+        "meta-analysis-workflow",
+        "prisma-manuscript-writer",
+        "manuscript-editor",
+        "inno-paper-writing",
+        "scientific-writing",
+        "citation-management",
+        "venue-templates",
+        "docx"
+      ],
+      "analysis": [
+        "meta-analysis-workflow",
+        "peer-review",
+        "scientific-critical-thinking",
+        "citation-management",
+        "inno-reference-audit"
+      ],
+      "delivery": [
+        "meta-analysis-workflow",
+        "inno-rclone-to-overleaf"
+      ]
+    }
+  },
+  "promotion": {
+    "base": [
+      "meta-analysis-workflow",
+      "scientific-slides",
+      "making-academic-presentations",
+      "paper-2-web",
+      "pptx-posters"
+    ],
+    "byTaskType": {
+      "scripting": [
+        "meta-analysis-workflow",
+        "scientific-slides",
+        "making-academic-presentations",
+        "scientific-writing"
+      ],
+      "rendering": [
+        "meta-analysis-workflow",
+        "scientific-visualization",
+        "paper-2-web"
+      ],
+      "narration": [
+        "meta-analysis-workflow",
+        "scientific-writing",
+        "scientific-slides"
+      ],
+      "delivery": [
+        "meta-analysis-workflow",
+        "scientific-slides",
+        "making-academic-presentations",
+        "paper-2-web"
+      ]
+    }
+  },
+  "dataAnalysis": {
+    "base": [
+      "meta-analysis-workflow",
+      "clinical-preanalysis",
+      "baseline-table",
+      "data-stats-analysis",
+      "inno-experiment-analysis",
+      "data-transform",
+      "data-visualization-biomedical",
+      "scientific-visualization"
+    ],
+    "byTaskType": {
+      "dataAccess": [
+        "medhelp-local-database-router",
+        "local-database-api-access",
+        "mimic-local-data-access",
+        "eicu-local-data-access",
+        "nhanes-local-data-access",
+        "elsa-local-data-access",
+        "hrs-local-data-access",
+        "klosa-local-data-access",
+        "lasi-local-data-access",
+        "mhas-local-data-access",
+        "share-local-data-access",
+        "charls-local-data-access",
+        "clhls-local-data-access",
+        "ukb-local-data-access",
+        "cfps-local-data-access",
+        "cgss-local-data-access",
+        "chfs-local-data-access",
+        "chip-local-data-access",
+        "chns-local-data-access",
+        "clds-local-data-access",
+        "css-local-data-access",
+        "geo-database",
+        "datacommons-client"
+      ],
+      "preprocessing": [
+        "data-transform",
+        "exploratory-data-analysis",
+        "dask",
+        "polars",
+        "vaex",
+        "mineru-pdf-parser",
+        "pdf-evidence-extraction"
+      ],
+      "preAnalysis": [
+        "clinical-preanalysis",
+        "data-transform",
+        "statistical-analysis",
+        "statsmodels",
+        "scikit-survival"
+      ],
+      "baselineTable": [
+        "baseline-table"
+      ],
+      "inference": [
+        "data-stats-analysis",
+        "statistical-analysis",
+        "statsmodels",
+        "diagnostic-meta-analysis",
+        "meta-statistics-r"
+      ],
+      "regression": [
+        "statsmodels",
+        "scikit-learn",
+        "ukb-cohort-analysis"
+      ],
+      "survival": [
+        "scikit-survival",
+        "ukb-cohort-analysis"
+      ],
+      "advanced": [
+        "pymc",
+        "shap",
+        "hypogenic",
+        "hypothesis-generation",
+        "aeon",
+        "simpy"
+      ],
+      "visualization": [
+        "data-visualization-biomedical",
+        "scientific-visualization",
+        "data-viz-plots",
+        "data-visualization-expert",
+        "matplotlib",
+        "seaborn",
+        "plotly"
+      ],
+      "resultsIntegration": [
+        "inno-experiment-analysis",
+        "prisma-manuscript-writer",
+        "manuscript-editor"
+      ]
+    }
+  }
+}

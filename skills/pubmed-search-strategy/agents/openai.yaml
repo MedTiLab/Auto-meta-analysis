@@ -1,0 +1,4 @@
+interface:
+  display_name: "PubMed Search Strategy"
+  short_description: "Build PRISMA-ready PubMed queries"
+  default_prompt: "Use $pubmed-search-strategy for PubMed/MEDLINE only: design a reproducible PubMed search, write normalized PubMed records into the Meta AI pre-screen input CSV/JSON, and leave visible screening results to screening_decisions.csv/json. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

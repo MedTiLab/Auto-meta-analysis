@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://medautodata.local/schemas/skills-taxonomy-v2.schema.json",
+  "title": "Skill Taxonomy V2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "primaryIntent",
+    "intents",
+    "capabilities",
+    "domains",
+    "keywords",
+    "source",
+    "status",
+    "summary"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "primaryIntent": {
+      "$ref": "#/$defs/intent"
+    },
+    "intents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/intent"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/capability"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/domain"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "keywords": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "source": {
+      "enum": ["medautodata", "vibelab", "imported"]
+    },
+    "status": {
+      "enum": ["candidate", "verified", "experimental", "deprecated"]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "relatedSkills": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "owner": {
+      "type": "string"
+    },
+    "maintainers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "lastReviewedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "legacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dirPath": {
+          "type": "string"
+        },
+        "skillFile": {
+          "type": "string"
+        },
+        "topLevelGroup": {
+          "type": "string"
+        },
+        "collection": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "intent": {
+      "enum": [
+        "research",
+        "ideation",
+        "data",
+        "experiment",
+        "training",
+        "evaluation",
+        "writing",
+        "deployment"
+      ]
+    },
+    "capability": {
+      "enum": [
+        "search-retrieval",
+        "research-planning",
+        "agent-workflow",
+        "data-processing",
+        "training-tuning",
+        "inference-serving",
+        "evaluation-benchmarking",
+        "prompt-structured-output",
+        "multimodal",
+        "interpretability",
+        "safety-alignment",
+        "infrastructure-ops",
+        "visualization-reporting"
+      ]
+    },
+    "domain": {
+      "enum": [
+        "general",
+        "cs-ai",
+        "bioinformatics",
+        "medical",
+        "vision",
+        "nlp",
+        "data-engineering"
+      ]
+    }
+  }
+}

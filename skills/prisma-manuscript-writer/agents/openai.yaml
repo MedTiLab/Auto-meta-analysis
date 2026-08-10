@@ -1,0 +1,4 @@
+interface:
+  display_name: "PRISMA Manuscript Writer"
+  short_description: "Draft PRISMA Meta manuscript sections"
+  default_prompt: "Use $prisma-manuscript-writer to draft PRISMA manuscript sections. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

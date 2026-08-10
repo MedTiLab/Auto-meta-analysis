@@ -1,0 +1,713 @@
+{
+  "title": "Settings",
+  "tabs": {
+    "projects": "Projects",
+    "llmProviders": "LLM Providers",
+    "account": "Account",
+    "apiProfiles": "API Profiles",
+    "permissions": "Permissions",
+    "integrations": "Integrations",
+    "memory": "Memory",
+    "mcpServers": "MCP Servers",
+    "appearance": "◐ Appearance"
+  },
+  "projectLocation": {
+    "title": "Project Settings",
+    "description": "Choose the one default location used when a new project is created.",
+    "defaultLabel": "Default Location",
+    "defaultHelp": "All new projects are created under this folder.",
+    "selected": "Selected",
+    "browse": "Browse",
+    "save": "Save",
+    "saving": "Saving...",
+    "loading": "Loading default location...",
+    "saved": "Default location saved.",
+    "noUserFolders": "This is a single global project location. MedHelp will not append a username, account name, or user-id folder.",
+    "errors": {
+      "load": "Failed to load the default location",
+      "save": "Failed to save the default location",
+      "browse": "Failed to browse folders"
+    },
+    "browser": {
+      "title": "Choose Default Location",
+      "up": "Up",
+      "empty": "No folders in this location.",
+      "cancel": "Cancel",
+      "choose": "Use This Folder"
+    }
+  },
+  "mineru": {
+    "title": "MinerU Document Parsing",
+    "description": "Configure the MinerU API token for this account. Meta PDF parsing and MCP / skill sessions loaded by the Agent SDK will receive the same credential automatically.",
+    "status": {
+      "label": "Configuration status",
+      "loading": "Checking...",
+      "account": "Using the token saved for this account",
+      "environment": "Using the server MINERU_API_TOKEN environment variable",
+      "notConfigured": "Not configured"
+    },
+    "fields": {
+      "apiToken": "MinerU API Token",
+      "placeholder": "Paste MINERU_API_TOKEN",
+      "replacePlaceholder": "Configured; enter a new token to replace it",
+      "help": "The token is stored only in this account's credential store and is never returned to the page, prompts, or logs. Account settings take precedence over the server environment."
+    },
+    "actions": {
+      "save": "Save token",
+      "saving": "Saving..."
+    },
+    "messages": {
+      "loadError": "Failed to load MinerU settings",
+      "saveError": "Failed to save the MinerU token",
+      "required": "Enter a MinerU API token",
+      "saved": "MinerU API token saved"
+    }
+  },
+  "memorySettings": {
+    "title": "Preference Memory",
+    "description": "Save a few durable preferences or workflow notes. The MedHelp agent reads one shared pool when memory is enabled. This is a lightweight personalization layer and does not restore the old standalone memory module.",
+    "categories": {
+      "general": "General",
+      "preference": "Preference",
+      "context": "Context",
+      "workflow": "Workflow"
+    },
+    "scopes": {
+      "user": "Global",
+      "meta": "Meta projects",
+      "project": "Specific project"
+    },
+    "actions": {
+      "add": "Add Memory",
+      "enable": "Enable memory",
+      "disable": "Disable memory",
+      "enableItem": "Enable this memory",
+      "disableItem": "Disable this memory"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "itemDisabled": "Disabled for prompt injection"
+    },
+    "form": {
+      "title": "Add a reusable preference",
+      "help": "Keep each item short and specific, for example preferred writing style, coding defaults, or recurring project context. Choose global, all Meta projects, or one specific project.",
+      "placeholder": "Example: Prefer concise executive summaries first, then detailed evidence. Use Python for analysis unless I ask otherwise.",
+      "selectProject": "Select a project...",
+      "counter": "{{count}} / {{max}}"
+    },
+    "list": {
+      "title": "Saved items ({{count}})",
+      "scope": "Applies to the MedHelp agent",
+      "empty": "No saved preference memories yet."
+    },
+    "messages": {
+      "loading": "Loading preference memory...",
+      "loadError": "Failed to load preference memory",
+      "createError": "Failed to create memory",
+      "updateError": "Failed to update memory",
+      "deleteError": "Failed to delete memory",
+      "toggleError": "Failed to update global memory setting",
+      "toggleItemError": "Failed to update memory status",
+      "confirmDelete": "Delete this saved memory?",
+      "disabledNotice": "Preference memory is currently disabled. Saved items remain stored, but they will not be injected into prompts."
+    }
+  },
+  "agentApi": {
+    "title": "API Profiles",
+    "description": "Save multiple Claude/Anthropic-compatible APIs for the MedHelp agent and switch them per session, similar to CC Switch.",
+    "scope": {
+      "user": "Mine",
+      "system": "System"
+    },
+    "badges": {
+      "default": "Default",
+      "disabled": "Disabled",
+      "selected": "Selected"
+    },
+    "strategy": {
+      "default": "default first",
+      "round_robin": "round-robin"
+    },
+    "systemAuto": {
+      "title": "System automatic selection",
+      "description": "When no personal profile is selected, the server chooses an API using the admin strategy: {{strategy}}."
+    },
+    "locked": {
+      "title": "Personal API profiles are not available for this account",
+      "description": "Only Plus / Pro accounts or accounts explicitly enabled by an administrator can add and switch personal APIs."
+    },
+    "fields": {
+      "name": "Name",
+      "authType": "Auth type",
+      "secret": "Secret",
+      "baseUrl": "Base URL",
+      "runtimeModel": "Runtime model",
+      "modelPlan": "Model plan",
+      "active": "Enabled"
+    },
+    "values": {
+      "officialDefault": "Official default",
+      "followPlan": "Follow Free / Plus / Pro mapping"
+    },
+    "plan": {
+      "all": "All"
+    },
+    "form": {
+      "createTitle": "Add personal API profile",
+      "editTitle": "Edit personal API profile",
+      "secretPlaceholderSaved": "Saved; leave blank to keep unchanged"
+    },
+    "sections": {
+      "userProfiles": "My APIs",
+      "systemProfiles": "System APIs"
+    },
+    "empty": {
+      "user": "No personal APIs yet. Add your Anthropic key or Claude-compatible gateway key.",
+      "system": "No system APIs have been configured by an administrator."
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "add": "Add",
+      "use": "Use",
+      "inUse": "In use",
+      "useSystemAuto": "Use system auto",
+      "enable": "Enable",
+      "disable": "Disable",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "messages": {
+      "loading": "Loading API profiles...",
+      "loadError": "Failed to load API profiles",
+      "saveError": "Failed to save API profile",
+      "selectError": "Failed to switch API profile",
+      "deleteError": "Failed to delete API profile",
+      "created": "API profile created.",
+      "updated": "API profile updated.",
+      "selected": "Switched to the selected API profile.",
+      "systemAutoSelected": "Switched to system automatic selection.",
+      "deleted": "API profile deleted.",
+      "confirmDelete": "Delete {{name}}?"
+    }
+  },
+  "account": {
+    "title": "Account",
+    "language": "Language",
+    "languageLabel": "Display Language",
+    "languageDescription": "Choose your preferred language for the interface",
+    "username": "Username",
+    "email": "Email",
+    "profile": "Profile",
+    "changePassword": "Change Password"
+  },
+  "mcp": {
+    "title": "MCP Servers",
+    "addServer": "Add Server",
+    "editServer": "Edit Server",
+    "deleteServer": "Delete Server",
+    "serverName": "Server Name",
+    "serverType": "Server Type",
+    "config": "Configuration",
+    "testConnection": "Test Connection",
+    "status": "Status",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "scope": {
+      "label": "Scope",
+      "user": "User",
+      "project": "Project"
+    }
+  },
+  "appearance": {
+    "title": "Appearance",
+    "theme": "Theme",
+    "codeEditor": "Code Editor",
+    "editorTheme": "Editor Theme",
+    "wordWrap": "Word Wrap",
+    "showMinimap": "Show Minimap",
+    "lineNumbers": "Line Numbers",
+    "fontSize": "Font Size"
+  },
+  "actions": {
+    "saveChanges": "Save Changes",
+    "resetToDefaults": "Reset to Defaults",
+    "cancelChanges": "Cancel Changes"
+  },
+  "quickSettings": {
+    "title": "Quick Settings",
+    "sections": {
+      "appearance": "◐ Appearance",
+      "toolDisplay": "Tool Display",
+      "viewOptions": "View Options",
+      "inputSettings": "Input Settings",
+      "whisperDictation": "Whisper Dictation"
+    },
+    "darkMode": "Dark Mode",
+    "autoExpandTools": "Auto-expand tools",
+    "showRawParameters": "Show raw parameters",
+    "showThinking": "Show thinking",
+    "autoScrollToBottom": "Auto-scroll to bottom",
+    "sendByCtrlEnter": "Send by Ctrl+Enter",
+    "sendByCtrlEnterDescription": "When enabled, pressing Ctrl+Enter will send the message instead of just Enter. This is useful for IME users to avoid accidental sends.",
+    "dragHandle": {
+      "dragging": "Dragging handle",
+      "closePanel": "Close settings panel",
+      "openPanel": "Open settings panel",
+      "draggingStatus": "Dragging...",
+      "toggleAndMove": "Click to toggle, drag to move"
+    },
+    "whisper": {
+      "modes": {
+        "default": "Default Mode",
+        "defaultDescription": "Direct transcription of your speech",
+        "prompt": "Prompt Enhancement",
+        "promptDescription": "Transform rough ideas into clear, detailed AI prompts",
+        "vibe": "Vibe Mode",
+        "vibeDescription": "Format ideas as clear agent instructions with details"
+      }
+    }
+  },
+  "mainTabs": {
+    "userAccount": "Account",
+    "helpFeedback": "Help & Suggestions",
+    "trash": "Trash",
+    "agents": "Agents",
+    "memory": "Memory",
+    "email": "Email",
+    "appearance": "◐ Appearance",
+    "git": "Git",
+    "tasks": "Tasks"
+  },
+  "trash": {
+    "title": "Trash",
+    "description": "Review deleted projects and sessions here, then restore or permanently remove them.",
+    "refresh": "Refresh"
+  },
+  "userAccount": {
+    "title": "App Account",
+    "description": "Manage the signed-in account here, including switching accounts and signing out.",
+    "currentAccount": "Current account",
+    "currentUserFallback": "Unnamed user",
+    "noNotificationEmail": "No notification email set",
+    "trial": {
+      "remaining": "Trial remaining",
+      "expired": "Trial expired",
+      "days": "days",
+      "expiresAt": "Expires at"
+    },
+    "usage": {
+      "title": "Usage quota",
+      "used": "Used",
+      "quota": "Quota",
+      "remaining": "Remaining"
+    },
+    "switchHint": "Switching accounts replaces the current session directly, without sending you back to a separate login page first.",
+    "switchFormTitle": "Sign in to another account",
+    "switchFormDescription": "Use the form below to replace the current signed-in account.",
+    "replaceSessionHint": "After a successful sign-in, the current account will be replaced by the new one.",
+    "mode": {
+      "login": "Sign In",
+      "register": "Register"
+    },
+    "status": {
+      "loggedIn": "Signed in",
+      "loggedOut": "Signed out"
+    },
+    "actions": {
+      "switchAccount": "Switch Account",
+      "logout": "Sign Out"
+    },
+    "avatar": {
+      "title": "Avatar",
+      "description": "Choose from generated avatar options. New accounts receive one automatically.",
+      "expand": "Change",
+      "collapse": "Collapse",
+      "currentLabel": "{{username}} avatar",
+      "searchPlaceholder": "Search avatars",
+      "saved": "Avatar updated.",
+      "empty": "No avatars match this filter.",
+      "categories": {
+        "all": "All",
+        "medical": "Medical",
+        "research": "Research",
+        "data": "Data",
+        "nature": "Nature",
+        "abstract": "Abstract",
+        "classic": "Classic"
+      },
+      "errors": {
+        "saveFailed": "Failed to update avatar",
+        "networkError": "Network error. Please try again."
+      }
+    },
+    "projectActivity": {
+      "title": "Project activity",
+      "description": "Projects opened over the past year.",
+      "loading": "Loading project activity...",
+      "empty": "No project opens in the past year.",
+      "retry": "Retry",
+      "stats": {
+        "opens": "Opens",
+        "projects": "Projects",
+        "activeDays": "Active days"
+      },
+      "weekdays": {
+        "mon": "Mon",
+        "wed": "Wed",
+        "fri": "Fri"
+      },
+      "legend": {
+        "less": "Less",
+        "more": "More"
+      },
+      "tooltip": "{{date}}: {{projects}} projects opened, {{opens}} opens",
+      "errors": {
+        "loadFailed": "Failed to load project activity"
+      }
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Enter your current password and set a new sign-in password.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "submit": "Update Password",
+      "loading": "Updating...",
+      "success": "Password updated. Use the new password the next time you sign in.",
+      "placeholders": {
+        "current": "Enter current password",
+        "new": "Enter new password",
+        "confirm": "Re-enter new password"
+      },
+      "errors": {
+        "requiredFields": "Please fill in all password fields",
+        "passwordLength": "New password must be at least 6 characters",
+        "passwordMismatch": "New passwords do not match",
+        "currentIncorrect": "Current password is incorrect",
+        "updateFailed": "Failed to update password",
+        "networkError": "Network error. Please try again."
+      }
+    }
+  },
+  "helpFeedback": {
+    "title": "Help & Suggestions",
+    "description": "Submit product questions, issues, or improvement ideas.",
+    "fields": {
+      "category": "Type",
+      "contact": "Contact (optional)",
+      "title": "Title (optional)",
+      "content": "Feedback"
+    },
+    "categories": {
+      "suggestion": "Suggestion",
+      "bug": "Issue",
+      "question": "Question",
+      "other": "Other"
+    },
+    "placeholders": {
+      "contact": "Email or another contact method",
+      "title": "Summarize this feedback",
+      "content": "Describe the issue, expected improvement, or other suggestion."
+    },
+    "counter": "{{count}} / {{max}}",
+    "actions": {
+      "submit": "Submit Feedback",
+      "submitting": "Submitting..."
+    },
+    "messages": {
+      "required": "Please enter feedback first",
+      "contentTooLong": "Feedback must be {{max}} characters or less",
+      "success": "Feedback submitted. Thank you.",
+      "submitError": "Failed to submit feedback. Please try again."
+    }
+  },
+  "appearanceSettings": {
+    "darkMode": {
+      "label": "Dark Mode",
+      "description": "Toggle between light and pure black dark themes"
+    },
+    "telemetry": {
+      "label": "Data Transfer",
+      "description": "Off by default. When enabled, the client calls this app's telemetry API; the server does not store or forward data."
+    },
+    "projectSorting": {
+      "label": "Project Sorting",
+      "description": "How projects are ordered in the sidebar",
+      "alphabetical": "Alphabetical",
+      "recentActivity": "Recent Activity"
+    },
+    "defaultProjectPath": {
+      "label": "Default Project Path",
+      "description": "Default directory for new projects",
+      "browse": "Browse",
+      "reset": "Reset",
+      "saved": "Saved",
+      "invalidPath": "Invalid directory path",
+      "locked": "This path is assigned by the server for your account."
+    },
+    "codeEditor": {
+      "title": "Code Editor",
+      "theme": {
+        "label": "Editor Theme",
+        "description": "Default theme for the code editor"
+      },
+      "wordWrap": {
+        "label": "Word Wrap",
+        "description": "Enable word wrapping by default in the editor"
+      },
+      "showMinimap": {
+        "label": "Show Minimap",
+        "description": "Display a minimap for easier navigation in diff view"
+      },
+      "lineNumbers": {
+        "label": "Show Line Numbers",
+        "description": "Display line numbers in the editor"
+      },
+      "fontSize": {
+        "label": "Font Size",
+        "description": "Editor font size in pixels"
+      }
+    }
+  },
+  "mcpForm": {
+    "title": {
+      "add": "Add MCP Server",
+      "edit": "Edit MCP Server"
+    },
+    "importMode": {
+      "form": "Form Input",
+      "json": "JSON Import"
+    },
+    "scope": {
+      "label": "Scope",
+      "userGlobal": "User (Global)",
+      "projectLocal": "Project (Local)",
+      "userDescription": "User scope: Available across all projects on your machine",
+      "projectDescription": "Local scope: Only available in the selected project",
+      "cannotChange": "Scope cannot be changed when editing an existing server"
+    },
+    "fields": {
+      "serverName": "Server Name",
+      "transportType": "Transport Type",
+      "command": "Command",
+      "arguments": "Arguments (one per line)",
+      "jsonConfig": "JSON Configuration",
+      "url": "URL",
+      "envVars": "Environment Variables (KEY=value, one per line)",
+      "headers": "Headers (KEY=value, one per line)",
+      "selectProject": "Select a project..."
+    },
+    "placeholders": {
+      "serverName": "my-server"
+    },
+    "validation": {
+      "missingType": "Missing required field: type",
+      "stdioRequiresCommand": "stdio type requires a command field",
+      "httpRequiresUrl": "{{type}} type requires a url field",
+      "invalidJson": "Invalid JSON format",
+      "jsonHelp": "Paste your MCP server configuration in JSON format. Example formats:",
+      "jsonExampleStdio": "• stdio: {\"type\":\"stdio\",\"command\":\"npx\",\"args\":[\"@upstash/context7-mcp\"]}",
+      "jsonExampleHttp": "• http/sse: {\"type\":\"http\",\"url\":\"https://api.example.com/mcp\"}"
+    },
+    "configDetails": "Configuration Details (from {{configFile}})",
+    "projectPath": "Path: {{path}}",
+    "actions": {
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "addServer": "Add Server",
+      "updateServer": "Update Server"
+    }
+  },
+  "saveStatus": {
+    "success": "Settings saved successfully!",
+    "error": "Failed to save settings",
+    "saving": "Saving..."
+  },
+  "footerActions": {
+    "save": "Save Settings",
+    "cancel": "Cancel"
+  },
+  "git": {
+    "title": "Git Configuration",
+    "description": "Configure your git identity for commits. These settings will be applied globally via git config --global",
+    "name": {
+      "label": "Git Name",
+      "help": "Your name for git commits"
+    },
+    "email": {
+      "label": "Git Email",
+      "help": "Your email for git commits"
+    },
+    "actions": {
+      "save": "Save Configuration",
+      "saving": "Saving..."
+    },
+    "status": {
+      "success": "Saved successfully"
+    }
+  },
+  "agents": {
+    "authStatus": {
+      "checking": "Checking...",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "installRequired": "Install required",
+      "disconnected": "Disconnected",
+      "checkingAuth": "Checking authentication status...",
+      "cliMissing": "Agent runtime is not installed ({{command}})",
+      "loggedInAs": "Logged in as {{email}}",
+      "authenticatedUser": "authenticated user"
+    },
+    "account": {
+      "claude": {
+        "description": "MedHelp agent assistant"
+      }
+    },
+    "connectionStatus": "Connection Status",
+    "login": {
+      "title": "Connect agent",
+      "reAuthenticate": "Reconnect",
+      "description": "Connect the {{agent}} agent runtime to enable AI features",
+      "installDescription": "Install the agent runtime ({{command}}) before connecting",
+      "reAuthDescription": "Connect with a different account or refresh credentials",
+      "button": "Connect",
+      "reLoginButton": "Reconnect"
+    },
+    "install": {
+      "title": "Missing CLI dependency"
+    },
+    "error": "Error: {{error}}"
+  },
+  "permissions": {
+    "title": "Permission Settings",
+    "allowedTools": {
+      "title": "Allowed Tools",
+      "description": "Tools this signed-in user can automatically use without a permission prompt",
+      "placeholder": "e.g., \"Read\" or \"Write\"",
+      "quickAdd": "Quick add common tools:",
+      "empty": "No allowed tools configured"
+    },
+    "blockedTools": {
+      "title": "Blocked Tools",
+      "description": "Tools this signed-in user automatically blocks without a permission prompt",
+      "placeholder": "e.g., \"Bash(rm:*)\"",
+      "empty": "No blocked tools configured"
+    },
+    "toolExamples": {
+      "title": "Tool Pattern Examples:",
+      "write": "- Allow all Write tool usage",
+      "bashRm": "- Block all rm commands (dangerous)"
+    },
+    "actions": {
+      "add": "Add"
+    }
+  },
+  "llmProviders": {
+    "title": "LLM Providers",
+    "description": "Manage Claude, OpenAI, Grok, Azure, and compatible providers. Newly started MedHelp agent sessions use the active provider automatically.",
+    "loading": "Loading LLM providers...",
+    "builtin": "Built in",
+    "active": "Active",
+    "loggedIn": "Signed in",
+    "officialEndpoint": "Official endpoint",
+    "addTitle": "Add LLM provider",
+    "editTitle": "Edit LLM provider",
+    "savedKey": "A key ending in {{last4}} is saved",
+    "keepSavedKey": "Leave blank to keep the saved key",
+    "advanced": "Advanced model and context settings",
+    "oneMillion": "Model slots with 1M context enabled",
+    "contextWindows": "Context window per model",
+    "autoCompact": "Auto-compact window",
+    "toolSearch": "Enable tool search",
+    "disableBetas": "Disable experimental beta headers",
+    "testSuccess": "Upstream connected ({{latency}}ms)",
+    "testFailed": "Upstream failed: {{error}}",
+    "proxySuccess": "Protocol bridge passed ({{latency}}ms)",
+    "proxyFailed": "Protocol bridge failed: {{error}}",
+    "confirmDelete": "Delete provider “{{name}}”?",
+    "cloudTitle": "Bedrock, Vertex AI, and Microsoft Foundry",
+    "cloudDescription": "Configure native Agent SDK cloud-provider environment variables.",
+    "cloudHelp": "Save server environment variables as JSON, such as env.CLAUDE_CODE_USE_BEDROCK, AWS_REGION, ANTHROPIC_VERTEX_PROJECT_ID, or ANTHROPIC_FOUNDRY_RESOURCE. Sensitive values remain on the backend.",
+    "fields": {
+      "preset": "Provider preset",
+      "name": "Name",
+      "apiKey": "API key / token",
+      "baseUrl": "Base URL",
+      "apiFormat": "API protocol",
+      "authStrategy": "Authentication",
+      "models": "Model mapping",
+      "notes": "Notes"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "add": "Add provider",
+      "activate": "Make active",
+      "test": "Test",
+      "login": "Sign in",
+      "logout": "Sign out",
+      "cancel": "Cancel",
+      "save": "Save",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "saveSettings": "Save cloud settings"
+    },
+    "messages": {
+      "activated": "Provider switched. New sessions will use this configuration.",
+      "deleted": "Provider deleted.",
+      "oauthStarted": "The sign-in page opened. Status will refresh after authorization.",
+      "loggedOut": "Signed out of the official provider.",
+      "settingsSaved": "Native cloud-provider settings saved."
+    },
+    "errors": {
+      "load": "Failed to load providers",
+      "save": "Failed to save provider",
+      "delete": "Failed to delete provider",
+      "activate": "Failed to switch provider",
+      "test": "Failed to test provider",
+      "oauth": "Official-provider sign-in failed",
+      "reorder": "Failed to reorder providers",
+      "action": "Action failed",
+      "nameRequired": "Enter a provider name",
+      "baseUrlRequired": "Enter a Base URL",
+      "modelsRequired": "Main, Haiku, Sonnet, and Opus model mappings are required",
+      "apiKeyForTest": "Enter an API key before testing an unsaved configuration",
+      "contextRange": "Context windows must be integers between 16000 and 10000000",
+      "invalidJson": "Cloud-provider settings are not valid JSON",
+      "saveSettings": "Failed to save cloud-provider settings"
+    }
+  },
+  "mcpServers": {
+    "title": "MCP Servers",
+    "description": {
+      "claude": "Model Context Protocol servers provide additional tools and data sources to the MedHelp agent"
+    },
+    "addButton": "Add MCP Server",
+    "empty": "No MCP servers configured",
+    "serverType": "Type",
+    "scope": {
+      "local": "local",
+      "user": "user"
+    },
+    "config": {
+      "command": "Command",
+      "url": "URL",
+      "args": "Args",
+      "environment": "Environment"
+    },
+    "tools": {
+      "title": "Tools",
+      "count": "({{count}}):",
+      "more": "+{{count}} more"
+    },
+    "actions": {
+      "edit": "Edit server",
+      "delete": "Delete server"
+    },
+    "help": {
+      "title": "About MedHelp MCP",
+      "description": "MedHelp supports MCP servers. You can add servers that extend the agent with additional tools and resources."
+    }
+  }
+}

@@ -1,0 +1,364 @@
+Title: SAE-Based Activation Fingerprinting for Deployment-Time Anomaly Detection and Automated Red-Teaming
+
+================================================================================
+1. PROBLEM STATEMENT
+================================================================================
+
+Current sparse autoencoder (SAE) research focuses almost exclusively on the
+*training* and *interpretation* phases: how to learn monosemantic features
+(Bricken et al., 2023; Templeton et al., 2024), how to improve reconstruction
+fidelity (Rajamanoharan et al., 2024; Gao et al., 2024), and how to evaluate
+feature quality (Cunningham et al., 2023). A critical gap remains: once we have
+a trained SAE that decomposes a model's internal representations into
+interpretable features, how do we *operationalize* those features for real-time
+safety monitoring during deployment?
+
+Specifically, three problems are unaddressed:
+
+(P1) ANOMALY DETECTION: Given a trained SAE on a language model's residual
+     stream, can we define a principled statistical test over feature activation
+     patterns that detects when the model encounters inputs that elicit novel or
+     dangerous internal computations — even when the surface-level text appears
+     benign?
+
+(P2) AUTOMATED RED-TEAMING VIA FEATURE INVERSION: Can we invert the SAE
+     feature space to *synthesize* adversarial inputs that maximally activate
+     rare or safety-critical feature combinations, providing a systematic
+     red-teaming methodology?
+
+(P3) THEORETICAL GUARANTEES: Under what conditions on the data distribution and
+     SAE reconstruction quality can we prove that anomalies in SAE feature space
+     correspond to genuine out-of-distribution (OOD) behavior in the model's
+     computation, rather than artifacts of imperfect dictionary learning?
+
+This work does NOT modify the SAE architecture or training objective. Instead,
+it takes a *pre-trained* SAE as given and builds a complete deployment
+monitoring and red-teaming framework on top of it.
+
+================================================================================
+2. PROPOSED METHOD
+================================================================================
+
+The method has three components: (A) Activation Fingerprinting, (B) Feature-
+Space Red-Teaming, and (C) Theoretical Recovery Guarantees.
+
+------------------------------------------------------------------------
+2A. Activation Fingerprinting for Anomaly Detection
+------------------------------------------------------------------------
+
+Let f: R^d -> R^D be a trained SAE encoder (with D >> d dictionary elements)
+applied to the residual stream activation h in R^d at layer l of a transformer.
+For an input token sequence x = (x_1, ..., x_T), define the feature activation
+vector at position t as:
+
+    z_t = f(h_t^l) in R^D,   where z_t >= 0 (ReLU activations)
+
+DEFINITION (Activation Fingerprint): For a sequence x, define the sequence-level
+activation fingerprint as:
+
+    F(x) = (mu(x), Sigma(x), S(x))
+
+where:
+    mu(x) = (1/T) sum_{t=1}^{T} z_t                    [mean activation]
+    Sigma(x) = (1/T) sum_{t=1}^{T} (z_t - mu)(z_t - mu)^top   [covariance]
+    S(x) = { j in [D] : max_t z_{t,j} > tau_j }        [support set]
+
+Here tau_j is a per-feature activation threshold calibrated on a reference
+distribution.
+
+REFERENCE DISTRIBUTION ESTIMATION: Given a calibration dataset X_cal = {x^(i)}
+of N safe, in-distribution sequences, compute:
+
+    mu_ref = (1/N) sum_i mu(x^(i))
+    Sigma_ref = (1/N) sum_i Sigma(x^(i)) + Cov_i[mu(x^(i))]  [total covariance]
+    p_j = (1/N) sum_i 1[j in S(x^(i))]       [feature activation frequency]
+
+ANOMALY SCORE: For a new input x, define the anomaly score as a combination of
+three signals:
+
+(i) Mahalanobis distance on the mean activation:
+
+    A_maha(x) = (mu(x) - mu_ref)^top Sigma_ref^{-1} (mu(x) - mu_ref)
+
+    In practice, since D >> N, we project onto the top-k principal components
+    of Sigma_ref. Let P_k in R^{D x k} be the matrix of top-k eigenvectors.
+    Then:
+
+    A_maha(x) = (P_k^top (mu(x) - mu_ref))^top Lambda_k^{-1} (P_k^top (mu(x) - mu_ref))
+
+    where Lambda_k = diag(lambda_1, ..., lambda_k) are the top-k eigenvalues.
+
+(ii) Support novelty score:
+
+    A_supp(x) = sum_{j in S(x)} max(0, -log(p_j + epsilon))
+
+    This is high when the input activates features that are rarely active in the
+    reference distribution. Features never seen in calibration (p_j = 0) receive
+    the maximum penalty -log(epsilon).
+
+(iii) Co-activation anomaly score: Define the empirical co-activation matrix on
+    the reference set:
+
+    C_ref[j,k] = (1/N) sum_i 1[j in S(x^(i)) AND k in S(x^(i))]
+
+    For a test input x, compute unexpected co-activations:
+
+    A_coact(x) = sum_{j,k in S(x), j<k} max(0, -log(C_ref[j,k] + epsilon))
+
+    This detects novel *combinations* of features, even when each individual
+    feature is familiar.
+
+COMBINED ANOMALY SCORE:
+
+    A(x) = w_1 * A_maha(x) + w_2 * A_supp(x) + w_3 * A_coact(x)
+
+    where w_1, w_2, w_3 are weights calibrated on a held-out validation set
+    to maximize AUROC for known anomaly types.
+
+DECISION RULE: Flag x as anomalous if A(x) > theta, where theta is set to
+achieve a target false positive rate alpha on the calibration set (e.g., alpha =
+0.01).
+
+------------------------------------------------------------------------
+2B. Feature-Space Red-Teaming via Activation Inversion
+------------------------------------------------------------------------
+
+Given the SAE decoder g: R^D -> R^d (the dictionary matrix W_dec in R^{d x D}),
+we can define a *target activation pattern* z* in R^D and attempt to find an
+input x* whose internal activations approximately realize z* at layer l.
+
+FORMULATION: Given a target feature activation z* in R^D (e.g., a rare
+combination of safety-relevant features), solve:
+
+    x* = argmin_{x in V^T} || f(h_x^l) - z* ||_2^2 + lambda * R(x)
+
+where V is the vocabulary, T is the sequence length, h_x^l is the residual
+stream at layer l when processing x, and R(x) is a fluency regularizer.
+
+This is intractable to solve exactly over discrete tokens. We use a two-stage
+relaxation:
+
+STAGE 1 (Continuous Relaxation): Optimize in the embedding space. Let
+E in R^{|V| x d_emb} be the embedding matrix. Replace the discrete tokens with
+continuous embeddings e_t in R^{d_emb} and optimize:
+
+    min_{e_1,...,e_T} || f(h_e^l) - z* ||_2^2 + lambda_1 * sum_t min_{v in V} ||e_t - E_v||^2
+
+The second term encourages proximity to actual token embeddings. Optimize with
+Adam for K steps.
+
+STAGE 2 (Discrete Projection): Project each optimized embedding onto the
+nearest vocabulary token:
+
+    x_t* = argmin_{v in V} || e_t^* - E_v ||_2
+
+Then verify: compute f(h_{x*}^l) and check whether the target features in z*
+are indeed activated above threshold.
+
+TARGET GENERATION STRATEGIES:
+
+(Strategy 1 — Rare Feature Amplification): Select features j with low p_j in
+the reference distribution but that are associated with safety-relevant
+concepts. Set z*_j = c * tau_j for a large constant c, and z*_k = 0 for other
+features.
+
+(Strategy 2 — Anomalous Co-activation): Select pairs (j, k) with low
+co-activation C_ref[j,k] but where j and k are individually common. Set both
+z*_j and z*_k to high values. This searches for inputs that combine normally
+separate model computations.
+
+(Strategy 3 — Boundary Probing): For each feature j identified as safety-
+relevant (via manual inspection or automated labeling), generate inputs at
+varying activation levels z*_j in {tau_j, 2*tau_j, 5*tau_j, 10*tau_j} to map
+the boundary between safe and unsafe model behavior.
+
+------------------------------------------------------------------------
+2C. Theoretical Guarantees on Feature-Space OOD Detection
+------------------------------------------------------------------------
+
+We provide conditions under which anomalies in SAE feature space correspond to
+genuine distributional shift in the model's computation.
+
+SETUP: Assume the true data-generating process for activations h at layer l has
+distribution P_in for in-distribution data. Assume the SAE has reconstruction
+error bounded as:
+
+    E_{h ~ P_in}[ || h - g(f(h)) ||^2 ] <= epsilon_rec
+
+and that the SAE achieves delta-approximate feature recovery in the sense of
+Elhage et al. (2022): there exists a ground-truth feature dictionary
+{phi_1, ..., phi_M} such that for each ground-truth feature phi_m, there exists
+an SAE feature j(m) with:
+
+    | <W_enc[j(m),:], phi_m> / (||W_enc[j(m),:]|| * ||phi_m||) - 1 | <= delta
+
+THEOREM 1 (Anomaly Soundness): Under the above assumptions, let P_out be an
+out-of-distribution activation distribution. Define the total variation distance
+between feature activation distributions:
+
+    TV(P_in^z, P_out^z) where P^z denotes the pushforward of P through f.
+
+If TV(P_in, P_out) >= gamma (the OOD shift is large enough), then:
+
+    TV(P_in^z, P_out^z) >= gamma - O(sqrt(epsilon_rec) + delta * sqrt(M))
+
+Proof sketch: By triangle inequality on total variation:
+    TV(P_in^z, P_out^z) >= TV(P_in, P_out) - TV(P_in, (g o f)_# P_in) - TV(P_out, (g o f)_# P_out)
+The reconstruction error bounds give TV(P, (g o f)_# P) <= O(sqrt(epsilon_rec))
+via Pinsker's inequality. The feature recovery gap introduces an additional
+delta * sqrt(M) term from the misalignment between SAE features and ground-truth
+features.
+
+IMPLICATION: When the SAE has low reconstruction error (epsilon_rec small) and
+good feature recovery (delta small), the anomaly detector in feature space
+inherits the detection power of an ideal detector that observes the raw
+activations. The bound degrades gracefully with SAE quality.
+
+THEOREM 2 (Support Novelty Concentration): Under P_in, suppose feature j has
+activation probability p_j. For a new input x drawn from P_in:
+
+    Pr[A_supp(x) > t] <= exp(-t / max_j(-log(p_j + epsilon)))
+
+by sub-exponential concentration. This gives a principled way to set the
+threshold theta for a given false positive rate alpha.
+
+================================================================================
+3. EXPERIMENTAL DESIGN
+================================================================================
+
+------------------------------------------------------------------------
+3.1 Models and SAEs
+------------------------------------------------------------------------
+
+- Base models: GPT-2 Small (for rapid iteration), Pythia-1B, Pythia-6.9B
+  (for scaling analysis)
+- Pre-trained SAEs: Use publicly available SAEs from Gao et al. (2024) and
+  the TransformerLens/SAELens ecosystem. Dictionary sizes: 4x, 8x, 16x, 32x
+  the residual stream dimension.
+- Layers: Apply to layers L/4, L/2, 3L/4 (early, middle, late) to study
+  which layer's feature space is most informative for anomaly detection.
+
+------------------------------------------------------------------------
+3.2 Datasets
+------------------------------------------------------------------------
+
+Calibration (in-distribution):
+- OpenWebText subset (100K sequences, 256 tokens each)
+
+Anomaly benchmarks:
+- (A1) Jailbreak detection: GCG adversarial suffixes (Zou et al., 2023b),
+  DAN-style prompts, AutoDAN outputs. In-distribution = benign instructions.
+  OOD = jailbreak attempts.
+- (A2) Toxic content detection: RealToxicityPrompts (Gehman et al., 2020).
+  In-distribution = non-toxic prompts. OOD = prompts that elicit toxic
+  continuations.
+- (A3) Factual anomalies: CounterFact dataset (Meng et al., 2022). In-
+  distribution = factually correct statements. OOD = counterfactual
+  statements that require the model to override learned facts.
+- (A4) Distribution shift: Domain-shifted text (legal, medical, code) vs.
+  web text calibration set.
+
+Red-teaming evaluation:
+- (R1) Given safety-relevant features (identified via Neuronpedia labels or
+  manual inspection), generate adversarial inputs via feature inversion.
+  Measure: (a) fraction of generated inputs that actually elicit unsafe
+  model outputs (attack success rate), (b) fluency of generated inputs
+  (perplexity under a reference LM), (c) novelty vs. existing red-teaming
+  datasets (BLEU-based de-duplication).
+
+------------------------------------------------------------------------
+3.3 Baselines
+------------------------------------------------------------------------
+
+For anomaly detection:
+- (B1) Perplexity-based OOD detection (threshold on model's own perplexity)
+- (B2) Mahalanobis distance on raw activations (without SAE decomposition)
+  (Lee et al., 2018)
+- (B3) Activation patching probes: linear probes trained on raw activations
+  for each anomaly type
+- (B4) Representation Engineering directions (Zou et al., 2023): project
+  activations onto known "harmful" directions
+- (B5) Ensemble of all above
+
+For red-teaming:
+- (B6) GCG attack (Zou et al., 2023b)
+- (B7) AutoDAN (Liu et al., 2024)
+- (B8) Random sampling from the model
+
+------------------------------------------------------------------------
+3.4 Metrics
+------------------------------------------------------------------------
+
+Anomaly detection:
+- AUROC and AUPRC for each anomaly type
+- False Positive Rate at 95% True Positive Rate (FPR@95)
+- Detection latency (wall-clock time per sequence)
+- Calibration: does the anomaly score threshold transfer across anomaly types?
+  Measure: set theta on one anomaly type, evaluate on others.
+
+Red-teaming:
+- Attack Success Rate (ASR): fraction of generated inputs that produce unsafe
+  outputs (judged by a safety classifier)
+- Fluency: perplexity of generated inputs under GPT-2 Large
+- Diversity: Self-BLEU across generated inputs (lower = more diverse)
+- Novelty: BLEU against existing red-teaming corpora (lower = more novel)
+
+Theoretical validation:
+- Empirically estimate TV(P_in^z, P_out^z) vs TV(P_in, P_out) and verify
+  the bound in Theorem 1 holds.
+- Measure concentration of A_supp under P_in and compare to Theorem 2.
+
+------------------------------------------------------------------------
+3.5 Ablation Studies
+------------------------------------------------------------------------
+
+- (Ab1) Effect of SAE dictionary size on detection quality
+- (Ab2) Effect of layer choice on detection quality
+- (Ab3) Individual contribution of A_maha, A_supp, A_coact (ablate each)
+- (Ab4) Effect of calibration set size N on threshold stability
+- (Ab5) Transferability: train fingerprint on model X, apply to model Y
+  (using a different SAE trained on Y) — do the anomaly patterns transfer?
+- (Ab6) Feature inversion quality vs. SAE reconstruction error
+
+================================================================================
+4. EXPECTED CONTRIBUTIONS
+================================================================================
+
+(C1) A complete, plug-and-play deployment monitoring framework that takes any
+     pre-trained SAE and converts it into an anomaly detector. This requires no
+     SAE architecture changes and no additional neural network training — only
+     statistics computed over a calibration set.
+
+(C2) A principled automated red-teaming methodology (feature-space inversion)
+     that leverages SAE interpretability to *target* specific safety-relevant
+     internal computations, rather than optimizing against surface-level output
+     classifiers. This produces more diverse and more interpretable attacks.
+
+(C3) The first theoretical guarantees connecting SAE reconstruction quality
+     and feature recovery to the statistical power of feature-space anomaly
+     detection. This provides a formal justification for why SAE-based
+     monitoring should work and quantifies how SAE quality affects detection.
+
+(C4) Comprehensive empirical evaluation across 4 anomaly types, 3 model
+     scales, and multiple SAE configurations, establishing the first benchmark
+     for SAE-based deployment monitoring.
+
+(C5) Practical insights: which layers, dictionary sizes, and fingerprint
+     components are most effective for different types of safety-relevant
+     anomalies.
+
+================================================================================
+5. DIFFERENTIATION FROM PRIOR IDEAS
+================================================================================
+
+- Unlike Candidate Idea #1 (contrastive SAE with safety-aware training), this
+  method uses STANDARD pre-trained SAEs with NO modifications to the SAE
+  training objective.
+
+- Unlike Candidate Idea #2 (architecture innovations for absorption/scaling),
+  this method makes NO changes to the SAE architecture. The SAE is treated as
+  a fixed, black-box feature extractor.
+
+- The novelty is entirely in the DOWNSTREAM USE of SAE features: statistical
+  anomaly detection, principled red-teaming via feature inversion, and
+  theoretical analysis of when and why SAE-based monitoring works.

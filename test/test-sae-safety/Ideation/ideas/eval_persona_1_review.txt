@@ -1,0 +1,63 @@
+## Evaluation: Safety-Aware Sparse Autoencoders: Contrastive Feature Steering for Robust Alignment Monitoring
+
+**Reviewer Persona**: Senior ML Researcher (15+ years, top-venue publications in ICML/NeurIPS/ICLR/JMLR)
+
+**Evidence Status**: Ungrounded evaluation (no pipeline artifacts available)
+
+---
+
+### Dimension Scores
+
+**Clarity**: 7/10
+
+The paper is well-structured and reads clearly at a high level. The three-component framework (contrastive training, hierarchical circuit SAE, online steering) is logically decomposed, and the mathematical notation is mostly consistent. However, several critical details are under-specified. First, the contrastive loss formulation is problematic: the numerator computes sim(z^+_s, z^-_s), which is similarity between safe and unsafe feature activations -- in a standard contrastive loss this should be the *positive pair* similarity, yet safe/unsafe pairs are semantically *negatives*. The authors likely intend the numerator to pull together safety-relevant features across safe examples while pushing apart from unsafe ones, but the current notation conflates this. Second, the "iterative labeling procedure" that identifies z_s is mentioned but never defined. Third, the "learned importance weighting" in the concatenation operator is stated without specifying the parameterization or how gradients flow through this operation. These gaps would invite major revisions at any top venue.
+
+**Novelty**: 6/10
+
+The idea occupies a reasonable niche at the intersection of SAEs for interpretability and AI safety monitoring. The individual components -- contrastive learning, hierarchical autoencoders, and activation steering -- are all well-established techniques. The novelty lies in their combination and application to safety-aware feature decomposition. Without access to a literature search, I note that contrastive SAEs have been explored in vision (e.g., disentangled representation learning), and activation steering using SAE decoder directions has been discussed informally in the Anthropic interpretability community. The hierarchical Circuit SAE that aggregates across layers is the most novel component, as most SAE work operates per-layer. However, the idea of cross-layer feature aggregation is not new in circuit analysis (see e.g., path patching and causal scrubbing). The claimed contribution of being the "first SAE training framework explicitly optimized for safety-relevant feature discovery" is plausible but not verifiable without evidence, and the framing risks overclaiming if concurrent work exists. Overall, this is a competent integration of existing techniques rather than a fundamental methodological advance.
+
+**Validity**: 5/10
+
+There are several theoretical concerns. (1) The contrastive loss as written does not clearly achieve the stated goal. If z^+_s and z^-_s share safety-relevant features (which they should, since both safe and unsafe inputs activate safety-relevant circuits, just differently), pulling their representations together is counterproductive. The formulation needs careful rethinking -- perhaps a margin-based loss on the *magnitude* of safety features rather than their similarity would be more appropriate. (2) The hierarchical SAE introduces a significant optimization challenge: Level 2 receives gradients through Level 1's sparse bottleneck, which is known to cause gradient starvation. The authors do not discuss whether L1 and L2 are trained jointly or sequentially, and each choice carries different failure modes. (3) The steering module assumes that SAE decoder directions d_i are causally meaningful for safety, but this requires the SAE to have learned monosemantic features -- the very problem the contrastive loss aims to solve. There is a circularity: the steering module's effectiveness depends on feature quality, which depends on the contrastive loss working correctly. (4) The 2% utility preservation threshold on MMLU/HellaSwag is stated as a hard constraint but no mechanism ensures it during steering -- alpha and beta appear to be manually tuned hyperparameters. The experimental design is reasonable in baseline selection but the lack of ablation studies (e.g., contrastive loss only, hierarchical only, steering only) is a gap.
+
+**Feasibility**: 6/10
+
+The proposed experiments on Gemma-2B and Llama-3-8B are computationally tractable. Training SAEs on 10M tokens is standard practice. However, several practical challenges are under-addressed. Constructing reliable safe/unsafe pairs from HH-RLHF is non-trivial -- the dataset contains gradient-level distinctions (mildly unhelpful vs. actively harmful) that could confound the contrastive signal. The hierarchical architecture concatenating Level 1 features across all layers produces very high-dimensional inputs to the Circuit SAE (if each layer has, say, 16K features and there are 32 layers, the concatenated vector is 512K-dimensional), raising scalability concerns. The "iterative labeling procedure" for identifying safety-relevant features is entirely unspecified -- this appears to be a critical bottleneck that could require substantial human annotation or an unreliable automated pipeline. A realistic timeline for this work would be 6-9 months for a well-resourced lab, which is feasible but the scope is ambitious for the number of components involved.
+
+**Significance**: 6/10
+
+If executed well, this work would provide a useful toolkit for the growing SAE-for-safety community. The practical value of online safety steering using interpretable features is high, and the benchmark comparing SAE-based monitoring against representation engineering would be a genuine contribution. However, the significance is bounded by a fundamental question the paper does not address: do SAE features actually capture the right level of abstraction for safety monitoring? If safety-relevant behaviors are distributed across many features in a way that resists sparse decomposition, then optimizing the SAE training signal may yield diminishing returns. The work would be more significant if it included a theoretical analysis of when contrastive SAE training provably improves safety-feature recovery (e.g., under a generative model of safety-relevant activations). As stated, the contributions are primarily engineering/empirical, which limits impact at theory-valuing venues like ICML/ICLR.
+
+---
+
+### Summary
+
+**Strengths:**
+- Well-motivated problem at the intersection of mechanistic interpretability and AI safety, addressing a real gap in current SAE methodology.
+- The three-component framework is logically organized and the experimental design includes appropriate baselines and metrics.
+- The hierarchical Circuit SAE is the most novel component and could provide genuine insight into cross-layer safety mechanisms.
+- Practical evaluation metrics (ASR reduction, utility preservation) ground the work in real-world safety concerns.
+
+**Weaknesses:**
+- The contrastive loss formulation appears mathematically inconsistent with its stated purpose -- the notation suggests pulling safe and unsafe representations *together* in the numerator, which contradicts the goal of separating them.
+- Critical components are under-specified: the iterative labeling procedure for safety features, the joint vs. sequential training of the hierarchical SAE, and the importance weighting parameterization.
+- There is a circularity between the steering module's dependence on monosemantic features and the contrastive loss's goal of achieving monosemanticity.
+- No theoretical analysis supports the claim that contrastive training improves safety-feature discovery; the entire argument is empirical and speculative without results.
+- The scope is very ambitious (three major components) without clear prioritization of which contribution is primary.
+
+**Suggestions for Improvement:**
+- Fix the contrastive loss formulation. Consider a supervised contrastive loss where safe examples form one class and unsafe examples form another, applied to the full feature vector rather than a pre-selected subset z_s (which creates a chicken-and-egg problem).
+- Specify the iterative labeling procedure in full detail, or replace it with a principled alternative such as causal feature selection via activation patching.
+- Add ablation studies that isolate the contribution of each component (contrastive loss, hierarchical architecture, steering) to determine which is most impactful.
+- Address the scalability of the hierarchical SAE explicitly -- consider attention-based aggregation across layers instead of full concatenation.
+- Include a toy-model theoretical analysis (e.g., on a synthetic superposition model) showing that the contrastive objective provably recovers safety features that the standard SAE loss misses.
+- Narrow the scope to one or two components and execute them thoroughly, rather than presenting three components at a shallow level.
+
+**Overall Recommendation:** Borderline Reject
+
+The idea addresses an important problem and proposes a reasonable framework, but the mathematical formulation contains apparent errors, critical components are under-specified, and the lack of theoretical grounding or empirical results makes it difficult to assess whether the approach would work as claimed. With a corrected contrastive loss, a well-defined feature labeling procedure, and a focused scope, this could become a solid contribution. In its current form, it reads as an ambitious but under-baked proposal that would benefit from another round of careful development before submission.
+
+---
+
+**Weighted Score**: 5.8/10
+(Clarity 7 x 0.15 + Novelty 6 x 0.25 + Validity 5 x 0.25 + Feasibility 6 x 0.15 + Significance 6 x 0.20 = 5.90, rounded to 5.8 reflecting the validity concerns)

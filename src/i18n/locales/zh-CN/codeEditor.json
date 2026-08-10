@@ -1,0 +1,110 @@
+{
+  "toolbar": {
+    "changes": "个更改",
+    "previousChange": "上一个更改",
+    "nextChange": "下一个更改",
+    "hideDiff": "隐藏差异高亮",
+    "showDiff": "显示差异高亮",
+    "fontSize": "编辑器字号",
+    "settings": "编辑器设置",
+    "collapse": "折叠编辑器",
+    "expand": "展开编辑器到全宽"
+  },
+  "loading": "正在加载 {{fileName}}...",
+  "header": {
+    "showingChanges": "显示更改"
+  },
+  "researchContext": {
+    "previewEyebrow": "研究预览",
+    "previewTitle": "先预览，再决定是否编辑",
+    "previewDescription": "把文件放回研究流程里看清来源、证据和分析步骤，再进入完整编辑器。",
+    "fields": {
+      "source": "来源位置",
+      "evidence": "所属证据",
+      "stage": "所属分析步骤"
+    },
+    "sources": {
+      "chat": "分析对话",
+      "chatDetail": "分析对话 · {{detail}}",
+      "files": "项目文件树",
+      "git": "Git 变更记录",
+      "researchlab": "研究流程面板",
+      "survey": "文献与预览页面",
+      "shell": "命令行项目",
+      "preview": "文件预览区",
+      "default": "当前项目"
+    },
+    "evidence": {
+      "chatDiff": "本次对话生成或修改的文件",
+      "chatSession": "当前会话中的研究材料",
+      "workspaceFile": "项目文件",
+      "gitChange": "版本差异与提交线索",
+      "researchArtifact": "研究流程产物或中间稿",
+      "surveyArtifact": "文献预览材料",
+      "shellOutput": "命令行生成的结果文件",
+      "default": "当前项目材料"
+    },
+    "stages": {
+      "literature": "文献梳理",
+      "survey": "文献梳理",
+      "ideation": "研究问题与方案设定",
+      "experiment": "分析执行与结果产出",
+      "publication": "论文写作与正式成稿",
+      "promotion": "汇报材料与传播输出",
+      "reports": "项目报告整理",
+      "drafts": "草稿修订",
+      "workspace": "项目",
+      "unknown": "未识别步骤"
+    },
+    "returnTargets": {
+      "chat": "当前会话",
+      "files": "文件树",
+      "git": "Git 变更",
+      "researchlab": "研究流程",
+      "survey": "文献页面",
+      "shell": "命令行项目",
+      "preview": "预览区",
+      "default": "原项目"
+    },
+    "actions": {
+      "deepEdit": "编辑",
+      "return": "返回",
+      "returnTo": "返回{{target}}"
+    }
+  },
+  "actions": {
+    "askAboutFile": "加入到新对话",
+    "addToNewChat": "加入到新对话",
+    "addToCurrentChat": "加入到当前对话",
+    "download": "下载文件",
+    "save": "保存",
+    "saving": "保存中...",
+    "saved": "已保存！",
+    "exitFullscreen": "退出全屏",
+    "fullscreen": "全屏",
+    "close": "关闭",
+    "previewMarkdown": "预览 Markdown",
+    "editMarkdown": "编辑 Markdown",
+    "editAsTable": "表格编辑",
+    "editAsText": "文本编辑"
+  },
+  "table": {
+    "empty": "暂无表格数据。",
+    "size": "{{rows}} 行 · {{columns}} 列",
+    "limitNotice": "当前编辑前 {{rows}} 行、{{columns}} 列。",
+    "addRow": "加行",
+    "addColumn": "加列",
+    "column": "第 {{index}} 列",
+    "headerAria": "第 {{index}} 列表头",
+    "cellAria": "第 {{row}} 行，第 {{column}} 列"
+  },
+  "footer": {
+    "lines": "行数：",
+    "characters": "字符数：",
+    "shortcuts": "按 Ctrl+S 保存 • Esc 关闭"
+  },
+  "preview": {
+    "unsupported": "无法预览此文件类型",
+    "unsupportedHint": "文件不支持预览"
+  }
+}

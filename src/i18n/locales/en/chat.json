@@ -1,0 +1,750 @@
+{
+  "codeBlock": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyCode": "Copy code"
+  },
+  "messageTypes": {
+    "user": "U",
+    "error": "Error",
+    "tool": "Tool",
+    "claude": "MedHelp"
+  },
+  "error": {
+    "retry": "Retry",
+    "usageLimitHint": "You can retry when your usage limit resets"
+  },
+  "tools": {
+    "settings": "Tool Settings",
+    "error": "Tool Error",
+    "result": "Tool Result",
+    "viewParams": "View input parameters",
+    "viewRawParams": "View raw parameters",
+    "viewDiff": "View edit diff for",
+    "creatingFile": "Creating new file:",
+    "updatingTodo": "Updating Todo List",
+    "read": "Read",
+    "readFile": "Read file",
+    "updateTodo": "Update todo list",
+    "readTodo": "Read todo list",
+    "searchResults": "results"
+  },
+  "search": {
+    "found": "Found {{count}} {{type}}",
+    "file": "file",
+    "files": "files",
+    "pattern": "pattern:",
+    "in": "in:"
+  },
+  "fileOperations": {
+    "updated": "File updated successfully",
+    "created": "File created successfully",
+    "written": "File written successfully",
+    "diff": "Diff",
+    "newFile": "New File",
+    "viewContent": "View file content",
+    "viewFullOutput": "View full output ({{count}} chars)",
+    "contentDisplayed": "The file content is displayed in the diff view above"
+  },
+  "interactive": {
+    "title": "Interactive Prompt",
+    "waiting": "Waiting for your response in the CLI",
+    "instruction": "Please select an option in the prompt.",
+    "selectedOption": "✓ Claude selected option {{number}}",
+    "instructionDetail": "In the CLI, you would select this option interactively using arrow keys or by typing the number."
+  },
+  "thinking": {
+    "title": "Thinking...",
+    "emoji": "💭 Thinking..."
+  },
+  "agentTurn": {
+    "thought": "Thought",
+    "usedTools": "Used {{count}} tools",
+    "steps": "Agent steps",
+    "streaming": "Streaming..."
+  },
+  "skill": {
+    "contentLoaded": "Skill Content Loaded",
+    "contentBadge": "Skill"
+  },
+  "json": {
+    "response": "JSON Response"
+  },
+  "messageShare": {
+    "button": "Share",
+    "creating": "Creating...",
+    "title": "Share answer",
+    "description": "Copies as a rich card when supported, with a plain link fallback.",
+    "cardTitle": "MedHelp",
+    "cardDescription": "Shared via MedHelp, an AI research assistant",
+    "copyFooter": "Please do not forward it to unrelated people.",
+    "scan": "Scan to view",
+    "copy": "Copy share card",
+    "copyText": "I shared a read-only MedHelp conversation for you to review:\n{{url}}\nPlease do not forward it to unrelated people.",
+    "copied": "Copied",
+    "close": "Close",
+    "qrAlt": "Share QR code"
+  },
+  "permissions": {
+    "grant": "Grant permission for {{tool}}",
+    "added": "Permission added",
+    "addTo": "Adds {{entry}} to Allowed Tools.",
+    "retry": "Permission saved to your account. Retry the request to use the tool.",
+    "error": "Unable to update permissions. Please try again.",
+    "openSettings": "Open settings"
+  },
+  "todo": {
+    "updated": "Todo list has been updated successfully",
+    "current": "Current Todo List"
+  },
+  "plan": {
+    "viewPlan": "📋 View implementation plan",
+    "title": "Implementation Plan"
+  },
+  "status": {
+    "thinking": "Thinking",
+    "processing": "Processing",
+    "analyzing": "Analyzing",
+    "working": "Working",
+    "computing": "Computing",
+    "reasoning": "Reasoning",
+    "runningCode": "Running code",
+    "resuming": "Resuming",
+    "initializing": "Initializing",
+    "restarting": "Restarting"
+  },
+  "usageLimit": {
+    "resetAt": "Claude usage limit reached. Your limit will reset at **{{time}} {{timezone}}** - {{date}}"
+  },
+  "tokenUsage": {
+    "unavailable": "Context N/A",
+    "unavailableTitle": "Current context usage is unavailable for this session."
+  },
+  "analysisLanguage": {
+    "selector": {
+      "title": "Analysis Language",
+      "label": "Analysis language",
+      "description": "Controls the default language agents should prefer for analysis code. This affects prompt guidance only and does not create or switch a real runtime environment."
+    },
+    "options": {
+      "auto": "Auto",
+      "python": "Python",
+      "r": "R"
+    }
+  },
+  "permissionModes": {
+    "permissionMode": "Permission Mode",
+    "modes": {
+      "default": "Default Mode",
+      "acceptEdits": "Accept Edits",
+      "plan": "Plan Mode"
+    },
+    "default": "Default Mode",
+    "acceptEdits": "Accept Edits",
+    "plan": "Plan Mode",
+    "descriptions": {
+      "default": "Only trusted commands (ls, cat, grep, git status, etc.) run automatically. Other commands are skipped. Can write to workspace.",
+      "acceptEdits": "All commands run automatically within the workspace. Full auto mode with sandboxed execution.",
+      "plan": "Planning mode - no commands are executed"
+    },
+    "technicalDetails": "Technical details"
+  },
+  "input": {
+    "placeholder": "Type / for commands, @ for files, or ask {{provider}} anything...",
+    "placeholderDefault": "Type your message...",
+    "disabled": "Input disabled",
+    "attachFiles": "Attach files",
+    "attachReferences": "Attach references",
+    "attachImages": "Attach images",
+    "dropFilesHere": "Drop files here",
+    "attachmentOnlyFallback": "Please inspect the attached files and help me with them.",
+    "send": "Send",
+    "stop": "Stop",
+    "hintText": {
+      "ctrlEnter": "Ctrl+Enter to send • Shift+Enter for new line • Tab to change modes • / for slash commands",
+      "enter": "Enter to send • Shift+Enter for new line • Tab to change modes • / for slash commands"
+    },
+    "clickToChangeMode": "Click to change permission mode (or press Tab in input)",
+    "showAllCommands": "Show all commands",
+    "clearInput": "Clear input",
+    "scrollToBottom": "Scroll to bottom"
+  },
+  "thinkingMode": {
+    "selector": {
+      "title": "Thinking Effort",
+      "description": "Use Claude SDK thinking / effort levels",
+      "active": "Active",
+      "tip": "Higher effort usually improves hard-task quality, but increases latency"
+    },
+    "modes": {
+      "none": {
+        "name": "Default",
+        "description": "Do not override the Claude SDK default"
+      },
+      "low": {
+        "name": "Low",
+        "description": "Minimal thinking, fastest responses"
+      },
+      "medium": {
+        "name": "Medium",
+        "description": "Moderate thinking"
+      },
+      "high": {
+        "name": "High",
+        "description": "Deep reasoning"
+      },
+      "xhigh": {
+        "name": "XHigh",
+        "description": "Deeper than high"
+      },
+      "max": {
+        "name": "Max",
+        "description": "Maximum effort"
+      }
+    },
+    "buttonTitle": "Thinking effort: {{mode}}"
+  },
+  "providerSelection": {
+    "title": "Choose Your AI Assistant",
+    "description": "Select an agent to start a new conversation",
+    "selectModel": "Select Model",
+    "notInstalled": "Not installed",
+    "installRequired": "{{provider}} runtime is not installed",
+    "notLoggedIn": "Not logged in",
+    "loginRequired": "{{provider}} runtime is not logged in",
+    "authRequiredHint": "No authenticated model runtime was detected. Reconnect an available agent in Settings before starting a chat.",
+    "unavailableHint": "Some CLI backends are unavailable on this machine. Install the missing tools in Settings before using them.",
+    "providerInfo": {
+      "anthropic": "MedHelp"
+    },
+    "readyPrompt": {
+      "claude": "Ready to use MedHelp with {{model}}. Start typing your message below.",
+      "default": "Select an agent above to begin"
+    }
+  },
+  "session": {
+    "mode": {
+      "title": "Choose Session Type",
+      "subtitle": "Decide whether this session should drive research planning or stay focused on workspace questions.",
+      "badge": "{{count}} options",
+      "research": "Research",
+      "workspaceQa": "Files Q&A",
+      "researchTitle": "Research Session",
+      "researchDescription": "Use the project research workflow, onboarding prompts, and pipeline guidance.",
+      "workspaceQaTitle": "Workspace Q&A",
+      "workspaceQaDescription": "Ask about files, modules, and implementation details without triggering the research workflow.",
+      "workspaceQaPlaceholder": "Ask about any file, module, or implementation detail...",
+      "workspaceQaGreeting": "I can help inspect this workspace: trace code paths, explain modules, debug behavior, and make targeted fixes.\n\nAsk about any file, bug, or implementation detail you want to understand or change.",
+      "workspaceQaHint": "This session stays focused on repository questions unless you explicitly ask to start research planning."
+    },
+    "continue": {
+      "title": "Continue your analysis chat",
+      "description": "Ask about study design, statistical plans, implementation details, or request concrete changes and execution help"
+    },
+    "loading": {
+      "olderMessages": "Loading older messages...",
+      "sessionMessages": "Loading session messages..."
+    },
+    "messages": {
+      "showingOf": "Showing {{shown}} of {{total}} messages",
+      "scrollToLoad": "Scroll up to load more",
+      "showingLast": "Showing last {{count}} messages ({{total}} total)",
+      "loadEarlier": "Load earlier messages",
+      "loadAll": "Load all messages",
+      "loadingAll": "Loading all messages...",
+      "allLoaded": "All messages loaded",
+      "perfWarning": "All messages loaded — scrolling may be slower. Click \"Scroll to bottom\" to restore performance."
+    }
+  },
+  "sessionContext": {
+    "title": "Session context",
+    "description": "Files, tasks, and outputs observed in this session trace.",
+    "traceError": "Could not load the full session trace. Showing in-memory live messages only.",
+    "stats": {
+      "mode": "Mode",
+      "provider": "Agent",
+      "contextFiles": "Context files",
+      "unreadOutputs": "Unread outputs"
+    },
+    "sections": {
+      "injectedContext": "Injected context",
+      "taskContext": "Task context",
+      "reviewQueue": "Review queue",
+      "fileReview": "File review"
+    },
+    "actions": {
+      "collapse": "Collapse context sidebar",
+      "expand": "Expand context sidebar",
+      "resize": "Drag to resize width"
+    },
+    "sidebarTabs": {
+      "context": "Context",
+      "research": "Research",
+      "zotero": "Zotero",
+      "meta": "Meta",
+      "files": "Files",
+      "git": "Code History"
+    },
+    "filters": {
+      "all": "All",
+      "unread": "Unread",
+      "reviewed": "Reviewed"
+    },
+    "kinds": {
+      "task": "Task",
+      "todo": "Todo",
+      "skill": "Skill",
+      "directory": "Directory"
+    },
+    "empty": {
+      "injectedContext": "No file or directory context observed yet.",
+      "taskContext": "No task or todo context collected yet.",
+      "reviewQueue": "No files generated in this session yet."
+    },
+    "preview": {
+      "titleFallback": "Preview",
+      "largeTitle": "Large file preview",
+      "selectFile": "Select a file to preview",
+      "open": "Open",
+      "openEditor": "Edit",
+      "previewMode": "Preview",
+      "dragTitle": "Drag to move preview",
+      "resize": "Drag to resize preview",
+      "resetSize": "Reset preview size",
+      "maximize": "Maximize preview",
+      "restoreSize": "Restore preview size",
+      "loading": "Loading preview…",
+      "loadError": "Could not load preview: {{error}}",
+      "missingTitle": "Referenced file is unavailable",
+      "missingHint": "This chat still contains the file path, but the file is no longer present in the workspace. It may have been deleted, renamed, moved, or generated in an older project state.",
+      "missingPathLabel": "Path:",
+      "truncatedNotice": "Large file — only the first {{previewSize}} is loaded for preview (file is about {{totalSize}}). Use Open to view the full file in the editor.",
+      "table": {
+        "empty": "No table rows to preview.",
+        "column": "Column {{index}}",
+        "limitNotice": "Showing first {{rows}} rows and {{columns}} columns."
+      },
+      "selectToReview": "Select a file to review",
+      "unreadHint": "Output files stay unread until opened from the review queue.",
+      "move": {
+        "title": "Move to another folder",
+        "projectRoot": "Project root",
+        "currentFolder": "Current folder: {{path}}",
+        "targetPlaceholder": "Type or pick a target folder, for example Literature/notes",
+        "loadingFolders": "Loading folders…",
+        "noFolders": "No other folders are available.",
+        "targetRequired": "Please choose a destination folder first.",
+        "sameFolder": "The destination folder is the same as the current folder.",
+        "confirm": "Move file",
+        "moveFailed": "Failed to move file.",
+        "loadFoldersError": "Failed to load folders."
+      }
+    }
+  },
+  "projectSelection": {
+    "startChatWithProvider": "Select a research workspace to start an analysis chat with {{provider}}"
+  },
+  "tasks": {
+    "nextTaskPrompt": "Start the next task",
+    "compact": {
+      "progress": "{{done}}/{{total}} done · {{pending}} pending",
+      "useInChat": "Use in Analysis Chat",
+      "allTasks": "All Tasks",
+      "allDone": "All tasks completed",
+      "stageLabel": "Stage",
+      "stageOnly": "Stage {{stage}}",
+      "stageProgress": "Stage {{stage}} · {{done}}/{{total}} done",
+      "done": "Done",
+      "inProgress": "In Progress",
+      "pending": "Pending",
+      "expand": "Expand task progress",
+      "collapse": "Collapse task progress",
+      "noTasks": "No tasks yet. Start an analysis chat first.",
+      "emptyTitle": "Task progress unavailable",
+      "emptyHint": "Use Analysis Chat to generate and configure the research pipeline."
+    },
+    "stages": {
+      "survey": "Literature",
+      "literature": "Literature",
+      "ideation": "Ideation",
+      "experiment": "Experiment",
+      "publication": "Publication",
+      "promotion": "Promotion"
+    },
+    "loading": "Loading tasks..."
+  },
+  "skillShortcuts": {
+    "title": "Medical Research Skill Shortcuts",
+    "useAll": "Use All",
+    "useAutoRoute": "Auto-select",
+    "useSelected": "Use selected ({{count}})",
+    "clearSelected": "Clear selected",
+    "useSingle": "Use this skill only",
+    "metaStatisticTypes": "Synthesis types",
+    "categories": {
+      "metaPipeline": "Start Meta Pipeline",
+      "metaAnalysis": "Meta-analysis",
+      "metaLiterature": "Literature Review",
+      "metaIdeation": "Meta Topic Framing",
+      "metaScopingReview": "Scoping / Systematic Review",
+      "metaProtocol": "Protocol / PICO",
+      "metaSearchDedupe": "Search / Dedupe",
+      "metaFullTextDownload": "Full-text Download",
+      "metaPdfAcquisition": "Zotero Communication",
+      "metaManualScreening": "Title/Abstract First Screen",
+      "metaTitleAbstractScreening": "Title Screening",
+      "metaTitleAbstractFirstScreen": "Title/Abstract First Screen",
+      "metaTitleAbstractSecondScreen": "Title/Abstract AI Second Screen",
+      "metaMineru": "Document Parsing",
+      "metaFullTextScreening": "Full-text Screening",
+      "metaFullTextFirstScreen": "Full-text First Screen",
+      "metaFullTextSecondScreen": "Full-text AI Second Screen",
+      "metaExtractionQuality": "Data Extraction",
+      "metaStatistics": "Synthesis / Modeling",
+      "metaDiagnostic": "Diagnostic Accuracy Meta",
+      "metaIntervention": "Intervention / Effect-size Meta",
+      "metaPrognostic": "Prognostic HR Meta",
+      "metaPrevalence": "Prevalence / Single-arm Meta",
+      "metaNetwork": "Network Meta",
+      "metaFigures": "Figures / Medical Visualization",
+      "metaManuscript": "PRISMA Draft / Manuscript",
+      "metaQualityAssessment": "Quality Assessment",
+      "metaRescreen": "Title/Abstract AI Second Screen"
+    },
+    "promptSingle": "Please use the {{skill}} skill to help me with this task.\n\nDescribe your task here:",
+    "promptMulti": "Please use the following skills for this task: {{skills}}.\n\nDescribe your research task here:",
+    "prompts": {
+      "metaPipeline": "Please help start this Meta project pipeline. Prefer meta-pipeline-planner first and use meta-analysis-workflow for cross-stage orchestration. Follow the project memory files, first identify the current stage, missing items, and next tasks; save the project startup report to 01_protocol/project_startup_report.md or a dated file in that folder; do not fabricate data, PDFs, extracted fields, or statistical results; when data/PDF/fields are unavailable, write a cannot-extract report; add targeted human-review checkpoints; after long runs, compact context by updating research_brief/tasks.\n\nMy task:",
+      "metaAnalysis": "Please help me with “{{scenario}}”. Follow the project memory files, identify the current Meta stage, and proceed with the smallest necessary steps.\n\nMy task:",
+      "metaLiterature": "Please help with literature review and evidence scanning for this Meta project. Follow the project memory files.\n\nMy task:",
+      "metaIdeation": "Please help frame the Meta topic. Follow the project memory files and assess feasibility and next steps.\n\nMy task:",
+      "metaScopingReview": "Please help with the scoping / systematic review route. Follow the project memory files.\n\nMy task:",
+      "metaProtocol": "Please help with Protocol / PICO for this Meta project. Follow the project memory files.\n\nMy task:",
+      "metaSearchDedupe": "Please help with search and dedupe for this Meta project. Follow the search-source routing and dedupe rules in the project memory files.\n\nMy task:",
+      "metaFullTextDownload": "Please help with Meta full-text download. First read or create 04_full_text_review/fulltext_manifest.json/csv and process only needs_full_text=true records with incomplete local full text. Choose the smallest necessary skill combination from the available skills, obtain PDF/HTML/Markdown/text from existing project files, user uploads, PMC/OA, or other public sources, and record downloaded/exists/manual_upload_required/no_oa_pdf/failed status; send remaining failures to Zotero communication afterward.\n\nAvailable skills: {{skills}}.\n\nMy task:",
+      "metaPdfAcquisition": "Use $meta-zotero-fulltext-handoff to push missing Meta full text to Zotero. First read the current full-text-stage 04_full_text_review/fulltext_manifest.json/csv, downloaded/parsed full-text assets; read ZOTERO_API_KEY, ZOTERO_USER_ID, MEDHELP_API_BASE_URL, and MEDHELP_API_TOKEN/MEDHELP_AUTHORIZATION from the current environment first, and do not ask the user to manually generate a JWT when those env vars exist; update the gap list from records that still lack usable full text, then push those gap records to Zotero so Zotero can obtain or attach PDFs. Prefer exporting a RIS reference-management file first, then import that RIS into Zotero; if RIS import fails, pause automatic handoff immediately and switch to manual import instructions plus the RIS file, without trying other automatic import paths. Do not treat title/abstract AI second screen as a hard prerequisite and do not frame this as full-text second screening; this is a full-text-stage gap-fill and availability-screening step. Do not run broad web downloads; except for the RIS-failure manual fallback, do not ask the AI to generate large manual-import files.\n\nMy task:",
+      "metaManualScreening": "Please help with Meta title/abstract first screening. Follow the project memory files and first report unscreened, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaTitleAbstractScreening": "Please help with Meta title screening. Follow the project memory files and handle title/abstract first screen plus AI second screen as one task; first report unscreened, first-screened, pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaTitleAbstractFirstScreen": "Please help with Meta title/abstract first screening. Follow the project memory files and first report unscreened, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaTitleAbstractSecondScreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaMineru": "Please help with document parsing. Follow the project memory files and do not expose tokens.\n\nMy task:",
+      "metaFullTextScreening": "Please help with Meta full-text screening. Follow the project memory files. Available skills: {{skills}}.\n\nMy task:",
+      "metaFullTextFirstScreen": "Please help with Meta full-text first screening. Follow the project memory files and first report pending full-text first-screen, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaFullTextSecondScreen": "Please help with Meta full-text AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaExtractionQuality": "Please help with data extraction for this Meta project. Prefer `meta-extraction`. Follow the project memory files. Available skills: {{skills}}.\n\nMy task:",
+      "metaStatistics": "Please help with the Meta synthesis / modeling gate. Follow the project memory files and check whether quantitative synthesis can start.\n\nMy task:",
+      "metaDiagnostic": "Please help route a Diagnostic accuracy Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaIntervention": "Please help route an Intervention / effect-size Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaPrognostic": "Please help route a Prognostic HR Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaPrevalence": "Please help route a Prevalence / single-arm Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaNetwork": "Please help route a Network Meta plan and data structure. Follow the project memory files.\n\nMy task:",
+      "metaFigures": "Please help with Meta figures / medical visualization. Follow the project memory files.\n\nMy task:",
+      "metaManuscript": "Please help with PRISMA draft / manuscript writing. Follow the project memory files.\n\nMy task:",
+      "metaQualityAssessment": "Please help with quality assessment / risk-of-bias appraisal for this Meta project. Follow the project memory files.\n\nMy task:",
+      "metaRescreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:"
+    },
+    "routePrompts": {
+      "metaPipeline": "Please help start this Meta project pipeline. Prefer meta-pipeline-planner first and use meta-analysis-workflow for cross-stage orchestration. Follow the project memory files and first report the current stage, missing items, and next tasks; save the project startup report to 01_protocol/project_startup_report.md or a dated file in that folder; do not fabricate data, PDFs, extracted fields, or statistical results; when data/PDF/fields are unavailable, write a cannot-extract report; add targeted human-review checkpoints; after long runs, compact context by updating research_brief/tasks.\n\nMy task:",
+      "metaAnalysis": "Please help me with “Meta-analysis / systematic review”. Follow the project memory files, identify the current stage, and proceed with the smallest necessary steps.\n\nMy task:",
+      "metaTitleAbstractScreening": "Please help with Meta title screening. Follow the project memory files and handle title/abstract first screen plus AI second screen as one task; first report unscreened, first-screened, pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaFullTextDownload": "Please help with Meta full-text download. First read or create 04_full_text_review/fulltext_manifest.json/csv and process only needs_full_text=true records with incomplete local full text. Choose the smallest necessary skill combination from the available skills, obtain PDF/HTML/Markdown/text from existing project files, user uploads, PMC/OA, or other public sources, and record downloaded/exists/manual_upload_required/no_oa_pdf/failed status; send remaining failures to Zotero communication afterward.\n\nAvailable skills: {{skills}}.\n\nMy task:",
+      "metaTitleAbstractFirstScreen": "Please help with Meta title/abstract first screening. Follow the project memory files and first report unscreened, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaTitleAbstractSecondScreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaFullTextScreening": "Please help with Meta full-text screening. Follow the project memory files. Available skills: {{skills}}.\n\nMy task:",
+      "metaFullTextFirstScreen": "Please help with Meta full-text first screening. Follow the project memory files and first report pending full-text first-screen, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaFullTextSecondScreen": "Please help with Meta full-text AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaRescreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:"
+    }
+  },
+  "guidedStarter": {
+    "greeting": "Hi {{username}}",
+    "title": "What should we do next?",
+    "description": "One entry point for registry cohorts (UKB, NHANES, All of Us, MIMIC, SEER, etc.) and general research flows. Each tile merges the former database + general skill lists (inno-* first).",
+    "refresh": "Randomize",
+    "recommendedSkills": "Recommended skills for this option",
+    "loadingSkills": "Checking available skills...",
+    "noAvailableSkills": "No matched installed skills for this option yet.",
+    "noAvailableSkillsFallback": "No installed match found, showing the default recommended skills for this option.",
+    "useAllSkills": "Use all skills",
+    "useAutoRoute": "Auto-select skills",
+    "metaStatisticTypes": "Synthesis Type",
+    "metaModes": {
+      "diagnostic": {
+        "title": "Diagnostic accuracy Meta",
+        "description": "Biomarker or diagnostic test review focused on TP, FP, FN, TN, sensitivity, specificity, DOR, and SROC."
+      },
+      "intervention": {
+        "title": "Intervention / effect-size Meta",
+        "description": "Treatment or exposure synthesis using OR, RR, HR, MD, SMD, or standardized effect-size inputs."
+      },
+      "prognostic": {
+        "title": "Prognostic HR Meta",
+        "description": "Prognostic factor synthesis centered on hazard ratios, survival outcomes, and subgroup robustness."
+      },
+      "prevalence": {
+        "title": "Prevalence / single-arm Meta",
+        "description": "Single-arm prevalence, incidence, proportion, or rate synthesis with transformation and heterogeneity planning."
+      },
+      "network": {
+        "title": "Network Meta",
+        "description": "Multi-intervention evidence network with treatment nodes, comparators, consistency, and ranking outputs."
+      },
+      "scoping": {
+        "title": "Scoping / systematic review",
+        "description": "Evidence mapping or systematic review workflow without forcing quantitative synthesis."
+      }
+    },
+    "template": {
+      "intro": "Please help me with \"{{scenario}}\". First identify which part of the research workflow this task belongs to, then use only the necessary skills: {{skills}}.",
+      "background": "Research background:",
+      "goal": "Goal and expected outcome:",
+      "database": "Target database / cohort:",
+      "question": "Core research question (population / exposure / outcome):",
+      "variables": "Key variables, phenotype definitions, and covariates:",
+      "design": "Study design / statistical analysis plan:",
+      "inputs": "Current data, code, data dictionary, or reference papers:",
+      "constraints": "Constraints (time / compute / data access / venue / etc.):",
+      "output": "Please provide a step-by-step plan and start with the first actionable task."
+    },
+    "prompts": {
+      "metaAnalysis": "Please help me with “{{scenario}}”. Follow the project memory files, identify the current Meta stage, and proceed with the smallest necessary steps.\n\nMy task:",
+      "paperWriting": "Please help me with \"{{scenario}}\". First confirm target journal/article type, study design, primary results, and citation materials; use nature-data when drafting or auditing Data Availability statements, repository plans, dataset citations, or FAIR metadata; then proceed through Title, Abstract, Introduction, Methods, Results, Discussion, and reference validation. Available skills: {{skills}}.\n\nMy task:",
+      "paperPolishing": "Please help me with \"{{scenario}}\". First confirm target journal/article type, the sections or paragraphs to polish, and the tone (strict submission-ready vs slightly more human/natural). Default to nature-polishing for Nature-leaning academic English and section logic; use inno-humanizer when you need more natural, less templated phrasing; pair with scientific-writing for IMRAD-level prose; use citation-management for references; use venue-templates for venue-specific structure. Available skills: {{skills}}.\n\nMy task:",
+      "manuscriptReview": "Please help me with \"{{scenario}}\". First check study design, statistical validity, evidence chain, causal language, figure/table consistency, and submission standards; then separate must-fix issues from recommended edits and acceptable content. Available skills: {{skills}}.\n\nMy task:",
+      "rebuttalResponse": "Please help me with \"{{scenario}}\". First classify each comment as methods, statistics, data definition, result interpretation, writing, or formatting; then design added analyses, sensitivity checks, text revisions, and point-by-point responses. Available skills: {{skills}}.\n\nMy task:",
+      "presentationPromotion": "Please help me with \"{{scenario}}\". First define audience, duration, core message, and available assets; then compress the paper into background, methods, results, clinical meaning, limitations, and next steps. Available skills: {{skills}}.\n\nMy task:",
+      "metaPipeline": "Please help start this Meta project pipeline. Prefer meta-pipeline-planner first and use meta-analysis-workflow for cross-stage orchestration. Follow the project memory files, first identify the current stage, missing items, and next tasks; save the project startup report to 01_protocol/project_startup_report.md or a dated file in that folder; do not fabricate data, PDFs, extracted fields, or statistical results; when data/PDF/fields are unavailable, write a cannot-extract report; add targeted human-review checkpoints; after long runs, compact context by updating research_brief/tasks.\n\nMy task:",
+      "metaLiterature": "Please help with literature review and evidence scanning for this Meta project. Follow the project memory files.\n\nMy task:",
+      "metaIdeation": "Please help frame the Meta topic. Follow the project memory files and assess feasibility and next steps.\n\nMy task:",
+      "metaScopingReview": "Please help with the scoping / systematic review route. Follow the project memory files.\n\nMy task:",
+      "metaProtocol": "Please help with Protocol / PICO for this Meta project. Follow the project memory files.\n\nMy task:",
+      "metaSearchDedupe": "Please help with search and dedupe for this Meta project. Follow the search-source routing and dedupe rules in the project memory files.\n\nMy task:",
+      "metaFullTextDownload": "Please help with Meta full-text download. First read or create 04_full_text_review/fulltext_manifest.json/csv and process only needs_full_text=true records with incomplete local full text. Choose the smallest necessary skill combination from the available skills, obtain PDF/HTML/Markdown/text from existing project files, user uploads, PMC/OA, or other public sources, and record downloaded/exists/manual_upload_required/no_oa_pdf/failed status; send remaining failures to Zotero communication afterward.\n\nAvailable skills: {{skills}}.\n\nMy task:",
+      "metaPdfAcquisition": "Use $meta-zotero-fulltext-handoff to push missing Meta full text to Zotero. First read the current full-text-stage 04_full_text_review/fulltext_manifest.json/csv, downloaded/parsed full-text assets; read ZOTERO_API_KEY, ZOTERO_USER_ID, MEDHELP_API_BASE_URL, and MEDHELP_API_TOKEN/MEDHELP_AUTHORIZATION from the current environment first, and do not ask the user to manually generate a JWT when those env vars exist; update the gap list from records that still lack usable full text, then push those gap records to Zotero so Zotero can obtain or attach PDFs. Prefer exporting a RIS reference-management file first, then import that RIS into Zotero; if RIS import fails, pause automatic handoff immediately and switch to manual import instructions plus the RIS file, without trying other automatic import paths. Do not treat title/abstract AI second screen as a hard prerequisite and do not frame this as full-text second screening; this is a full-text-stage gap-fill and availability-screening step. Do not run broad web downloads; except for the RIS-failure manual fallback, do not ask the AI to generate large manual-import files.\n\nMy task:",
+      "metaManualScreening": "Please help with Meta title/abstract first screening. Follow the project memory files and first report unscreened, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaTitleAbstractScreening": "Please help with Meta title screening. Follow the project memory files and handle title/abstract first screen plus AI second screen as one task; first report unscreened, first-screened, pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaTitleAbstractFirstScreen": "Please help with Meta title/abstract first screening. Follow the project memory files and first report unscreened, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaTitleAbstractSecondScreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaMineru": "Please help with document parsing. Follow the project memory files and do not expose tokens.\n\nMy task:",
+      "metaFullTextScreening": "Please help with Meta full-text screening. Follow the project memory files. Available skills: {{skills}}.\n\nMy task:",
+      "metaFullTextFirstScreen": "Please help with Meta full-text first screening. Follow the project memory files and first report pending full-text first-screen, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaFullTextSecondScreen": "Please help with Meta full-text AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaExtractionQuality": "Please help with data extraction for this Meta project. Prefer `meta-extraction`. Follow the project memory files. Available skills: {{skills}}.\n\nMy task:",
+      "metaStatistics": "Please help with the Meta synthesis / modeling gate. Follow the project memory files and check whether quantitative synthesis can start.\n\nMy task:",
+      "metaDiagnostic": "Please help route a Diagnostic accuracy Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaIntervention": "Please help route an Intervention / effect-size Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaPrognostic": "Please help route a Prognostic HR Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaPrevalence": "Please help route a Prevalence / single-arm Meta synthesis. Follow the project memory files.\n\nMy task:",
+      "metaNetwork": "Please help route a Network Meta plan and data structure. Follow the project memory files.\n\nMy task:",
+      "metaFigures": "Please help with Meta figures / medical visualization. Follow the project memory files.\n\nMy task:",
+      "metaManuscript": "Please help with PRISMA draft / manuscript writing. Follow the project memory files.\n\nMy task:",
+      "metaQualityAssessment": "Please help with quality assessment / risk-of-bias appraisal for this Meta project. Follow the project memory files.\n\nMy task:",
+      "metaRescreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:"
+    },
+    "routePrompts": {
+      "metaPipeline": "Please help start this Meta project pipeline. Prefer meta-pipeline-planner first and use meta-analysis-workflow for cross-stage orchestration. Follow the project memory files and first report the current stage, missing items, and next tasks; save the project startup report to 01_protocol/project_startup_report.md or a dated file in that folder; do not fabricate data, PDFs, extracted fields, or statistical results; when data/PDF/fields are unavailable, write a cannot-extract report; add targeted human-review checkpoints; after long runs, compact context by updating research_brief/tasks.\n\nMy task:",
+      "metaAnalysis": "Please help me with “Meta-analysis / systematic review”. Follow the project memory files, identify the current stage, and proceed with the smallest necessary steps.\n\nMy task:",
+      "metaTitleAbstractFirstScreen": "Please help with Meta title/abstract first screening. Follow the project memory files and first report unscreened, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaTitleAbstractSecondScreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaFullTextFirstScreen": "Please help with Meta full-text first screening. Follow the project memory files and first report pending full-text first-screen, first-screened, and pending AI second-screen counts.\n\nMy task:",
+      "metaFullTextSecondScreen": "Please help with Meta full-text AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:",
+      "metaRescreen": "Please help with Meta title/abstract AI second screening. Follow the project memory files and first report pending AI second-screen, AI-second-screened, and catch-up candidate counts. Do not create a default user-review queue; if still unstable, run at most one AI catch-up audit.\n\nMy task:"
+    },
+    "scenarios": {
+      "metaAnalysis": {
+        "title": "Meta-analysis",
+        "description": "Run a PRISMA-oriented Meta workflow: literature, protocol, multi-pass AI screening, PDF/MinerU, data extraction, quality assessment, synthesis, figures, manuscript, and presentation."
+      },
+      "paperWriting": {
+        "title": "Medical Manuscript Writing",
+        "description": "Structure sections and claims; use nature-data for Data Availability statements, repository plans, dataset citations, and FAIR metadata checks; use citation-management to organize/validate citations & references; after drafting, use the \"Manuscript polishing\" shortcut for Nature-style edits and humanized phrasing."
+      },
+      "paperPolishing": {
+        "title": "Manuscript Polishing",
+        "description": "Refine near-final prose: nature-polishing for Nature-leaning English and flow; inno-humanizer for natural, less AI-templated phrasing; optionally scientific-writing, citation-management, and venue-templates for the target venue."
+      },
+      "manuscriptReview": {
+        "title": "Medical Paper Review",
+        "description": "Reviewer-style checks plus interpreting findings, clinical impact, limitations, and narrative framing."
+      },
+      "rebuttalResponse": {
+        "title": "Rebuttal & causal/sensitivity",
+        "description": "Respond to reviewers; strengthen confounding control, robustness, alternate definitions, and causal framing."
+      },
+      "presentationPromotion": {
+        "title": "Academic Presentation & Translation",
+        "description": "Slides and lab-meeting materials; or narration scripts, audio, and demo video assets."
+      }
+    },
+    "metaFlow": {
+      "pipeline": {
+        "title": "Start Meta Pipeline",
+        "description": "Generate the Meta research brief, task queue, directory rules, and first execution step across the review workflow."
+      },
+      "literature": {
+        "title": "Literature",
+        "description": "Evidence gaps, search scope, seed references, and evidence synthesis."
+      },
+      "ideation": {
+        "title": "Topic framing",
+        "description": "Evaluate clinical relevance, evidence volume, heterogeneity risk, extractable effects, and submission value."
+      },
+      "scopingReview": {
+        "title": "Scoping / systematic review",
+        "description": "Evidence mapping, systematic review design, narrative synthesis, and PRISMA counts without forcing pooled statistics."
+      },
+      "protocol": {
+        "title": "Protocol / PICO",
+        "description": "Review type, PICO/PECO, eligibility criteria, and PRISMA logic."
+      },
+      "searchDedupe": {
+        "title": "Search / dedupe",
+        "description": "Queries, logs, imported records, dedupe, and candidate reference sheets."
+      },
+      "screeningPdf": {
+        "title": "AI Screening / Full Text",
+        "description": "AI first-screen scoring, Claude AI second screen, at most one catch-up audit, full-text candidates, full-text upload, and legal-source audit."
+      },
+      "pdfAcquisition": {
+        "title": "Zotero Communication",
+        "description": "Use the current full-text-stage gap list and local asset status to import only records still missing usable full text into Zotero via RIS first; pause automatic handoff and switch to manual import if RIS import fails."
+      },
+      "manualScreening": {
+        "title": "Title/abstract first screen",
+        "description": "Read deduped candidate records and produce title/abstract AI first-screen decisions plus the AI second-screen queue."
+      },
+      "titleAbstractScreening": {
+        "title": "Title screening",
+        "description": "Handle title/abstract first screen and AI second screen from one entry point, including decisions, conflicts, exclusion reasons, include/maybe records, and catch-up candidates."
+      },
+      "fullTextDownload": {
+        "title": "Full-text Download",
+        "description": "Process only needs_full_text=true records with incomplete local full text from fulltext_manifest, use available download skills to obtain PDF/HTML/Markdown/text from public sources, and record failure reasons."
+      },
+      "titleAbstractFirstScreen": {
+        "title": "Title/abstract first screen",
+        "description": "Read deduped candidate records and produce title/abstract AI first-screen decisions plus the AI second-screen queue."
+      },
+      "titleAbstractSecondScreen": {
+        "title": "Title/abstract AI second screen",
+        "description": "Use Claude AI second screen to review title/abstract first-screen results, optionally run one catch-up audit, and output conflicts, exclusion reasons, and include/maybe records for Zotero full-text handoff."
+      },
+      "fullTextFirstScreen": {
+        "title": "Full-text first screen",
+        "description": "After Zotero attachments are synced back, read PDF, Markdown, HTML, or text materials and produce AI first-screen decisions plus the AI second-screen queue."
+      },
+      "fullTextSecondScreen": {
+        "title": "Full-text AI second screen",
+        "description": "Use Claude AI second screen to review full-text first-screen results, optionally run one catch-up audit, and output full-text exclusion reasons, conflicts, and final inclusion candidates."
+      },
+      "mineru": {
+        "title": "Document parsing",
+        "description": "Parsing queue for audited PDFs, markdown, tables, figures, quality scores, and Claude AI review issues."
+      },
+      "fullTextScreening": {
+        "title": "Full-text screening",
+        "description": "Handle full-text first screen and AI second screen from one entry point, including full-text materials, exclusion reasons, conflicts, final inclusion candidates, and catch-up review."
+      },
+      "extractionQuality": {
+        "title": "Data extraction",
+        "description": "Candidate extraction tables, study characteristics, effect fields, evidence locations, confidence, and review status."
+      },
+      "statistics": {
+        "title": "Synthesis / modeling",
+        "description": "Effect sizes, models, heterogeneity, subgroup, sensitivity analysis, and meta-ready data."
+      },
+      "figures": {
+        "title": "Figures / medical visualization",
+        "description": "Forest, funnel, SROC, PRISMA flow, RoB figures, and publication-ready medical visualization."
+      },
+      "manuscript": {
+        "title": "PRISMA draft / manuscript",
+        "description": "Manuscript, abstract, submission format, supplements, checklist, and citation audit."
+      },
+      "promotion": {
+        "title": "Presentation / translation",
+        "description": "Slides, project page, audio, video, and communication assets."
+      },
+      "qualityAssessment": {
+        "title": "Quality assessment",
+        "description": "RoB, QUADAS, NOS, GRADE, evidence certainty, and AI second-screen and user-override status."
+      },
+      "rescreen": {
+        "title": "Title/abstract AI second screen",
+        "description": "Use Claude AI second screen to review title/abstract first-screen results, optionally run one catch-up audit, and output conflicts, exclusion reasons, and include/maybe records for Zotero full-text handoff."
+      }
+    }
+  },
+  "attachedPrompt": {
+    "showPrompt": "Show prompt",
+    "hidePrompt": "Hide prompt",
+    "remove": "Remove"
+  },
+  "pipelineOnboarding": {
+    "noBrief": {
+      "title": "Set Up Your Research Pipeline",
+      "description": "Describe your research idea below and the agent will interactively build your pipeline, generating a research brief and task list.",
+      "stepsLabel": "What to include",
+      "step1": "Your research topic and high-level goal",
+      "step2": "Scope, boundaries, and target venue (if any)",
+      "step3": "Preferred methods and evaluation approach",
+      "buttonLabel": "Use Analysis Template"
+    },
+    "noTasks": {
+      "title": "Generate Tasks from Your Brief",
+      "description": "A research brief exists but no tasks have been generated yet. You can generate tasks directly now, or continue in Analysis Chat and let the agent refine the brief first.",
+      "briefExists": "research_brief.json detected",
+      "buttonLabel": "Generate Tasks Now",
+      "buttonLoadingLabel": "Generating tasks...",
+      "secondaryButtonLabel": "Continue in Analysis Chat"
+    }
+  },
+  "importedProject": {
+    "title": "Analyze imported project?",
+    "description": "Start a new session to scan this workspace, analyze the project structure and implementation, and summarize next steps.",
+    "provider": "Agent",
+    "model": "Model",
+    "notInstalled": "Not installed",
+    "notLoggedIn": "Not logged in",
+    "notAvailable": "Selected agent is not available.",
+    "notNow": "Not now",
+    "analyzeProject": "Analyze project"
+  },
+  "taskMaster": {
+    "initFailed": "Failed to initialize TaskMaster: {{message}}",
+    "initError": "Error initializing TaskMaster. Please try again.",
+    "createFailed": "Failed to create task: {{message}}",
+    "createError": "Error creating task. Please try again.",
+    "templateError": "Error: {{message}}",
+    "setupTitle": "TaskMaster setup",
+    "setupSubtitle": "Interactive CLI for {{project}}",
+    "setupFooter": "TaskMaster initialization will start automatically",
+    "close": "Close",
+    "createTaskTitle": "Create New Task",
+    "useAiGenerate": "Use AI to generate task details",
+    "taskDescAi": "Task description (AI will generate details)",
+    "taskDescAiPlaceholder": "Describe what you want to accomplish...",
+    "taskTitle": "Task title",
+    "taskTitlePlaceholder": "Enter task title...",
+    "description": "Description",
+    "taskDescPlaceholder": "Describe the task...",
+    "priority": "Priority",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "creating": "Creating...",
+    "createTask": "Create Task",
+    "loadingTemplates": "Loading templates...",
+    "selectPrdTemplate": "Select PRD template",
+    "customizeTemplateStep": "Customize template",
+    "generatingTasksStep": "Generating tasks",
+    "fileName": "File name",
+    "customizeTemplateLabel": "Customize template",
+    "enterFieldPlaceholder": "Enter {{field}}",
+    "back": "Back",
+    "applying": "Applying...",
+    "applyGenerateTasks": "Apply & generate tasks",
+    "templateSuccessTitle": "Template applied successfully!",
+    "templateSuccessBody": "Your PRD has been created and tasks are being generated..."
+  }
+}

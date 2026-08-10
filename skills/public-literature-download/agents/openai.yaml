@@ -1,0 +1,4 @@
+interface:
+  display_name: "Public Literature Download"
+  short_description: "Download lawful OA literature PDFs"
+  default_prompt: "Use $public-literature-download to fetch lawful open-access PDFs. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

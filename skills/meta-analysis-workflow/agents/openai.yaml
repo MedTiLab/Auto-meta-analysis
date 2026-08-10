@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta-analysis Workflow"
+  short_description: "Coordinate full PRISMA Meta workflows"
+  default_prompt: "Use $meta-analysis-workflow to continue this PRISMA Meta-analysis project, keeping early literature/topic/scoping work in 00_literature, startup/task-queue reports in 01_protocol/project_startup_report.md or a dated variant, and visible screening results in screening_decisions.csv/json. Do not fabricate data, PDFs, extraction fields, or statistical results; if data/PDF/fields are unavailable, write the appropriate cannot-extract report and create targeted human-review gates. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

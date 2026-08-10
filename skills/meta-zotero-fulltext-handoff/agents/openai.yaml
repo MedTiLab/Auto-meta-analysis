@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta Zotero Full Text"
+  short_description: "Hand missing Meta full text to Zotero"
+  default_prompt: "Use $meta-zotero-fulltext-handoff to push only missing Meta full-text records to Zotero for PDF retrieval, then sync attachments back. Read ZOTERO_API_KEY, ZOTERO_USER_ID, MEDHELP_API_BASE_URL, and MEDHELP_API_TOKEN/MEDHELP_AUTHORIZATION from the current environment before asking the user for credentials or JWT generation. Prefer exporting a RIS reference-management file first and importing that RIS into Zotero; if RIS import fails, pause automatic handoff and switch to manual import instructions plus the RIS file. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

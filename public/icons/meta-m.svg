@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Meta">
+  <defs>
+    <linearGradient id="meta-gradient" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B6077" />
+      <stop offset="1" stop-color="#13B8A6" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#meta-gradient)" />
+  <path
+    fill="#FFFFFF"
+    d="M14 48V16h10l8 18.2L40 16h10v32h-7.5V28.4l-7 15.6h-7l-7-15.6V48H14Z"
+  />
+</svg>

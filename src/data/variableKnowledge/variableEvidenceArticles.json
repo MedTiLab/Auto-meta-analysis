@@ -1,0 +1,21 @@
+[
+  {
+    "id": "evidence_nhhr_39810422",
+    "variable_id": "variable_nhhr",
+    "pmid": "39810422",
+    "title": "Non-high-density lipoprotein cholesterol to high-density lipoprotein cholesterol ratio in NHANES and UK Biobank",
+    "journal": "Atherosclerosis Population Studies",
+    "publication_year": 2025,
+    "publication_date": "2025-05-17",
+    "abstract": "NHHR was evaluated as a derived lipid indicator in population cohorts and showed incremental association with cardiometabolic outcomes.",
+    "database_used": ["NHANES", "UKB"],
+    "exposure_variable": "NHHR",
+    "outcome_variable": "Cardiometabolic outcomes",
+    "study_type": "cohort",
+    "evidence_role": "application",
+    "relevance_score": 0.88,
+    "is_key_reference": false,
+    "import_source": "pubmed_auto_discovery",
+    "created_at": "2025-05-18T08:34:12.000Z"
+  }
+]

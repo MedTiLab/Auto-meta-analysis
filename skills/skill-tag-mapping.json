@@ -1,0 +1,539 @@
+{
+  "version": 1,
+  "stageOverrides": {
+    "meta-analysis-workflow": {
+      "zh": "阶段: Meta 流程",
+      "en": "Stage: Meta Pipeline"
+    },
+    "meta-pipeline-planner": {
+      "zh": "阶段: Meta 启动",
+      "en": "Stage: Meta Startup"
+    },
+    "public-literature-download": {
+      "zh": "阶段: 全文获取",
+      "en": "Stage: Full-text Acquisition"
+    },
+    "inno-prepare-resources": {
+      "zh": "阶段: 资源准备",
+      "en": "Stage: Resource Prep"
+    },
+    "inno-idea-generation": {
+      "zh": "阶段: Idea生成",
+      "en": "Stage: Idea Generation"
+    },
+    "inno-idea-eval": {
+      "zh": "阶段: Idea评估",
+      "en": "Stage: Idea Evaluation"
+    },
+    "inno-deep-research": {
+      "zh": "阶段: 文献",
+      "en": "Stage: Literature"
+    },
+    "inno-experiment-analysis": {
+      "zh": "阶段: 实验分析",
+      "en": "Stage: Analysis"
+    },
+    "inno-paper-writing": {
+      "zh": "阶段: 论文撰写",
+      "en": "Stage: Paper Writing"
+    },
+    "inno-paper-reviewer": {
+      "zh": "阶段: 论文评审",
+      "en": "Stage: Paper Review"
+    },
+    "inno-reference-audit": {
+      "zh": "阶段: 论文评审",
+      "en": "Stage: Paper Review"
+    },
+    "inno-humanizer": {
+      "zh": "阶段: 论文撰写",
+      "en": "Stage: Paper Writing"
+    },
+    "inno-grant-proposal": {
+      "zh": "阶段: 基金撰写",
+      "en": "Stage: Grant Writing"
+    },
+    "inno-rclone-to-overleaf": {
+      "zh": "阶段: 发布同步",
+      "en": "Stage: Publication Sync"
+    },
+    "inno-rebuttal": {
+      "zh": "阶段: 论文评审",
+      "en": "Stage: Paper Review"
+    },
+    "making-academic-presentations": {
+      "zh": "阶段: 成果推广",
+      "en": "Stage: Promotion"
+    },
+    "inno-figure-gen": {
+      "zh": "阶段: 论文撰写",
+      "en": "Stage: Paper Writing"
+    },
+    "biorxiv-database": {
+      "zh": "阶段: 资源准备",
+      "en": "Stage: Resource Prep"
+    },
+    "scientific-writing": {
+      "zh": "阶段: 论文撰写",
+      "en": "Stage: Paper Writing"
+    },
+    "nature-data": {
+      "zh": "阶段: 论文撰写",
+      "en": "Stage: Paper Writing"
+    },
+    "nature-polishing": {
+      "zh": "阶段: 论文撰写",
+      "en": "Stage: Paper Writing"
+    },
+    "academic-researcher": {
+      "zh": "阶段: 文献",
+      "en": "Stage: Literature"
+    },
+    "gemini-deep-research": {
+      "zh": "阶段: 文献",
+      "en": "Stage: Literature"
+    },
+    "ukb-cohort-analysis": {
+      "zh": "阶段: 实验分析",
+      "en": "Stage: Analysis"
+    },
+    "brainstorming-research-ideas": {
+      "zh": "类别: 模型与研究",
+      "en": "Category: Model & Research"
+    },
+    "creative-thinking-for-research": {
+      "zh": "类别: 模型与研究",
+      "en": "Category: Model & Research"
+    },
+    "research-news": {
+      "zh": "阶段: 论文发现",
+      "en": "Stage: Paper Discovery"
+    },
+    "paper-analyzer": {
+      "zh": "阶段: 论文分析",
+      "en": "Stage: Paper Analysis"
+    },
+    "paper-image-extractor": {
+      "zh": "阶段: 图片提取",
+      "en": "Stage: Image Extraction"
+    },
+    "paper-finder": {
+      "zh": "阶段: 论文搜索",
+      "en": "Stage: Paper Search"
+    },
+    "baseline-table": {
+      "zh": "分析: 三线表/基线表",
+      "en": "Analysis: Baseline Table"
+    },
+    "clinical-preanalysis": {
+      "zh": "分析: 预分析统计",
+      "en": "Analysis: Pre-Analysis"
+    },
+    "data-stats-analysis": {
+      "zh": "分析: 推断统计",
+      "en": "Analysis: Inferential Stats"
+    },
+    "statistical-analysis": {
+      "zh": "分析: 统计检验选择",
+      "en": "Analysis: Test Selection"
+    },
+    "statsmodels": {
+      "zh": "分析: 回归建模",
+      "en": "Analysis: Regression"
+    },
+    "scikit-survival": {
+      "zh": "分析: 生存分析",
+      "en": "Analysis: Survival"
+    },
+    "scikit-learn": {
+      "zh": "分析: 预测建模",
+      "en": "Analysis: Prediction"
+    },
+    "data-transform": {
+      "zh": "分析: 数据预处理",
+      "en": "Analysis: Preprocessing"
+    },
+    "exploratory-data-analysis": {
+      "zh": "分析: 探索性分析",
+      "en": "Analysis: EDA"
+    },
+    "data-visualization-biomedical": {
+      "zh": "分析: 医学可视化",
+      "en": "Analysis: Biomedical Viz"
+    },
+    "r-graph-selector": {
+      "zh": "分析: R图库选图",
+      "en": "Analysis: R Gallery Picker"
+    },
+    "data-viz-plots": {
+      "zh": "分析: 通用绘图",
+      "en": "Analysis: General Plots"
+    },
+    "data-visualization-expert": {
+      "zh": "分析: 叙事图表",
+      "en": "Analysis: Narrative Charts"
+    },
+    "scientific-visualization": {
+      "zh": "分析: 期刊图表",
+      "en": "Analysis: Journal Figures"
+    },
+    "pymc": {
+      "zh": "分析: 贝叶斯建模",
+      "en": "Analysis: Bayesian"
+    },
+    "shap": {
+      "zh": "分析: 模型解释",
+      "en": "Analysis: Interpretability"
+    },
+    "medhelp-local-database-router": {
+      "zh": "数据库: 总路由",
+      "en": "Database: Router"
+    },
+    "local-database-api-access": {
+      "zh": "数据库: API/直读",
+      "en": "Database: API/Fallback"
+    },
+    "mimic-local-data-access": {
+      "zh": "数据库: MIMIC-IV",
+      "en": "Database: MIMIC-IV"
+    },
+    "eicu-local-data-access": {
+      "zh": "数据库: eICU",
+      "en": "Database: eICU"
+    },
+    "nhanes-local-data-access": {
+      "zh": "数据库: NHANES",
+      "en": "Database: NHANES"
+    },
+    "elsa-local-data-access": {
+      "zh": "数据库: ELSA",
+      "en": "Database: ELSA"
+    },
+    "hrs-local-data-access": {
+      "zh": "数据库: HRS",
+      "en": "Database: HRS"
+    },
+    "klosa-local-data-access": {
+      "zh": "数据库: KLoSA",
+      "en": "Database: KLoSA"
+    },
+    "lasi-local-data-access": {
+      "zh": "数据库: LASI",
+      "en": "Database: LASI"
+    },
+    "mhas-local-data-access": {
+      "zh": "数据库: MHAS",
+      "en": "Database: MHAS"
+    },
+    "share-local-data-access": {
+      "zh": "数据库: SHARE",
+      "en": "Database: SHARE"
+    },
+    "charls-local-data-access": {
+      "zh": "数据库: CHARLS",
+      "en": "Database: CHARLS"
+    },
+    "clhls-local-data-access": {
+      "zh": "数据库: CLHLS",
+      "en": "Database: CLHLS"
+    },
+    "ukb-local-data-access": {
+      "zh": "数据库: UK Biobank",
+      "en": "Database: UK Biobank"
+    },
+    "cfps-local-data-access": {
+      "zh": "数据库: CFPS",
+      "en": "Database: CFPS"
+    },
+    "cgss-local-data-access": {
+      "zh": "数据库: CGSS",
+      "en": "Database: CGSS"
+    },
+    "chfs-local-data-access": {
+      "zh": "数据库: CHFS",
+      "en": "Database: CHFS"
+    },
+    "chip-local-data-access": {
+      "zh": "数据库: CHIP",
+      "en": "Database: CHIP"
+    },
+    "chns-local-data-access": {
+      "zh": "数据库: CHNS",
+      "en": "Database: CHNS"
+    },
+    "clds-local-data-access": {
+      "zh": "数据库: CLDS",
+      "en": "Database: CLDS"
+    },
+    "css-local-data-access": {
+      "zh": "数据库: CSS",
+      "en": "Database: CSS"
+    },
+    "geo-database": {
+      "zh": "数据库: GEO",
+      "en": "Database: GEO"
+    },
+    "pubmed-search-strategy": {
+      "zh": "阶段: Meta 检索",
+      "en": "Stage: Meta Search"
+    },
+    "meta-zotero-fulltext-handoff": {
+      "zh": "阶段: Zotero 补全文",
+      "en": "Stage: Zotero Full Text"
+    },
+    "legal-pdf-acquisition": {
+      "zh": "阶段: 全文获取",
+      "en": "Stage: Full-text Acquisition"
+    },
+    "mineru-pdf-parser": {
+      "zh": "阶段: MinerU 解析",
+      "en": "Stage: MinerU Parsing"
+    },
+    "pdf-evidence-extraction": {
+      "zh": "阶段: 证据提取",
+      "en": "Stage: Evidence Extraction"
+    },
+    "diagnostic-data-extraction": {
+      "zh": "阶段: 诊断数据提取",
+      "en": "Stage: Diagnostic Extraction"
+    },
+    "diagnostic-meta-analysis": {
+      "zh": "阶段: 诊断 Meta 统计",
+      "en": "Stage: Diagnostic Meta Statistics"
+    },
+    "meta-statistics-r": {
+      "zh": "阶段: R 统计合并",
+      "en": "Stage: R Meta Statistics"
+    },
+    "prisma-manuscript-writer": {
+      "zh": "阶段: PRISMA 成稿",
+      "en": "Stage: PRISMA Manuscript"
+    },
+    "manuscript-editor": {
+      "zh": "阶段: Meta 手稿编辑",
+      "en": "Stage: Meta Manuscript Editing"
+    }
+  },
+  "domainOverrides": {
+    "brainstorming-research-ideas": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "creative-thinking-for-research": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "biorxiv-database": {
+      "zh": "领域: q-bio",
+      "en": "Domain: q-bio"
+    },
+    "ukb-cohort-analysis": {
+      "zh": "领域: q-bio",
+      "en": "Domain: q-bio"
+    },
+    "scientific-writing": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "academic-researcher": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "inno-grant-proposal": {
+      "zh": "领域: general",
+      "en": "Domain: general"
+    },
+    "research-news": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "paper-analyzer": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "paper-image-extractor": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "paper-finder": {
+      "zh": "领域: cs",
+      "en": "Domain: cs"
+    },
+    "baseline-table": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "clinical-preanalysis": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "medhelp-local-database-router": {
+      "zh": "领域: general",
+      "en": "Domain: general"
+    },
+    "local-database-api-access": {
+      "zh": "领域: general",
+      "en": "Domain: general"
+    },
+    "mimic-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "eicu-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "nhanes-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "elsa-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "hrs-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "klosa-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "lasi-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "mhas-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "share-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "charls-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "clhls-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "ukb-local-data-access": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "meta-analysis-workflow": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "data-visualization-biomedical": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "r-graph-selector": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "scikit-survival": {
+      "zh": "领域: medical",
+      "en": "Domain: medical"
+    },
+    "pubmed-search-strategy": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "meta-zotero-fulltext-handoff": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "legal-pdf-acquisition": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "public-literature-download": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "mineru-pdf-parser": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "pdf-evidence-extraction": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "diagnostic-data-extraction": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "diagnostic-meta-analysis": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "meta-statistics-r": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "prisma-manuscript-writer": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    },
+    "manuscript-editor": {
+      "zh": "领域: 医疗",
+      "en": "Domain: Medical"
+    }
+  },
+  "platformNativeSkills": [
+    "clinical-preanalysis",
+    "dataset-discovery",
+    "diagnostic-data-extraction",
+    "diagnostic-meta-analysis",
+    "inno-deep-research",
+    "inno-experiment-analysis",
+    "inno-figure-gen",
+    "inno-grant-proposal",
+    "inno-humanizer",
+    "inno-idea-eval",
+    "inno-idea-generation",
+    "inno-paper-reviewer",
+    "inno-paper-writing",
+    "inno-prepare-resources",
+    "inno-rclone-to-overleaf",
+    "inno-rebuttal",
+    "inno-reference-audit",
+    "legal-pdf-acquisition",
+    "manuscript-editor",
+    "meta-analysis-workflow",
+    "meta-zotero-fulltext-handoff",
+    "meta-pipeline-planner",
+    "meta-statistics-r",
+    "mineru-pdf-parser",
+    "pdf-evidence-extraction",
+    "prisma-manuscript-writer",
+    "public-literature-download",
+    "pubmed-search-strategy",
+    "ukb-cohort-analysis",
+    "zotero-medautodata-library"
+  ],
+  "domainCsAiExceptions": [
+    "baseline-table",
+    "biorxiv-database",
+    "clinical-preanalysis",
+    "charls-local-data-access",
+    "clhls-local-data-access",
+    "data-stats-analysis",
+    "data-visualization-biomedical",
+    "r-graph-selector",
+    "elsa-local-data-access",
+    "hrs-local-data-access",
+    "klosa-local-data-access",
+    "lasi-local-data-access",
+    "mhas-local-data-access",
+    "nhanes-local-data-access",
+    "scikit-survival",
+    "share-local-data-access",
+    "ukb-cohort-analysis",
+    "ukb-local-data-access"
+  ]
+}

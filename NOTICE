@@ -1,0 +1,17 @@
+MedAutoData
+Copyright (C) MedAutoData Contributors
+
+This project is based on software from the following upstream project,
+used under the GNU General Public License v3.0 (GPL-3.0):
+
+  Claude Code UI (claudecodeui)
+  https://github.com/siteboon/claudecodeui
+
+Modifications and the Research Lab, InnoFlow Skills, and related features
+are Copyright (C) MedAutoData Contributors and are licensed under the
+GNU Affero General Public License v3.0 (AGPL-3.0), to the extent
+permitted by applicable copyright rights in those contributions.
+
+The upstream GPL-3.0-covered portions remain under GPL-3.0.
+See the file LICENSE in this distribution for the AGPL-3.0 text and
+project licensing notes.

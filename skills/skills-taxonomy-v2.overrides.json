@@ -1,0 +1,459 @@
+{
+  "academic-researcher": {
+    "primaryIntent": "research",
+    "intents": [
+      "research",
+      "writing"
+    ],
+    "capabilities": [
+      "search-retrieval"
+    ],
+    "domains": [
+      "cs-ai"
+    ]
+  },
+  "brainstorming-research-ideas": {
+    "primaryIntent": "ideation",
+    "intents": [
+      "ideation",
+      "research"
+    ],
+    "capabilities": [
+      "research-planning"
+    ],
+    "domains": [
+      "cs-ai"
+    ]
+  },
+  "biorxiv-database": {
+    "primaryIntent": "research",
+    "intents": [
+      "research",
+      "data"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "data-processing"
+    ],
+    "domains": [
+      "bioinformatics"
+    ]
+  },
+  "gemini-deep-research": {
+    "primaryIntent": "research",
+    "intents": [
+      "research"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "agent-workflow"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "creative-thinking-for-research": {
+    "primaryIntent": "ideation",
+    "intents": [
+      "ideation",
+      "research"
+    ],
+    "capabilities": [
+      "research-planning"
+    ],
+    "domains": [
+      "cs-ai"
+    ]
+  },
+  "dataset-discovery": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "research"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "data-processing"
+    ],
+    "domains": [
+      "data-engineering"
+    ]
+  },
+  "inno-deep-research": {
+    "primaryIntent": "research",
+    "intents": [
+      "research"
+    ],
+    "capabilities": [
+      "search-retrieval"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-experiment-analysis": {
+    "primaryIntent": "evaluation",
+    "intents": [
+      "evaluation",
+      "experiment"
+    ],
+    "capabilities": [
+      "evaluation-benchmarking"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-figure-gen": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing"
+    ],
+    "capabilities": [
+      "visualization-reporting"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-grant-proposal": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing",
+      "research"
+    ],
+    "capabilities": [
+      "visualization-reporting",
+      "research-planning"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-humanizer": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing"
+    ],
+    "capabilities": [
+      "visualization-reporting"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-idea-eval": {
+    "primaryIntent": "ideation",
+    "intents": [
+      "ideation",
+      "evaluation"
+    ],
+    "capabilities": [
+      "research-planning"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-idea-generation": {
+    "primaryIntent": "ideation",
+    "intents": [
+      "ideation",
+      "research"
+    ],
+    "capabilities": [
+      "research-planning"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-paper-reviewer": {
+    "primaryIntent": "evaluation",
+    "intents": [
+      "evaluation",
+      "writing"
+    ],
+    "capabilities": [
+      "evaluation-benchmarking"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-rebuttal": {
+    "primaryIntent": "evaluation",
+    "intents": [
+      "evaluation",
+      "writing"
+    ],
+    "capabilities": [
+      "evaluation-benchmarking"
+    ],
+    "domains": [
+      "cs-ai",
+      "vision"
+    ]
+  },
+  "inno-paper-writing": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing",
+      "research"
+    ],
+    "capabilities": [
+      "visualization-reporting"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-pipeline-planner": {
+    "primaryIntent": "research",
+    "intents": [
+      "research",
+      "experiment"
+    ],
+    "capabilities": [
+      "research-planning",
+      "agent-workflow"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-prepare-resources": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "research"
+    ],
+    "capabilities": [
+      "research-planning",
+      "data-processing"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-rclone-to-overleaf": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing",
+      "deployment"
+    ],
+    "capabilities": [
+      "infrastructure-ops",
+      "visualization-reporting"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "inno-reference-audit": {
+    "primaryIntent": "evaluation",
+    "intents": [
+      "evaluation",
+      "writing"
+    ],
+    "capabilities": [
+      "evaluation-benchmarking",
+      "search-retrieval"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "making-academic-presentations": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing"
+    ],
+    "capabilities": [
+      "visualization-reporting"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "scientific-writing": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing",
+      "research"
+    ],
+    "capabilities": [
+      "visualization-reporting"
+    ],
+    "domains": [
+      "general"
+    ]
+  },
+  "pubmed-search-strategy": {
+    "primaryIntent": "research",
+    "intents": [
+      "research",
+      "data"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "research-planning"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "zotero-medautodata-library": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "research"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "data-processing"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "meta-zotero-fulltext-handoff": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "research"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "data-processing"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "legal-pdf-acquisition": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "research"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "data-processing"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "public-literature-download": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "research"
+    ],
+    "capabilities": [
+      "search-retrieval",
+      "data-processing"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "mineru-pdf-parser": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "research"
+    ],
+    "capabilities": [
+      "data-processing"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "pdf-evidence-extraction": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "evaluation"
+    ],
+    "capabilities": [
+      "data-processing",
+      "evaluation-benchmarking"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "diagnostic-data-extraction": {
+    "primaryIntent": "data",
+    "intents": [
+      "data",
+      "evaluation"
+    ],
+    "capabilities": [
+      "data-processing",
+      "evaluation-benchmarking"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "diagnostic-meta-analysis": {
+    "primaryIntent": "evaluation",
+    "intents": [
+      "evaluation",
+      "research"
+    ],
+    "capabilities": [
+      "evaluation-benchmarking",
+      "visualization-reporting"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "meta-statistics-r": {
+    "primaryIntent": "evaluation",
+    "intents": [
+      "evaluation",
+      "data"
+    ],
+    "capabilities": [
+      "evaluation-benchmarking",
+      "data-processing"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "prisma-manuscript-writer": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing",
+      "research"
+    ],
+    "capabilities": [
+      "visualization-reporting",
+      "research-planning"
+    ],
+    "domains": [
+      "medical"
+    ]
+  },
+  "manuscript-editor": {
+    "primaryIntent": "writing",
+    "intents": [
+      "writing",
+      "evaluation"
+    ],
+    "capabilities": [
+      "visualization-reporting",
+      "evaluation-benchmarking"
+    ],
+    "domains": [
+      "medical"
+    ]
+  }
+}

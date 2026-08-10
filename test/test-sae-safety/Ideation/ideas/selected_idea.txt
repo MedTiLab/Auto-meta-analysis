@@ -1,0 +1,70 @@
+# Safety-Aware Sparse Autoencoders: Contrastive Feature Steering for Robust Alignment Monitoring
+
+## Problem Statement
+
+Sparse Autoencoders (SAEs) have emerged as a promising tool for mechanistic interpretability, decomposing neural network activations into interpretable features. However, current SAE approaches face critical limitations when applied to AI safety monitoring:
+
+1. **Feature polysemanticity under distribution shift**: SAE features learned on standard training data often conflate safety-relevant and benign activation patterns when the model processes adversarial or out-of-distribution inputs.
+2. **No safety-aware training signal**: Standard SAE objectives (reconstruction + sparsity) are agnostic to which features matter for safety, leading to poor decomposition of safety-critical circuits.
+3. **Lack of real-time steering capability**: Existing SAE-based analysis is post-hoc; there is no mechanism to use SAE features for online intervention during inference.
+
+## Proposed Method
+
+We propose **SafeSAE**, a contrastive sparse autoencoder framework with three key innovations:
+
+### 1. Safety-Contrastive Training Objective
+
+Augment the standard SAE loss with a contrastive term that encourages separation between safety-relevant and safety-irrelevant features:
+
+$$\mathcal{L}_{\text{SafeSAE}} = \underbrace{\|x - \hat{x}\|_2^2}_{\text{reconstruction}} + \lambda_1 \underbrace{\|z\|_1}_{\text{sparsity}} + \lambda_2 \underbrace{\mathcal{L}_{\text{contrastive}}(z^+, z^-)}_{\text{safety separation}}$$
+
+where $z^+$ and $z^-$ are SAE feature activations on paired safe/unsafe model behaviors, and:
+
+$$\mathcal{L}_{\text{contrastive}}(z^+, z^-) = -\log \frac{\exp(\text{sim}(z^+_s, z^-_s) / \tau)}{\sum_{k} \exp(\text{sim}(z^+_s, z^-_k) / \tau)}$$
+
+Here $z_s$ denotes the subset of features identified as safety-relevant through an iterative labeling procedure.
+
+### 2. Hierarchical Feature Attribution for Safety Circuits
+
+We introduce a two-level SAE architecture:
+- **Level 1 (Local SAE)**: Standard per-layer SAE decomposition
+- **Level 2 (Circuit SAE)**: Aggregates Level 1 features across layers to identify cross-layer safety circuits
+
+The Circuit SAE learns:
+$$h_{\text{circuit}} = \text{SAE}_{\text{L2}}\left(\bigoplus_{l \in \text{layers}} \text{SAE}_{\text{L1}}^{(l)}(x^{(l)})\right)$$
+
+where $\bigoplus$ denotes concatenation with learned importance weighting per layer.
+
+### 3. Online Feature Steering Module
+
+Using the learned safety features, we implement a real-time steering mechanism:
+
+$$x'_l = x_l + \alpha \sum_{i \in S_{\text{safe}}} w_i \cdot d_i - \beta \sum_{j \in S_{\text{unsafe}}} w_j \cdot d_j$$
+
+where $d_i$ are SAE decoder directions, $S_{\text{safe}}$ and $S_{\text{unsafe}}$ are safety-classified feature sets, and $\alpha, \beta$ are steering strengths.
+
+## Experimental Design
+
+### Dataset
+- **Safe/Unsafe pairs**: Construct from Anthropic's HH-RLHF dataset (helpful-harmless splits), augmented with red-teaming outputs from Perez et al. (2022)
+- **Model**: Gemma-2B and Llama-3-8B as target models
+- **SAE training data**: 10M tokens from The Pile, balanced with 1M safety-relevant tokens
+
+### Baselines
+1. Vanilla SAE (Cunningham et al., 2023)
+2. TopK SAE (Gao et al., 2024)
+3. Anthropic's scaled SAEs (Templeton et al., 2024)
+4. Representation Engineering (Zou et al., 2023)
+5. Activation Patching (Meng et al., 2022)
+
+### Evaluation Metrics
+- **Feature quality**: Mean max cosine similarity (MMCS) with ground-truth features, feature absorption rate
+- **Safety detection**: AUROC/AUPRC on held-out unsafe behavior classification using only SAE features
+- **Steering effectiveness**: Attack success rate (ASR) reduction on GCG and AutoDAN attacks after steering
+- **Model utility preservation**: MMLU, HellaSwag, TruthfulQA scores after steering (must remain within 2% of baseline)
+
+## Expected Contributions
+1. First SAE training framework explicitly optimized for safety-relevant feature discovery
+2. A hierarchical circuit-level SAE that captures cross-layer safety mechanisms
+3. A real-time steering module enabling online safety intervention using learned SAE features
+4. Comprehensive benchmark comparing SAE-based safety monitoring against representation engineering approaches

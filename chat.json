@@ -1,0 +1,641 @@
+{
+  "codeBlock": {
+    "copy": "复制",
+    "copied": "已复制",
+    "copyCode": "复制代码"
+  },
+  "messageTypes": {
+    "user": "U",
+    "error": "错误",
+    "tool": "工具",
+    "claude": "Claude",
+    "cursor": "Cursor",
+    "codex": "Codex",
+    "gemini": "Gemini"
+  },
+  "error": {
+    "retry": "重试",
+    "usageLimitHint": "使用限制重置后可以重试"
+  },
+  "tools": {
+    "settings": "工具设置",
+    "error": "工具错误",
+    "result": "工具结果",
+    "viewParams": "查看输入参数",
+    "viewRawParams": "查看原始参数",
+    "viewDiff": "查看编辑差异",
+    "creatingFile": "创建新文件：",
+    "updatingTodo": "更新待办事项",
+    "read": "读取",
+    "readFile": "读取文件",
+    "updateTodo": "更新待办列表",
+    "readTodo": "读取待办列表",
+    "searchResults": "结果"
+  },
+  "search": {
+    "found": "找到 {{count}} 个{{type}}",
+    "file": "文件",
+    "files": "文件",
+    "pattern": "模式：",
+    "in": "在："
+  },
+  "fileOperations": {
+    "updated": "文件更新成功",
+    "created": "文件创建成功",
+    "written": "文件写入成功",
+    "diff": "差异",
+    "newFile": "新文件",
+    "viewContent": "查看文件内容",
+    "viewFullOutput": "查看完整输出（{{count}} 个字符）",
+    "contentDisplayed": "文件内容显示在上面的差异视图中"
+  },
+  "interactive": {
+    "title": "交互式提示",
+    "waiting": "等待您在 CLI 中响应",
+    "instruction": "请在 Claude 运行的终端中选择一个选项。",
+    "selectedOption": "✓ Claude 选择了选项 {{number}}",
+    "instructionDetail": "在 CLI 中，您可以使用方向键或输入数字来交互式地选择此选项。"
+  },
+  "thinking": {
+    "title": "思考中...",
+    "emoji": "💭 思考中..."
+  },
+  "agentTurn": {
+    "thought": "思考",
+    "usedTools": "使用了 {{count}} 个工具",
+    "steps": "执行步骤",
+    "streaming": "传输中..."
+  },
+  "skill": {
+    "contentLoaded": "技能内容已加载",
+    "contentBadge": "技能"
+  },
+  "json": {
+    "response": "JSON 响应"
+  },
+  "permissions": {
+    "grant": "授予 {{tool}} 权限",
+    "added": "权限已添加",
+    "addTo": "将 {{entry}} 添加到允许的工具。",
+    "retry": "权限已保存。重试请求以使用该工具。",
+    "error": "无法更新权限。请重试。",
+    "openSettings": "打开设置"
+  },
+  "todo": {
+    "updated": "待办列表已成功更新",
+    "current": "当前待办列表"
+  },
+  "plan": {
+    "viewPlan": "📋 查看实施计划",
+    "title": "实施计划"
+  },
+  "status": {
+    "thinking": "思考中",
+    "processing": "处理中",
+    "analyzing": "分析中",
+    "working": "执行中",
+    "computing": "计算中",
+    "reasoning": "推理中",
+    "runningCode": "正在运行代码",
+    "resuming": "恢复中",
+    "initializing": "初始化中",
+    "restarting": "重启中"
+  },
+  "usageLimit": {
+    "resetAt": "Claude 使用限制已达到。您的限制将在 **{{time}} {{timezone}}** - {{date}} 重置"
+  },
+  "tokenUsage": {
+    "unavailable": "上下文不可用",
+    "unavailableTitle": "当前无法获取这个会话的上下文使用量。"
+  },
+  "codex": {
+    "permissionMode": "权限模式",
+    "modes": {
+      "default": "默认模式",
+      "acceptEdits": "编辑模式",
+      "bypassPermissions": "无限制模式",
+      "plan": "计划模式"
+    },
+    "descriptions": {
+      "default": "只有受信任的命令（ls、cat、grep、git status 等）自动运行。其他命令将被跳过。可以写入工作区。",
+      "acceptEdits": "工作区内的所有命令自动运行。完全自动模式，具有沙盒执行功能。",
+      "bypassPermissions": "完全的系统访问，无限制。所有命令自动运行，具有完整的磁盘和网络访问权限。请谨慎使用。",
+      "plan": "计划模式 - 不执行任何命令"
+    },
+    "technicalDetails": "技术细节"
+  },
+  "input": {
+    "placeholder": "输入 / 调用命令，@ 选择文件，或向 {{provider}} 提问...",
+    "placeholderDefault": "输入您的消息...",
+    "disabled": "输入已禁用",
+    "attachFiles": "附加文件",
+    "attachReferences": "附加文献",
+    "attachImages": "附加图片",
+    "dropFilesHere": "拖放文件到此处",
+    "attachmentOnlyFallback": "请先查看我附上的文件，并基于这些文件帮助我。",
+    "send": "发送",
+    "stop": "停止",
+    "hintText": {
+      "ctrlEnter": "Ctrl+Enter 发送 • Shift+Enter 换行 • Tab 切换模式 • / 斜杠命令",
+      "enter": "Enter 发送 • Shift+Enter 换行 • Tab 切换模式 • / 斜杠命令"
+    },
+    "clickToChangeMode": "点击更改权限模式（或在输入框中按 Tab）",
+    "showAllCommands": "显示所有命令",
+    "clearInput": "清空输入",
+    "scrollToBottom": "滚动到底部"
+  },
+  "thinkingMode": {
+    "selector": {
+      "title": "思考模式",
+      "description": "扩展思考给 Claude 更多时间来评估替代方案",
+      "active": "激活",
+      "tip": "更高的思考模式需要更多时间，但提供更彻底的分析"
+    },
+    "modes": {
+      "none": {
+        "name": "标准",
+        "description": "常规 Claude 响应",
+        "prefix": ""
+      },
+      "think": {
+        "name": "思考",
+        "description": "基本扩展思考",
+        "prefix": "思考"
+      },
+      "thinkHard": {
+        "name": "深入思考",
+        "description": "更彻底的评估",
+        "prefix": "深入思考"
+      },
+      "thinkHarder": {
+        "name": "更深入思考",
+        "description": "考虑替代方案的深度分析",
+        "prefix": "更深入思考"
+      },
+      "ultrathink": {
+        "name": "超级思考",
+        "description": "最大思考预算",
+        "prefix": "超级思考"
+      }
+    },
+    "buttonTitle": "思考模式：{{mode}}"
+  },
+  "codexReasoningEffort": {
+    "selector": {
+      "title": "思考强度",
+      "description": "控制 Codex 在响应前投入多少审慎推理",
+      "active": "激活",
+      "tip": "更高的思考强度通常能提升复杂任务质量，但会增加响应时延"
+    },
+    "levels": {
+      "default": {
+        "name": "默认",
+        "description": "使用模型默认的思考强度"
+      },
+      "minimal": {
+        "name": "极低",
+        "description": "最快响应，仅进行最少量的审慎推理"
+      },
+      "low": {
+        "name": "低",
+        "description": "较轻量推理，延迟更低"
+      },
+      "medium": {
+        "name": "中",
+        "description": "在深度与延迟之间取得平衡"
+      },
+      "high": {
+        "name": "高",
+        "description": "为更难任务投入更多推理"
+      },
+      "xhigh": {
+        "name": "最高",
+        "description": "最大推理强度"
+      }
+    },
+    "buttonTitle": "思考强度：{{level}}"
+  },
+  "geminiThinking": {
+    "selector": {
+      "title": "思考强度",
+      "descriptionGemini3": "Gemini 3 模型使用官方 thinking level",
+      "descriptionGemini25": "Gemini 2.5 模型使用固定的 thinking budget 预设",
+      "active": "激活",
+      "tipGemini3": "Gemini 3 使用官方 thinking level。更高等级通常会提升推理深度，但也会增加延迟。",
+      "tipGemini25": "Gemini 2.5 使用 token budget。更高预算会允许模型在最终回答前使用更多推理 token。"
+    },
+    "modes": {
+      "default": {
+        "name": "默认",
+        "description": "使用该模型在 Gemini CLI 中的默认行为"
+      },
+      "minimal": {
+        "name": "极低",
+        "description": "最低官方 thinking level"
+      },
+      "low": {
+        "name": "低",
+        "description": "更低延迟的轻量推理"
+      },
+      "medium": {
+        "name": "中",
+        "description": "在推理深度与延迟之间取得平衡"
+      },
+      "high": {
+        "name": "高",
+        "description": "最高官方 thinking level"
+      },
+      "dynamic": {
+        "name": "动态",
+        "description": "让模型动态调整 thinking budget"
+      },
+      "off": {
+        "name": "关闭",
+        "description": "关闭思考"
+      },
+      "light": {
+        "name": "轻量",
+        "description": "使用较小的固定 thinking budget（{{budget}} tokens）"
+      },
+      "balanced": {
+        "name": "平衡",
+        "description": "使用中等 thinking budget（{{budget}} tokens）"
+      },
+      "deep": {
+        "name": "深入",
+        "description": "使用较大的 thinking budget（{{budget}} tokens）"
+      },
+      "max": {
+        "name": "最高",
+        "description": "使用该模型支持的最大 thinking budget（{{budget}} tokens）"
+      }
+    },
+    "buttonTitle": "思考强度：{{mode}}"
+  },
+  "providerSelection": {
+    "title": "选择您的 AI 助手",
+    "description": "选择一个供应商以开始新对话",
+    "selectModel": "选择模型",
+    "notInstalled": "未安装",
+    "installRequired": "{{provider}} CLI 未安装",
+    "notLoggedIn": "未登录",
+    "loginRequired": "{{provider}} CLI 未登录",
+    "authRequiredHint": "当前没有检测到已登录的模型 CLI。请先在「设置」中重新登录可用的供应商，再开始对话。",
+    "unavailableHint": "当前机器上有些 CLI 后端不可用。请先在「设置」中安装缺失工具，再使用这些选项。",
+    "providerInfo": {
+      "anthropic": "Anthropic",
+      "openai": "OpenAI",
+      "google": "Google",
+      "cursorEditor": "AI 代码编辑器",
+      "local": "在本地 GPU 上运行"
+    },
+    "readyPrompt": {
+      "claude": "已准备好使用 Claude {{model}}。在下方输入您的消息。",
+      "cursor": "已准备好使用 Cursor {{model}}。在下方输入您的消息。",
+      "gemini": "已准备好使用 Gemini {{model}}。在下方输入您的消息。",
+      "codex": "已准备好使用 Codex {{model}}。在下方输入您的消息。",
+      "local": "已准备好使用本地 GPU {{model}}。在下方输入您的消息。",
+      "default": "请在上方选择一个供应商以开始"
+    }
+  },
+  "session": {
+    "mode": {
+      "title": "选择会话类型",
+      "subtitle": "决定这个会话是用于研究流程，还是仅用于项目文件问答。",
+      "badge": "{{count}} 个选项",
+      "research": "研究",
+      "workspaceQa": "文件问答",
+      "researchTitle": "研究会话",
+      "researchDescription": "使用研究工作流、入门引导与流水线提示。",
+      "workspaceQaTitle": "工作区问答",
+      "workspaceQaDescription": "只询问文件、模块和实现细节，不触发研究流程。",
+      "workspaceQaPlaceholder": "询问任意文件、模块或实现细节...",
+      "workspaceQaGreeting": "我可以帮你查看这个工作区：梳理代码路径、解释模块、排查行为问题，并做定向修复。\n\n直接告诉我你想了解或修改的文件、bug 或实现细节即可。",
+      "workspaceQaHint": "这个会话会聚焦仓库问题，除非你明确要求开始研究规划。"
+    },
+    "continue": {
+      "title": "继续您的对话",
+      "description": "询问研究设计、统计方案、代码实现，或请求具体修改与执行支持"
+    },
+    "loading": {
+      "olderMessages": "正在加载更早的消息...",
+      "sessionMessages": "正在加载会话消息..."
+    },
+    "messages": {
+      "showingOf": "显示 {{shown}} / {{total}} 条消息",
+      "scrollToLoad": "向上滚动以加载更多",
+      "showingLast": "显示最近 {{count}} 条消息（共 {{total}} 条）",
+      "loadEarlier": "加载更早的消息",
+      "loadAll": "加载全部消息",
+      "loadingAll": "正在加载全部消息...",
+      "allLoaded": "全部消息已加载",
+      "perfWarning": "已加载全部消息 - 滚动可能变慢。点击「滚动到底部」恢复性能。"
+    }
+  },
+  "sessionContext": {
+    "title": "会话上下文",
+    "description": "展示本会话追踪中实际观测到的文件、任务与输出。",
+    "codexNotice": "Codex 会话可见性目前仅部分覆盖运行时暴露的工具事件范围。",
+    "traceError": "无法加载完整会话追踪，当前仅显示内存中的实时消息。",
+    "stats": {
+      "mode": "模式",
+      "provider": "提供商",
+      "contextFiles": "上下文文件",
+      "unreadOutputs": "未读输出"
+    },
+    "sections": {
+      "injectedContext": "注入的上下文",
+      "taskContext": "任务上下文",
+      "reviewQueue": "待审阅队列",
+      "fileReview": "文件审阅"
+    },
+    "actions": {
+      "collapse": "收起上下文侧栏",
+      "expand": "展开上下文侧栏",
+      "resize": "拖动调整宽度"
+    },
+    "sidebarTabs": {
+      "context": "上下文",
+      "research": "研究",
+      "files": "文件",
+      "shell": "终端",
+      "git": "代码历史"
+    },
+    "filters": {
+      "all": "全部",
+      "unread": "未读",
+      "reviewed": "已审阅"
+    },
+    "kinds": {
+      "task": "任务",
+      "todo": "待办",
+      "skill": "技能",
+      "directory": "目录"
+    },
+    "empty": {
+      "injectedContext": "尚未观测到文件或目录上下文。",
+      "taskContext": "尚未收集到任务或待办上下文。",
+      "reviewQueue": "本会话尚未生成可审阅的文件。"
+    },
+    "preview": {
+      "titleFallback": "预览",
+      "selectFile": "请选择要预览的文件",
+      "open": "打开",
+      "loading": "正在加载预览…",
+      "loadError": "无法加载预览：{{error}}",
+      "selectToReview": "请选择要审阅的文件",
+      "unreadHint": "输出文件在从待审队列打开前将保持未读状态。"
+    }
+  },
+  "shell": {
+    "selectProject": {
+      "title": "选择项目",
+      "description": "选择一个项目以在该目录中打开交互式终端"
+    },
+    "status": {
+      "newSession": "新会话",
+      "initializing": "初始化中...",
+      "restarting": "重启中..."
+    },
+    "actions": {
+      "disconnect": "断开连接",
+      "disconnectTitle": "断开终端连接",
+      "restart": "重启",
+      "restartTitle": "重启终端（请先断开连接）",
+      "connect": "在终端中继续",
+      "connectTitle": "连接到终端"
+    },
+    "loading": "正在加载终端...",
+    "connecting": "正在连接到终端...",
+    "startSession": "启动新的 Claude 会话",
+    "resumeSession": "恢复会话：{{displayName}}...",
+    "runCommand": "在 {{projectName}} 中运行 {{command}}",
+    "openTerminal": "在 {{projectName}} 中打开终端",
+    "startCli": "在 {{projectName}} 中启动 Claude CLI",
+    "historyEdit": {
+      "action": "修改历史输入",
+      "promptTitle": "请在终端中完成历史编辑",
+      "promptDescription": "网页聊天不直接改写历史消息。如需使用模型原生的编辑、撤回或重试能力，请前往终端操作。",
+      "cancel": "取消",
+      "confirm": "前往终端",
+      "bannerTitle": "当前会话已切换到终端",
+      "bannerDescription": "请在这里使用模型原生的历史编辑、撤回或重试能力。网页聊天仅展示对话，不直接改写历史。"
+    },
+    "workspace": {
+      "currentSession": "当前会话",
+      "newShell": "新建终端",
+      "tabTitle": "终端 {{index}}",
+      "closeShell": "关闭 {{title}}"
+    }
+  },
+  "projectSelection": {
+    "startChatWithProvider": "选择一个研究工作区以开始与 {{provider}} 进行对话"
+  },
+  "tasks": {
+    "nextTaskPrompt": "开始下一个任务",
+    "compact": {
+      "progress": "已完成 {{done}}/{{total}} · 待处理 {{pending}}",
+      "useInChat": "在对话中使用",
+      "allTasks": "全部任务",
+      "allDone": "所有任务已完成",
+      "done": "已完成",
+      "inProgress": "进行中",
+      "pending": "待处理",
+      "expand": "展开任务进度",
+      "collapse": "收起任务进度",
+      "noTasks": "暂无任务。请先开始对话。",
+      "emptyTitle": "任务进度不可用",
+      "emptyHint": "通过对话生成并配置研究流水线。"
+    },
+    "loading": "正在加载任务..."
+  },
+  "skillShortcuts": {
+    "title": "研究技能快捷方式",
+    "useAll": "全部使用",
+    "useSelected": "使用选中（{{count}}）",
+    "clearSelected": "清空选中",
+    "useSingle": "单独使用此技能",
+    "categories": {
+      "pipeline": "研究路径",
+      "deepResearch": "文献综述",
+      "localDataAccess": "本地数据库提取",
+      "ideation": "研究选题",
+      "preAnalysis": "预分析统计",
+      "baselineTable": "基线表",
+      "statisticalModeling": "统计建模与检验",
+      "medicalViz": "医学可视化",
+      "resultsIntegration": "方法和结果撰写",
+      "paperWriting": "论文撰写",
+      "graphicalAbstract": "图形摘要",
+      "paperReview": "论文审评",
+      "grantWriting": "基金申请",
+      "promotion": "汇报与转化"
+    },
+    "promptSingle": "请使用 {{skill}} 技能来帮助我完成这个任务。\n\n在此描述你的任务：",
+    "promptMulti": "请使用以下技能完成这个任务：{{skills}}。\n\n在此描述你的任务："
+  },
+  "guidedStarter": {
+    "greeting": "Hi {{username}}",
+    "title": "接下来我们做什么？",
+    "refresh": "随机换一组",
+    "recommendedSkills": "该方向推荐技能",
+    "loadingSkills": "正在检测可用技能...",
+    "noAvailableSkills": "当前环境中暂无匹配的已安装技能。",
+    "noAvailableSkillsFallback": "未找到已安装匹配项，已回退显示该方向默认推荐技能。",
+    "useAllSkills": "使用全部技能",
+    "template": {
+      "intro": "请协助我完成“{{scenario}}”。优先面向医学论文综述、证据整合与数据库驱动研究流程；先用简短咨询明确范围，再在需要时使用这些技能：{{skills}}。",
+      "background": "研究背景：",
+      "goal": "目标与预期产出：",
+      "database": "目标数据库 / 队列：",
+      "question": "核心研究问题（人群 / 暴露 / 结局）：",
+      "variables": "关键变量、表型定义与协变量：",
+      "design": "研究设计 / 统计分析计划：",
+      "inputs": "已有数据、代码、数据字典或参考论文：",
+      "constraints": "约束条件（时间 / 算力 / 数据权限 / 投稿等）：",
+      "output": "请先给出分步执行计划，并从第一个可落地任务开始。"
+    },
+    "scenarios": {
+      "startFullProject": {
+        "title": "启动你的研究项目",
+        "description": "从想法或数据库队列出发，搭建流程，明确问题、变量/实验路径，并形成可执行计划。"
+      },
+      "paperReproduction": {
+        "title": "复现论文",
+        "description": "读懂方法与实现细节；若基于队列/数据库，对齐纳排、变量定义与统计模型。"
+      },
+      "dataPlatformSurvey": {
+        "title": "数据源调研",
+        "description": "比较、筛选与课题匹配的公开队列或数据库（如 UKB、NHANES、MIMIC 等），并梳理数据可用性与分析路径。"
+      },
+      "literatureSurvey": {
+        "title": "文献综述",
+        "description": "系统梳理文献脉络、研究空白与争议点；可与常见队列/数据库资源对照，但不作为选库主入口。"
+      },
+      "localDataAccess": {
+        "title": "本地数据库提取",
+        "description": "面向本地数据库工作区做变量定位、表结构核对与真实字段提取；支持先路由再提取，覆盖 MIMIC、eICU、UKB、NHANES、OLDMAN、CHARLS、CLHLS、CHNS，以及中国家庭/社会调查家族。"
+      },
+      "researchIdea": {
+        "title": "研究选题",
+        "description": "收敛为清晰假设与创新点；队列研究明确暴露、结局与评估标准。"
+      },
+      "preAnalysis": {
+        "title": "预分析统计",
+        "description": "在正式基线表或全量建模前，先抽取关键自变量、核心结局、时间变量与最小必要协变量，结合临床判断和流行病学指标完成预筛查，包括患病率/发病率/人时、粗效应与最小调整效应、混杂与重叠性检查，并给出继续、暂停或修订建议。"
+      },
+      "baselineTable": {
+        "title": "基线特征",
+        "description": "生成单库/多库三线表：按疾病、暴露、分位数分组；自动选择mean±SD或median(IQR)；加权统计与PSM前后SMD对比。"
+      },
+      "statisticalModeling": {
+        "title": "统计建模与检验",
+        "description": "假设检验、Logistic/线性/Cox回归、生存分析、亚组分析、敏感性分析、贝叶斯建模与模型解释。"
+      },
+      "medicalVisualization": {
+        "title": "数据可视化",
+        "description": "期刊级图表：KM生存曲线、森林图、火山图、热图、多面板组图，适配Nature/Lancet/JAMA/中华系列风格。"
+      },
+      "resultsIntegration": {
+        "title": "方法和结果撰写",
+        "description": "整合Table、统计输出与图表，生成符合STROBE/CONSORT规范的可投稿Results章节，并撰写Results部分。"
+      },
+      "paperWriting": {
+        "title": "论文撰写",
+        "description": "完成章节结构、论点与论证；建议先用 citation-management 统一管理与核验引用/参考文献，再推进格式与润色；面向目标期刊或会议体裁。"
+      },
+      "graphicalAbstract": {
+        "title": "图形摘要",
+        "description": "把论文核心问题、方法流程和主要发现压缩成一张适合投稿或汇报的图形摘要。"
+      },
+      "manuscriptReview": {
+        "title": "审稿与结果解读",
+        "description": "审稿视角检查方法与证据；并解读结果、临床意义、局限性与成文框架。"
+      },
+      "rebuttalResponse": {
+        "title": "审稿答复",
+        "description": "专业回应审稿意见；补强混杂、稳健性、替代定义与因果表述。"
+      },
+      "grantProposal": {
+        "title": "基金申请",
+        "description": "基金本子规划、立项依据与撰写、修改与打磨；对标资助方要求与格式。"
+      },
+      "presentationPromotion": {
+        "title": "汇报材料",
+        "description": "演示文稿与组会材料；或旁白、音视频等多媒体产出。"
+      }
+    }
+  },
+  "attachedPrompt": {
+    "showPrompt": "显示提示词",
+    "hidePrompt": "隐藏提示词",
+    "remove": "移除"
+  },
+  "pipelineOnboarding": {
+    "noBrief": {
+      "title": "设置研究流水线",
+      "description": "在下方描述您的研究想法，智能体将通过对话帮您构建流水线，生成研究简报和任务列表。",
+      "stepsLabel": "建议包含以下信息",
+      "step1": "您的研究主题和总体目标",
+      "step2": "范围、边界和目标会议/期刊（如有）",
+      "step3": "偏好的方法和评估方案",
+      "buttonLabel": "使用分析模板"
+    },
+    "noTasks": {
+      "title": "从研究简报生成任务",
+      "description": "检测到研究简报，但尚未生成任务。你可以直接一键生成任务，或继续在对话中让智能体调整后再生成。",
+      "briefExists": "已检测到 research_brief.json",
+      "buttonLabel": "立即生成任务",
+      "buttonLoadingLabel": "正在生成任务...",
+      "secondaryButtonLabel": "在对话中继续"
+    }
+  },
+  "importedProject": {
+    "title": "分析已导入的项目？",
+    "description": "新建会话以扫描此工作区、分析项目结构与实现，并总结后续步骤。",
+    "provider": "供应商",
+    "model": "模型",
+    "notInstalled": "未安装",
+    "notLoggedIn": "未登录",
+    "notAvailable": "所选供应商不可用。",
+    "notNow": "暂时不要",
+    "analyzeProject": "分析项目"
+  },
+  "taskMaster": {
+    "initFailed": "初始化 TaskMaster 失败：{{message}}",
+    "initError": "初始化 TaskMaster 时出错，请重试。",
+    "createFailed": "创建任务失败：{{message}}",
+    "createError": "创建任务时出错，请重试。",
+    "templateError": "错误：{{message}}",
+    "setupTitle": "TaskMaster 配置",
+    "setupSubtitle": "{{project}} 的交互式命令行",
+    "setupFooter": "将自动开始 TaskMaster 初始化",
+    "close": "关闭",
+    "createTaskTitle": "新建任务",
+    "useAiGenerate": "使用 AI 生成任务详情",
+    "taskDescAi": "任务描述（AI 将生成详情）",
+    "taskDescAiPlaceholder": "描述你要完成的内容…",
+    "taskTitle": "任务标题",
+    "taskTitlePlaceholder": "输入任务标题…",
+    "description": "描述",
+    "taskDescPlaceholder": "描述任务…",
+    "priority": "优先级",
+    "priorityLow": "低",
+    "priorityMedium": "中",
+    "priorityHigh": "高",
+    "creating": "创建中…",
+    "createTask": "创建任务",
+    "loadingTemplates": "正在加载模板…",
+    "selectPrdTemplate": "选择 PRD 模板",
+    "customizeTemplateStep": "自定义模板",
+    "generatingTasksStep": "正在生成任务",
+    "fileName": "文件名",
+    "customizeTemplateLabel": "自定义模板",
+    "enterFieldPlaceholder": "填写 {{field}}",
+    "back": "返回",
+    "applying": "应用中…",
+    "applyGenerateTasks": "应用并生成任务",
+    "templateSuccessTitle": "模板应用成功！",
+    "templateSuccessBody": "已创建 PRD，正在生成任务…"
+  }
+}

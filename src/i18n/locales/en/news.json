@@ -1,0 +1,157 @@
+{
+  "hero": {
+    "badge": "Meta Literature Monitor",
+    "title": "Literature Triage Board",
+    "description": "Monitor recent systematic reviews, Meta-analysis papers, review protocols, and preprints from PubMed, Europe PMC, medRxiv, and arXiv, then review them as a screening list organized by topic match, recency, source signal, and abstract quality.",
+    "chatTarget": "Current project target for intake: {{project}}",
+    "selectProjectHint": "Select a project in the sidebar first, then send papers into chat for analysis intake."
+  },
+  "sources": {
+    "pubmed": "PubMed",
+    "europepmc": "Europe PMC",
+    "medrxiv": "medRxiv",
+    "arxiv": "arXiv",
+    "xiaohongshu": "Xiaohongshu"
+  },
+  "actions": {
+    "settings": "Settings",
+    "refresh": "Update",
+    "clear": "Clear",
+    "searchAll": "Fetch Latest",
+    "searching": "Searching...",
+    "startSearch": "Start Search",
+    "openSettings": "Open Settings",
+    "resetDefaults": "Restore Defaults",
+    "save": "Save Changes",
+    "close": "Close",
+    "researchFromPaper": "Intake Analysis",
+    "selectProjectFirst": "Select a project first",
+    "translate": "Chinese",
+    "showOriginal": "Original"
+  },
+  "status": {
+    "loading": "Loading literature triage board...",
+    "noActiveSources": "No active sources selected.",
+    "noResults": "No results yet",
+    "noResultsHint": "Complete the setup above, then click \"Start Search\"",
+    "resultsCount": "{{count}} results",
+    "resultsWithTotal": "{{count}} results from {{total}} scanned"
+  },
+  "view": {
+    "list": "List",
+    "card": "Cards"
+  },
+  "list": {
+    "rankSignal": "Rank / Final Score",
+    "paperSummary": "Paper Summary",
+    "screeningPanel": "Actions / Details"
+  },
+  "card": {
+    "abstract": "Abstract",
+    "showMore": "View abstract & screening signal",
+    "showLess": "Collapse",
+    "relevance": "Relevance",
+    "recency": "Recency",
+    "popularity": "Journal Signal",
+    "quality": "Quality",
+    "final": "Final",
+    "pdf": "PDF",
+    "comments": "comments",
+    "scoreBreakdown": "Screening Signal",
+    "matchedKeywords": "Matched keywords:",
+    "source": "Source",
+    "indexed": "Indexed",
+    "domain": "Domain",
+    "translating": "Translating...",
+    "translationFailed": "Translation failed"
+  },
+  "setup": {
+    "title": "Setup Guide",
+    "arxiv": {
+      "steps": [
+        "Click \"Settings\" to configure your research domains and keywords",
+        "Add arXiv categories that match your biomedical preprint interests",
+        "Adjust \"Results to show\" and \"Max results to scan\" as needed",
+        "Click \"Start Search\" to fetch the latest papers"
+      ]
+    },
+    "pubmed": {
+      "steps": [
+        "Click \"Settings\" to define systematic review, Meta-analysis, or methods keywords",
+        "Adjust the lookback window and scan size for your monitoring cadence",
+        "PubMed will fetch recent records with abstracts and rank them automatically",
+        "Click \"Start Search\" to fetch the latest papers"
+      ]
+    },
+    "europepmc": {
+      "steps": [
+        "Click \"Settings\" to define evidence synthesis, screening, or methodology keywords",
+        "Adjust the lookback window and scan size for your monitoring cadence",
+        "Europe PMC will pull recent indexed papers with abstracts and rank them automatically",
+        "Click \"Start Search\" to fetch the latest papers"
+      ]
+    },
+    "medrxiv": {
+      "steps": [
+        "Click \"Settings\" to define review protocol, evidence synthesis, or Meta methods keywords",
+        "Adjust the lookback window and scan size for your monitoring cadence",
+        "medRxiv will fetch recent preprints and rank them automatically",
+        "Click \"Start Search\" to fetch the latest papers"
+      ]
+    },
+    "xiaohongshu": {
+      "steps": [
+        "Use QR login or browser-cookie login first so Xiaohongshu searches can authenticate correctly",
+        "Configure search keywords for paper notes, methods summaries, or research commentary",
+        "Research domain keywords still drive relevance scoring, but Xiaohongshu posts are treated as research signals rather than formal papers",
+        "Click \"Start Search\" to fetch the latest posts"
+      ],
+      "note": "If you haven't installed xiaohongshu-cli yet, run: uv tool install xiaohongshu-cli"
+    }
+  },
+  "footer": {
+    "poweredBy": "Powered by"
+  },
+  "settings": {
+    "arxivTitle": "arXiv Settings",
+    "pubmedTitle": "PubMed Settings",
+    "europepmcTitle": "Europe PMC Settings",
+    "medrxivTitle": "medRxiv Settings",
+    "xiaohongshuTitle": "Xiaohongshu Settings",
+    "browserCookieAuth": "Browser Cookie Login",
+    "browserCookieDescription": "Read browser cookies from the machine hosting the MedHelp service. Make sure a browser on that machine is already logged into xiaohongshu.com.",
+    "serviceMachineHint": "This reads browser cookies from the machine running the MedHelp service, not from the device where this page is open. If you are using a remote deployment, prefer QR login.",
+    "cookieSource": "Browser Source",
+    "cookieSourceDescription": "If auto-detection fails, choose the browser actually installed on the server machine.",
+    "extractBrowserCookie": "Extract Browser Cookie",
+    "extracting": "Extracting...",
+    "cookieSuccess": "Cookie extraction successful!",
+    "cookieSuccessWithName": "Login successful. Current account: {{nickname}}",
+    "cookieFailure": "Login failed. Make sure a browser on the server machine is logged into xiaohongshu.com.",
+    "loginFailed": "Login failed",
+    "qrLoginTitle": "QR Code Login",
+    "qrLoginDescription": "Prefer this mode for remote deployments or Linux environments where browser-cookie extraction is less reliable.",
+    "loginViaQr": "Login via QR Code",
+    "qrLoggingIn": "Waiting for QR login...",
+    "qrSuccess": "QR login successful!",
+    "qrFailure": "QR login failed. Please try again.",
+    "qrRecommendedHint": "This looks like a remote-access setup, so QR login is recommended by default because it does not depend on reading browser cookies from the host machine.",
+    "recommendedTag": "Recommended",
+    "searchKeywords": "Search Keywords (comma-separated)",
+    "searchKeywordsPlaceholder": "meta-analysis, systematic review, PRISMA, evidence synthesis...",
+    "resultsToShow": "Results to show",
+    "maxArxivResults": "Max arXiv results to scan",
+    "maxPubmedResults": "Max PubMed results to scan",
+    "maxEuropepmcResults": "Max Europe PMC results to scan",
+    "maxMedrxivResults": "Max medRxiv results to scan",
+    "dateRangeDays": "Lookback days",
+    "researchDomains": "Research Domains",
+    "newDomainPlaceholder": "New domain name...",
+    "addDomain": "Add Domain",
+    "priority": "Priority",
+    "keywords": "Keywords",
+    "addPlaceholder": "Add...",
+    "arxivCategories": "arXiv Categories",
+    "credentialRequired": "Credential required"
+  }
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "job_pubmed_weekly_2025_05_18",
+    "job_type": "weekly",
+    "query_text": "(NHANES OR \"UK Biobank\" OR CHARLS OR MIMIC OR eICU OR CHNS OR CLHLS) AND (index OR score OR ratio OR biomarker OR \"novel indicator\" OR \"composite indicator\" OR \"risk score\") AND (cohort OR \"cross-sectional\" OR prospective OR retrospective OR epidemiology)",
+    "date_from": "2025-05-12",
+    "date_to": "2025-05-18",
+    "total_articles": 386,
+    "candidate_count": 5,
+    "matched_existing_count": 1,
+    "pending_review_count": 5,
+    "status": "success",
+    "created_at": "2025-05-18T08:30:00.000Z",
+    "finished_at": "2025-05-18T08:34:12.000Z"
+  }
+]

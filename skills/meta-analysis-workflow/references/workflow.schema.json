@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MedAutoData Meta-analysis Workflow Status",
+  "type": "object",
+  "required": ["project", "phases", "counts", "artifacts", "next_actions"],
+  "properties": {
+    "project": {
+      "type": "object",
+      "required": ["question", "pico"],
+      "properties": {
+        "question": { "type": "string" },
+        "pico": { "type": "string" },
+        "review_type": { "type": "string" },
+        "analysis_family": { "type": "string" }
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status"],
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "enum": ["not_started", "in_progress", "blocked", "needs_human_review", "complete"] },
+          "percent": { "type": "number", "minimum": 0, "maximum": 100 },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "properties": {
+        "searched": { "type": "integer", "minimum": 0 },
+        "deduplicated": { "type": "integer", "minimum": 0 },
+        "screened_title_abstract": { "type": "integer", "minimum": 0 },
+        "full_text_assessed": { "type": "integer", "minimum": 0 },
+        "included": { "type": "integer", "minimum": 0 },
+        "excluded_full_text": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "kind"],
+        "properties": {
+          "path": { "type": "string" },
+          "kind": { "type": "string" },
+          "status": { "type": "string" },
+          "checksum": { "type": "string" }
+        }
+      }
+    },
+    "pdf_manifest_summary": {
+      "type": "object",
+      "properties": {
+        "downloaded": { "type": "integer", "minimum": 0 },
+        "exists": { "type": "integer", "minimum": 0 },
+        "not_oa": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "updated_at": { "type": "string" },
+    "updated_by": { "type": "string" }
+  }
+}

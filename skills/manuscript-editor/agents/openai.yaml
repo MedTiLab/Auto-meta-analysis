@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta Manuscript Editor"
+  short_description: "Edit PRISMA manuscripts for consistency"
+  default_prompt: "Use $manuscript-editor to edit this Meta-analysis manuscript. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

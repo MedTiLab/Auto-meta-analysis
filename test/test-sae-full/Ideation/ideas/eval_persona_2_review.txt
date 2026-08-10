@@ -1,0 +1,50 @@
+================================================================================
+EVALUATION: Causal Sparse Autoencoders with Feature-Level Structural Equations
+             for Mechanistic Interpretability
+Persona: Domain Expert (AI Safety & Interpretability, 10+ years)
+Focus: Significance (highest), Feasibility (high), Clarity
+================================================================================
+
+### Dimension Scores
+
+**Clarity**: 8/10
+The proposal is exceptionally well-structured, with precise mathematical formulations (Eqs. 1-16), a clear three-phase training pipeline, and a thorough code implementation plan. The problem statement cleanly decomposes the motivation into three concrete sub-problems (P1-P3). The exposition of the SEM layer and its relationship to standard SAEs is lucid. Minor deductions: the block-sparse approximation (Section 2.4c) introduces hand-wavy assumptions about "adjacent blocks" that are not formally justified, and the sheer volume of hyperparameters (alpha, beta, gamma, eta, tau, plus augmented Lagrangian parameters mu, rho, and scheduling constants T_update, T_topo, T_block) may obscure the core contribution for readers.
+
+**Novelty**: 7/10
+The central idea of embedding a learnable SEM layer via (I - A)^{-1} directly into an autoencoder latent space is genuinely novel in the interpretability literature. No prior work has integrated structural causal models into dictionary learning in this manner. However, the individual components are well-established: Gated SAEs, NOTEARS for DAG learning, augmented Lagrangian optimization, and sparse forward substitution are all existing techniques. The novelty is primarily in the architectural combination rather than in any single algorithmic breakthrough. The anti-absorption proposition (Proposition 1) is interesting but limited to a simplified linear setting, and its generalization to the nonlinear, high-dimensional regime is stated without proof.
+
+**Validity**: 5/10
+This is where the proposal faces its most serious challenges. First, the claim that learned edges in A reflect genuine causal structure is a strong and largely unsupported assumption. In observational data (which is what SAE training uses), statistical dependencies can masquerade as causal edges, and the NOTEARS framework is known to be sensitive to confounders and non-Gaussian violations. The synthetic validation (Section 3.6) is well-designed but uses a generative process that exactly matches the model's assumptions (SEM with sparse activations), which risks circular validation. Second, Proposition 1's anti-absorption guarantee holds only in a two-feature linear case; the leap to thousands of interacting features in a real transformer is a significant gap. Third, the consistency-with-activation-patching metric (C2) tests correlation, not causation, creating a fundamental validation gap for the "causal" claims.
+
+**Feasibility**: 6/10
+The computational estimates are reasonable: 120 A100-hours for the full suite is within reach for a well-resourced academic lab. The warm-start strategy (Phase 1) is a pragmatic design choice. However, several practical concerns arise. The NOTEARS augmented Lagrangian is notoriously finicky to tune, and here it must converge jointly with SAE training -- a far more complex optimization landscape than standard DAG discovery. The topological reordering every 100 steps during training introduces discontinuities in the forward pass computation graph that may cause gradient instabilities. The block-sparse approximation for d >= 16384 restricts edges to within/between adjacent blocks, which may sever genuinely long-range causal links. The seven proposed ablation studies and five main experiments across three models and multiple dictionary sizes amount to a very ambitious experimental plan that could easily require 6-12 months of focused effort.
+
+**Significance**: 7/10
+If the method works as described, its impact on AI safety and interpretability would be substantial. The ability to automatically extract causal feature hierarchies from a single training run -- replacing O(d^2) activation patching with O(d + edges) DAG traversal -- would be a genuine workflow improvement for mechanistic interpretability practitioners. The safety applications (refusal decomposition, jailbreak detection, causal intervention via do-calculus) are well-motivated and address real needs. The root-cause intervention formula (Eq. 16) is particularly compelling: targeted do(z_i = 0) operations with downstream propagation offer a principled alternative to blunt activation steering. However, significance is tempered by the validity concerns above. If the learned DAG does not reflect true causal structure, then the safety applications become unreliable -- and in safety-critical contexts, unreliable tools can be worse than no tools at all.
+
+### Summary
+
+**Strengths:**
+- Architecturally elegant: the (I-A)^{-1} SEM layer is a principled, minimal modification to existing SAEs that addresses multiple problems simultaneously (absorption, circuit discovery, intervention).
+- Directly attacks a real and recognized problem (feature absorption) with a formal anti-absorption guarantee, even if the guarantee is limited in scope.
+- The safety applications (Sections 2.7c-d, 3.4 Category D) are well-conceived and target high-value use cases for the interpretability community.
+- Comprehensive experimental design with strong baselines (B1-B5), multiple evaluation categories (A-E), and a synthetic benchmark with known ground truth.
+- The proposal explicitly acknowledges risks and provides mitigation strategies (Section 6), demonstrating intellectual honesty.
+
+**Weaknesses:**
+- The "causal" label is epistemologically overloaded: the method learns statistical dependencies from observational data, and calling these "causal" edges without interventional validation is misleading. The proposal should distinguish between "causal" in the SEM sense (structural equations) and "causal" in the interventionist sense (counterfactual robustness).
+- Proposition 1 is proved only for a toy two-feature linear case. The gap between this and practical use (thousands of features, nonlinear activations, superposition) is large and unaddressed.
+- The hyperparameter space is vast (at least 10 tunable quantities), raising concerns about reproducibility and sensitivity to tuning choices. Ablations Ab3-Ab7 partially address this, but the interaction effects between hyperparameters are not studied.
+- The block-sparse approximation (Section 2.4c) is presented as a scaling solution, but it fundamentally constrains the discoverable causal structure. Features in non-adjacent blocks cannot have edges, which is an arbitrary and potentially harmful restriction.
+- The validation strategy for real neural networks relies heavily on consistency with activation patching (C2), which is a correlation measure, not a causal validation. The human evaluation (C3, 50 subgraphs) is thin for a paper making strong causal claims.
+
+**Suggestions for Improvement:**
+- Reframe the language: replace "causal" with "dependency-structured" or "causally-inspired" when referring to the learned DAG, and reserve "causal" for claims backed by interventional experiments. This would strengthen the paper's credibility.
+- Extend Proposition 1 to a multi-feature setting, even if under additional assumptions (e.g., bounded condition number of W_dec, maximum in-degree constraints). The current two-feature case is too simple to be convincing.
+- Prioritize the synthetic benchmark and the absorption experiments (Experiments 2-3) over the ambitious safety evaluations (Experiment 5). A paper that convincingly demonstrates absorption resistance and DAG recovery on controlled settings would be more impactful than one that also runs preliminary safety evaluations on large models.
+- Add an interventional validation protocol: after training, perform actual do-interventions on learned features and verify that downstream features respond as predicted by A. This would be the strongest evidence that the learned structure is meaningful.
+- Reduce the experimental scope to GPT-2 Small and Pythia-1.4B. Including Gemma-2-2B with d=65536 adds significant compute requirements without proportional scientific value at this stage.
+
+**Overall Recommendation:** Borderline Accept
+
+The core architectural idea is sound and novel, addressing a real problem with an elegant solution. The significance for AI safety and interpretability is clear. However, the gap between the theoretical claims (causal structure, anti-absorption guarantees) and the available evidence (toy linear case, observational training) is substantial. The proposal would benefit from a more honest framing of what "causal" means in this context and a tighter experimental scope focused on the strongest claims. If the authors can demonstrate convincing DAG recovery on synthetic data and measurable absorption resistance on real models, this would be a strong contribution to the field.

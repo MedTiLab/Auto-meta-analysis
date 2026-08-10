@@ -1,0 +1,52 @@
+## Domain Expert Review — Safety-Aware Sparse Autoencoders: Contrastive Feature Steering for Robust Alignment Monitoring
+
+**Reviewer Persona**: Domain Expert (AI Safety & Alignment, 10+ years applied ML for safety)
+**Evidence Status**: Ungrounded Evaluation (no pipeline artifacts available)
+
+---
+
+### Dimension Scores
+
+**Clarity**: 7/10
+The proposal is well-structured and accessible to practitioners familiar with both mechanistic interpretability and AI safety. The three-component architecture (contrastive training, hierarchical circuits, online steering) is cleanly separated, and the mathematical notation is standard. However, several critical details remain underspecified for a practitioner audience. The "iterative labeling procedure" for identifying safety-relevant feature subsets z_s is never defined — yet it is arguably the hardest part of the entire pipeline. How are features labeled as safety-relevant versus safety-irrelevant? Is this manual annotation, automated probing, or some hybrid? A domain practitioner trying to deploy this would immediately ask this question and find no answer. The contrastive loss formulation also has a subtle ambiguity: it appears to encourage similarity between the safety-relevant feature subsets of safe and unsafe examples (via sim(z^+_s, z^-_s) in the numerator), but the stated goal is separation — the intended semantics of the contrastive objective need clearer exposition. The experimental design section is solid and readable.
+
+**Novelty**: 6/10
+The individual components — contrastive learning, sparse autoencoders, activation steering — are all well-established techniques. The contribution is primarily in their combination and reframing for safety monitoring. Adding a contrastive term to SAE training is a natural extension that multiple groups have likely considered. The hierarchical (two-level) SAE is the most novel component, as cross-layer circuit discovery through a second-stage sparse decomposition is less explored. However, the online steering module (Component 3) is essentially the same as the intervention technique used in representation engineering and activation addition (Turner et al., 2023; Zou et al., 2023), recast in SAE feature space. The proposal does not sufficiently articulate why steering via SAE decoder directions would be meaningfully different from steering via the linear probes or representation vectors already used in the literature. Without evidence to verify novelty claims against the existing literature, this remains a reasonable but incremental combination of known methods.
+
+**Validity**: 5/10
+The experimental design covers the right surface area — appropriate baselines, relevant attack benchmarks (GCG, AutoDAN), and model utility preservation checks. However, there are significant methodological concerns. First, the MMCS metric assumes access to "ground-truth features," which do not exist for safety concepts in any established sense. The proposal does not explain what ground truth would look like or how it would be constructed. Second, the contrastive training depends heavily on the quality and completeness of the safe/unsafe pair dataset. HH-RLHF covers a narrow slice of the safety landscape (mostly refusal behavior), and red-teaming outputs from Perez et al. (2022) are similarly narrow. Real-world safety concerns include sycophancy, deceptive alignment, power-seeking, and subtle value misalignment — none of which are well-represented in these datasets. Third, the 2% utility preservation threshold is stated but no analysis is given for why this threshold is appropriate or what happens at the boundary. Fourth, the hierarchical SAE (concatenating features across all layers) will face a severe dimensionality challenge: if each layer produces thousands of SAE features across, say, 32 layers, the Level 2 input becomes enormous, and the learned importance weighting may simply collapse to attending to a few layers.
+
+**Feasibility**: 5/10
+From a computational standpoint, training per-layer SAEs on Gemma-2B is tractable, and the contrastive augmentation to the loss adds minimal overhead. However, the hierarchical Circuit SAE introduces substantial complexity. Concatenating SAE features across all layers of a model and then training a second SAE on the result creates a very high-dimensional optimization problem whose convergence properties are unclear. For Llama-3-8B with, say, 32 layers and 16K features per layer SAE, the Level 2 input could be 500K+ dimensional. The data requirements for the contrastive component are also a practical concern: constructing high-quality safe/unsafe pairs that cover the breadth of safety-relevant behaviors is extremely labor-intensive and remains an open challenge in the field. The online steering module is feasible in principle — it is a simple linear intervention — but calibrating the steering strengths (alpha, beta) without degrading model capabilities in production is a non-trivial engineering problem that the proposal does not address. The 1M safety-relevant tokens mentioned in the dataset section may be insufficient to train robust safety features across the full distribution of unsafe behaviors.
+
+**Significance**: 6/10
+The problem is genuinely important. Real-time safety monitoring and intervention during inference is one of the most pressing practical needs in AI deployment. If SafeSAE could reliably identify and steer safety-relevant features, it would be a valuable tool for practitioners. However, the practical significance is tempered by several concerns. First, practitioners already have simpler tools (classifier heads, representation engineering, input/output filters) that achieve reasonable safety intervention without the complexity of SAE training. The proposal needs to make a stronger case for why SAE-based decomposition provides actionable advantages over these simpler approaches — for instance, superior generalization to novel attack types or more interpretable failure modes. Second, the approach is fundamentally limited by the quality of the safe/unsafe training pairs; if the contrastive signal does not cover a failure mode, the method will miss it, just as current approaches do. The potential for false confidence (practitioners trusting the "safety features" more than warranted) is a real deployment risk that is not discussed.
+
+---
+
+### Summary
+
+**Strengths:**
+- Addresses a genuinely important gap: current SAE methods are safety-agnostic, and adding a safety-aware training signal is a well-motivated direction.
+- The three-component architecture is modular and cleanly designed, allowing each component to be evaluated independently.
+- The experimental design includes the right categories of evaluation (feature quality, safety detection, adversarial robustness, utility preservation) and relevant baselines.
+- The hierarchical circuit SAE is an interesting structural contribution that could enable cross-layer safety analysis beyond what per-layer SAEs provide.
+
+**Weaknesses:**
+- The contrastive objective semantics are ambiguous, and the critical "iterative labeling procedure" for identifying safety-relevant features is undefined.
+- The novelty over existing representation engineering and activation steering methods is not clearly articulated — Component 3 closely resembles existing intervention techniques.
+- The validity of the experimental design relies on "ground-truth features" (MMCS metric) that do not exist for safety concepts, and the training data covers only a narrow slice of the safety landscape.
+- The hierarchical SAE faces severe scalability challenges that are not analyzed or discussed.
+- There is no discussion of failure modes, false confidence risks, or the known fragility of linear intervention methods under adaptive adversaries.
+
+**Suggestions for Improvement:**
+- Define the iterative labeling procedure concretely, ideally with a pilot study showing it produces meaningful safety/non-safety feature partitions.
+- Clarify the contrastive loss formulation and explicitly state what geometric relationship it enforces between safe and unsafe feature activations.
+- Add a direct comparison with simple baselines (e.g., linear probes on activations, output classifiers) to demonstrate that the SAE decomposition provides value beyond what simpler methods achieve.
+- Address the dimensionality challenge of the hierarchical SAE explicitly — consider layer selection, bottleneck architectures, or attention-based aggregation instead of full concatenation.
+- Expand the safety-relevant dataset beyond HH-RLHF refusal behavior to include sycophancy, deceptive reasoning, and subtle misalignment cases.
+- Discuss adversarial robustness of the steering mechanism itself — can an adversary learn to exploit or circumvent the SAE-based intervention?
+
+**Overall Recommendation:** Borderline Reject
+
+The idea targets an important problem and proposes a reasonable architectural framework, but the execution plan has significant gaps in the most critical details (feature labeling, contrastive loss semantics, scalability of the hierarchical component). The novelty over existing representation engineering methods is insufficiently argued, and the experimental design relies on assumptions (ground-truth safety features, narrow training distribution) that undermine confidence in the expected results. With substantial revisions addressing the above concerns — particularly a concrete feature labeling protocol and a clearer novelty argument relative to activation steering — this could become a solid contribution.

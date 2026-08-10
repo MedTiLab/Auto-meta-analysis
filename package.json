@@ -1,0 +1,178 @@
+{
+  "name": "medautodata",
+  "version": "1.1.0",
+  "description": "AI research workspace with chat, files, git, tasks, and multi-agent workflows",
+  "type": "module",
+  "main": "server/index.js",
+  "bin": {
+    "medautodata": "server/cli.js",
+    "vibelab": "server/cli.js"
+  },
+  "files": [
+    "server/",
+    "shared/",
+    "desktop/",
+    "dist/",
+    "README.md",
+    "NOTICE",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/YzGLab/medautodata",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YzGLab/medautodata.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YzGLab/medautodata/issues"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others \"npm run server:watch\" \"npm run client\"",
+    "server": "node scripts/ensure-native-modules.js && node server/index.js",
+    "server:watch": "node scripts/ensure-native-modules.js && node scripts/watch-server.js",
+    "client": "node scripts/wait-for-backend.js && vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "smoke:deepmed": "node scripts/deepmed-smoke.mjs",
+    "start": "npm run build && npm run server",
+    "release": "./release.sh",
+    "prepublishOnly": "npm run build",
+    "postinstall": "node scripts/install-python-tools.js && node scripts/ensure-native-modules.js --record-only",
+    "desktop:deps": "electron-builder install-app-deps",
+    "desktop:start": "npm run build && npm run desktop:deps && electron desktop/main.mjs",
+    "desktop:pack": "npm run build && npm run desktop:deps && electron-builder --dir",
+    "desktop:dist": "npm run build && npm run desktop:deps && electron-builder",
+    "desktop:dist:mac": "npm run build && npm run desktop:deps && electron-builder --mac dmg",
+    "desktop:dist:win": "npm run build && npm run desktop:deps && electron-builder --win nsis",
+    "test": "node scripts/ensure-native-modules.js && vitest run",
+    "test:watch": "node scripts/ensure-native-modules.js && vitest"
+  },
+  "build": {
+    "appId": "com.yzglab.medautodata",
+    "productName": "MedAutoData",
+    "asar": false,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "server/**/*",
+      "shared/**/*",
+      "desktop/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "desktop/main.mjs"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+  },
+  "keywords": [
+    "claude code",
+    "ai",
+    "anthropic",
+    "ui",
+    "mobile"
+  ],
+  "author": "Project Contributors",
+  "license": "(GPL-3.0-only AND AGPL-3.0-only)",
+  "engines": {
+    "node": "20.x || 22.x || 24.x"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.226",
+    "@anthropic-ai/sdk": "0.116.0",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/lang-markdown": "^6.3.3",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/merge": "^6.11.1",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@iarna/toml": "^2.2.5",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@octokit/rest": "^22.0.0",
+    "@replit/codemirror-minimap": "^0.5.2",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/qrcode": "^1.5.6",
+    "@uiw/react-codemirror": "^4.23.13",
+    "adm-zip": "^0.5.16",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.2.0",
+    "chokidar": "^4.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "cross-spawn": "^7.0.3",
+    "docx": "^9.6.1",
+    "express": "^4.18.2",
+    "fuse.js": "^7.0.0",
+    "gray-matter": "^4.0.3",
+    "i18next": "^25.7.4",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "katex": "^0.16.25",
+    "lucide-react": "^0.515.0",
+    "mammoth": "^1.12.0",
+    "mermaid": "^11.12.3",
+    "mime-types": "^3.0.1",
+    "multer": "^2.0.1",
+    "node-fetch": "^2.7.0",
+    "qrcode": "^1.5.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
+    "react-i18next": "^16.5.3",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.8.1",
+    "react-syntax-highlighter": "^15.6.1",
+    "rehype-katex": "^7.0.1",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.0",
+    "remark-math": "^6.0.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "tailwind-merge": "^3.3.1",
+    "ws": "^8.14.2",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^22.19.7",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.6.0",
+    "auto-changelog": "^2.5.0",
+    "autoprefixer": "^10.4.16",
+    "concurrently": "^8.2.2",
+    "electron": "^35.7.5",
+    "electron-builder": "^26.8.1",
+    "node-gyp": "^10.0.0",
+    "postcss": "^8.4.32",
+    "release-it": "^19.0.5",
+    "sharp": "^0.34.2",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.0.4",
+    "vitest": "^4.1.0"
+  }
+}

@@ -1,0 +1,75 @@
+import type React from 'react';
+import type { AppTab, LoadingProgress, Project, ProjectCreationOptions, ProjectSession, SessionMode, SessionProvider, TrashProject } from '../../../types/app';
+
+export type ProjectSortOrder = 'name' | 'date';
+
+export type SessionWithProvider = ProjectSession & {
+  __provider: SessionProvider;
+  __isProcessing?: boolean;
+};
+
+export type AdditionalSessionsByProject = Record<string, ProjectSession[]>;
+export type LoadingSessionsByProject = Record<string, boolean>;
+
+export type DeleteProjectConfirmation = {
+  project: Project;
+  sessionCount: number;
+};
+
+export type DeleteTrashProjectConfirmation = {
+  project: TrashProject;
+};
+
+export type SessionDeleteConfirmation = {
+  projectName: string;
+  sessionId: string;
+  sessionTitle: string;
+  provider: SessionProvider;
+};
+
+export type SidebarProps = {
+  projects: Project[];
+  selectedProject: Project | null;
+  selectedSession: ProjectSession | null;
+  onProjectSelect: (project: Project) => void;
+  onSessionSelect: (session: ProjectSession) => void;
+  onNewSession: (project: Project, mode?: SessionMode) => void;
+  onSessionDelete?: (sessionId: string) => void;
+  onProjectDelete?: (projectName: string) => void;
+  isLoading: boolean;
+  loadingProgress: LoadingProgress | null;
+  onRefresh: () => Promise<void> | void;
+  onShowSettings: () => void;
+  showSettings: boolean;
+  settingsInitialTab: string;
+  onCloseSettings: () => void;
+  isMobile: boolean;
+  activeTab: AppTab;
+  processingSessions?: Set<string>;
+  onOpenDashboard: () => void;
+  onOpenTrash: () => void;
+  onOpenSkills: () => void;
+  onOpenNews: () => void;
+  onOpenReferences: () => void;
+  onImportedProjectCreated?: (project: Project, options?: ProjectCreationOptions) => void;
+  newSessionMode?: SessionMode;
+};
+
+export type SessionViewModel = {
+  isActive: boolean;
+  sessionName: string;
+  sessionTime: string;
+  messageCount: number;
+  mode: SessionMode;
+};
+
+export type MCPServerStatus = {
+  hasMCPServer?: boolean;
+  isConfigured?: boolean;
+} | null;
+
+export type TouchHandlerFactory = (
+  callback: () => void,
+) => (event: React.TouchEvent<HTMLElement>) => void;
+
+export type SettingsProject = Pick<Project, 'name' | 'displayName' | 'fullPath' | 'path'>;

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta Statistics R"
+  short_description: "Run reproducible R Meta statistics"
+  default_prompt: "Use $meta-statistics-r to run reproducible R Meta-analysis. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Legal PDF Acquisition"
+  short_description: "Resolve lawful Meta-analysis PDFs"
+  default_prompt: "Use $legal-pdf-acquisition to resolve lawful PDFs for this review. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

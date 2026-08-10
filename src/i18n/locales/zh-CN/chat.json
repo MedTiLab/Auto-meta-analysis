@@ -1,0 +1,749 @@
+{
+  "codeBlock": {
+    "copy": "复制",
+    "copied": "已复制",
+    "copyCode": "复制代码"
+  },
+  "messageTypes": {
+    "user": "U",
+    "error": "错误",
+    "tool": "工具",
+    "claude": "MedHelp"
+  },
+  "error": {
+    "retry": "重试",
+    "usageLimitHint": "使用限制重置后可以重试"
+  },
+  "tools": {
+    "settings": "工具设置",
+    "error": "工具错误",
+    "result": "工具结果",
+    "viewParams": "查看输入参数",
+    "viewRawParams": "查看原始参数",
+    "viewDiff": "查看编辑差异",
+    "creatingFile": "创建新文件：",
+    "updatingTodo": "更新待办事项",
+    "read": "读取",
+    "readFile": "读取文件",
+    "updateTodo": "更新待办列表",
+    "readTodo": "读取待办列表",
+    "searchResults": "结果"
+  },
+  "search": {
+    "found": "找到 {{count}} 个{{type}}",
+    "file": "文件",
+    "files": "文件",
+    "pattern": "模式：",
+    "in": "在："
+  },
+  "fileOperations": {
+    "updated": "文件更新成功",
+    "created": "文件创建成功",
+    "written": "文件写入成功",
+    "diff": "差异",
+    "newFile": "新文件",
+    "viewContent": "查看文件内容",
+    "viewFullOutput": "查看完整输出（{{count}} 个字符）",
+    "contentDisplayed": "文件内容显示在上面的差异视图中"
+  },
+  "interactive": {
+    "title": "交互式提示",
+    "waiting": "等待您在 CLI 中响应",
+    "instruction": "请在提示中选择一个选项。",
+    "selectedOption": "✓ Claude 选择了选项 {{number}}",
+    "instructionDetail": "在 CLI 中，您可以使用方向键或输入数字来交互式地选择此选项。"
+  },
+  "thinking": {
+    "title": "思考中...",
+    "emoji": "💭 思考中..."
+  },
+  "agentTurn": {
+    "thought": "思考",
+    "usedTools": "使用了 {{count}} 个工具",
+    "steps": "执行步骤",
+    "streaming": "传输中..."
+  },
+  "skill": {
+    "contentLoaded": "技能内容已加载",
+    "contentBadge": "技能"
+  },
+  "json": {
+    "response": "JSON 响应"
+  },
+  "messageShare": {
+    "button": "分享",
+    "creating": "生成中...",
+    "title": "分享回答",
+    "description": "复制后会以富文本卡片形式粘贴；不支持富文本的平台会自动退回普通链接。",
+    "cardTitle": "MedHelp",
+    "cardDescription": "Shared via MedHelp, an AI research assistant",
+    "copyFooter": "请不要转发给无关人员。",
+    "scan": "扫码查看",
+    "copy": "复制分享卡片",
+    "copyText": "我分享了一段 MedHelp 只读对话，方便你查看这次讨论内容：\n{{url}}\n请不要转发给无关人员。",
+    "copied": "已复制",
+    "close": "关闭",
+    "qrAlt": "分享二维码"
+  },
+  "permissions": {
+    "grant": "授予 {{tool}} 权限",
+    "added": "权限已添加",
+    "addTo": "将 {{entry}} 添加到允许的工具。",
+    "retry": "权限已保存到当前账号。重试请求以使用该工具。",
+    "error": "无法更新权限。请重试。",
+    "openSettings": "打开设置"
+  },
+  "todo": {
+    "updated": "待办列表已成功更新",
+    "current": "当前待办列表"
+  },
+  "plan": {
+    "viewPlan": "📋 查看实施计划",
+    "title": "实施计划"
+  },
+  "status": {
+    "thinking": "思考中",
+    "processing": "处理中",
+    "analyzing": "分析中",
+    "working": "执行中",
+    "computing": "计算中",
+    "reasoning": "推理中",
+    "runningCode": "正在运行代码",
+    "resuming": "恢复中",
+    "initializing": "初始化中",
+    "restarting": "重启中"
+  },
+  "usageLimit": {
+    "resetAt": "Claude 使用限制已达到。您的限制将在 **{{time}} {{timezone}}** - {{date}} 重置"
+  },
+  "tokenUsage": {
+    "unavailable": "上下文不可用",
+    "unavailableTitle": "当前无法获取这个会话的上下文使用量。"
+  },
+  "analysisLanguage": {
+    "selector": {
+      "title": "分析语言",
+      "label": "分析语言",
+      "description": "控制聊天中默认偏好的分析代码语言。这里只影响 agent 的分析实现偏好，不会直接创建或切换真实运行环境。"
+    },
+    "options": {
+      "auto": "自动",
+      "python": "Python",
+      "r": "R"
+    }
+  },
+  "permissionModes": {
+    "permissionMode": "权限模式",
+    "modes": {
+      "default": "默认模式",
+      "acceptEdits": "编辑模式",
+      "plan": "计划模式"
+    },
+    "default": "默认模式",
+    "acceptEdits": "编辑模式",
+    "plan": "计划模式",
+    "descriptions": {
+      "default": "只有受信任的命令（ls、cat、grep、git status 等）自动运行。其他命令将被跳过。可以写入项目。",
+      "acceptEdits": "项目内的所有命令自动运行。完全自动模式，具有沙盒执行功能。",
+      "plan": "计划模式 - 不执行任何命令"
+    },
+    "technicalDetails": "技术细节"
+  },
+  "input": {
+    "placeholder": "输入 / 调用命令，@ 选择文件，或向 {{provider}} 提问...",
+    "placeholderDefault": "输入您的消息...",
+    "disabled": "输入已禁用",
+    "attachFiles": "附加文件",
+    "attachReferences": "附加文献",
+    "attachImages": "附加图片",
+    "dropFilesHere": "拖放文件到此处",
+    "attachmentOnlyFallback": "请先查看我附上的文件，并基于这些文件帮助我。",
+    "send": "发送",
+    "stop": "停止",
+    "hintText": {
+      "ctrlEnter": "Ctrl+Enter 发送 • Shift+Enter 换行 • Tab 切换模式 • / 斜杠命令",
+      "enter": "Enter 发送 • Shift+Enter 换行 • Tab 切换模式 • / 斜杠命令"
+    },
+    "clickToChangeMode": "点击更改权限模式（或在输入框中按 Tab）",
+    "showAllCommands": "显示所有命令",
+    "clearInput": "清空输入",
+    "scrollToBottom": "滚动到底部"
+  },
+  "thinkingMode": {
+    "selector": {
+      "title": "思考强度",
+      "description": "使用 Claude SDK 的 thinking / effort 档位",
+      "active": "激活",
+      "tip": "更高的 effort 通常会提升复杂任务质量，但会增加延迟"
+    },
+    "modes": {
+      "none": {
+        "name": "默认",
+        "description": "不覆盖 Claude SDK 默认设置"
+      },
+      "low": {
+        "name": "低",
+        "description": "最少思考，响应最快"
+      },
+      "medium": {
+        "name": "中",
+        "description": "中等思考强度"
+      },
+      "high": {
+        "name": "高",
+        "description": "深度推理"
+      },
+      "xhigh": {
+        "name": "超高",
+        "description": "比高强度更深的推理"
+      },
+      "max": {
+        "name": "最大",
+        "description": "最大思考强度"
+      }
+    },
+    "buttonTitle": "思考强度：{{mode}}"
+  },
+  "providerSelection": {
+    "title": "选择您的 AI 助手",
+    "description": "选择一个智能体以开始新对话",
+    "selectModel": "选择模型",
+    "notInstalled": "未安装",
+    "installRequired": "{{provider}} 运行环境未安装",
+    "notLoggedIn": "未登录",
+    "loginRequired": "{{provider}} 运行环境未登录",
+    "authRequiredHint": "当前没有检测到已登录的模型运行环境。请先在「设置」中重新连接可用的智能体，再开始对话。",
+    "unavailableHint": "当前机器上有些 CLI 后端不可用。请先在「设置」中安装缺失工具，再使用这些选项。",
+    "providerInfo": {
+      "anthropic": "MedHelp"
+    },
+    "readyPrompt": {
+      "claude": "已准备好使用 MedHelp {{model}}。在下方输入您的消息。",
+      "default": "请在上方选择一个智能体以开始"
+    }
+  },
+  "session": {
+    "mode": {
+      "title": "选择会话类型",
+      "subtitle": "决定这个会话是用于研究流程，还是仅用于项目文件问答。",
+      "badge": "{{count}} 个选项",
+      "research": "研究",
+      "workspaceQa": "文件问答",
+      "researchTitle": "研究会话",
+      "researchDescription": "使用研究工作流、入门引导与流水线提示。",
+      "workspaceQaTitle": "项目问答",
+      "workspaceQaDescription": "只询问文件、模块和实现细节，不触发研究流程。",
+      "workspaceQaPlaceholder": "询问任意文件、模块或实现细节...",
+      "workspaceQaGreeting": "我可以帮你查看这个项目：梳理代码路径、解释模块、排查行为问题，并做定向修复。\n\n直接告诉我你想了解或修改的文件、bug 或实现细节即可。",
+      "workspaceQaHint": "这个会话会聚焦仓库问题，除非你明确要求开始研究规划。"
+    },
+    "continue": {
+      "title": "继续您的对话",
+      "description": "询问研究设计、统计方案、代码实现，或请求具体修改与执行支持"
+    },
+    "loading": {
+      "olderMessages": "正在加载更早的消息...",
+      "sessionMessages": "正在加载会话消息..."
+    },
+    "messages": {
+      "showingOf": "显示 {{shown}} / {{total}} 条消息",
+      "scrollToLoad": "向上滚动以加载更多",
+      "showingLast": "显示最近 {{count}} 条消息（共 {{total}} 条）",
+      "loadEarlier": "加载更早的消息",
+      "loadAll": "加载全部消息",
+      "loadingAll": "正在加载全部消息...",
+      "allLoaded": "全部消息已加载",
+      "perfWarning": "已加载全部消息 - 滚动可能变慢。点击「滚动到底部」恢复性能。"
+    }
+  },
+  "sessionContext": {
+    "title": "会话上下文",
+    "description": "展示本会话追踪中实际观测到的文件、任务与输出。",
+    "traceError": "无法加载完整会话追踪，当前仅显示内存中的实时消息。",
+    "stats": {
+      "mode": "模式",
+      "provider": "智能体",
+      "contextFiles": "上下文文件",
+      "unreadOutputs": "未读输出"
+    },
+    "sections": {
+      "injectedContext": "注入的上下文",
+      "taskContext": "任务上下文",
+      "reviewQueue": "待审阅队列",
+      "fileReview": "文件审阅"
+    },
+    "actions": {
+      "collapse": "收起上下文侧栏",
+      "expand": "展开上下文侧栏",
+      "resize": "拖动调整宽度"
+    },
+    "sidebarTabs": {
+      "context": "上下文",
+      "research": "研究",
+      "zotero": "Zotero",
+      "meta": "Meta",
+      "files": "文件",
+      "git": "代码历史"
+    },
+    "filters": {
+      "all": "全部",
+      "unread": "未读",
+      "reviewed": "已审阅"
+    },
+    "kinds": {
+      "task": "任务",
+      "todo": "待办",
+      "skill": "技能",
+      "directory": "目录"
+    },
+    "empty": {
+      "injectedContext": "尚未观测到文件或目录上下文。",
+      "taskContext": "尚未收集到任务或待办上下文。",
+      "reviewQueue": "本会话尚未生成可审阅的文件。"
+    },
+    "preview": {
+      "titleFallback": "预览",
+      "largeTitle": "大窗口文件预览",
+      "selectFile": "请选择要预览的文件",
+      "open": "打开",
+      "openEditor": "编辑",
+      "previewMode": "预览",
+      "dragTitle": "拖动移动预览窗口",
+      "resize": "拖动调整预览大小",
+      "resetSize": "重置预览大小",
+      "maximize": "最大化预览",
+      "restoreSize": "还原预览大小",
+      "loading": "正在加载预览…",
+      "loadError": "无法加载预览：{{error}}",
+      "missingTitle": "引用的文件不可用",
+      "missingHint": "这条对话仍然保留了文件路径，但工作区里已经找不到该文件。它可能已被删除、重命名、移动，或来自较早的项目状态。",
+      "missingPathLabel": "路径：",
+      "truncatedNotice": "文件较大，仅加载前 {{previewSize}} 用于预览（约 {{totalSize}}）。请使用「打开」在编辑器中查看完整内容。",
+      "table": {
+        "empty": "没有可预览的表格行。",
+        "column": "第 {{index}} 列",
+        "limitNotice": "当前显示前 {{rows}} 行、{{columns}} 列。"
+      },
+      "selectToReview": "请选择要审阅的文件",
+      "unreadHint": "输出文件在从待审队列打开前将保持未读状态。",
+      "move": {
+        "title": "移动到其他文件夹",
+        "projectRoot": "项目根目录",
+        "currentFolder": "当前文件夹：{{path}}",
+        "targetPlaceholder": "输入或选择目标文件夹，例如 Literature/notes",
+        "loadingFolders": "正在加载文件夹…",
+        "noFolders": "没有可移动到的其他文件夹。",
+        "targetRequired": "请先选择目标文件夹。",
+        "sameFolder": "目标文件夹和当前文件夹相同。",
+        "confirm": "移动文件",
+        "moveFailed": "移动文件失败。",
+        "loadFoldersError": "加载文件夹失败。"
+      }
+    }
+  },
+  "projectSelection": {
+    "startChatWithProvider": "选择一个研究项目以开始与 {{provider}} 进行对话"
+  },
+  "tasks": {
+    "nextTaskPrompt": "开始下一个任务",
+    "compact": {
+      "progress": "已完成 {{done}}/{{total}} · 待处理 {{pending}}",
+      "useInChat": "在对话中使用",
+      "allTasks": "全部任务",
+      "allDone": "所有任务已完成",
+      "stageLabel": "阶段",
+      "stageOnly": "阶段 {{stage}}",
+      "stageProgress": "阶段 {{stage}} · 已完成 {{done}}/{{total}}",
+      "done": "已完成",
+      "inProgress": "进行中",
+      "pending": "待处理",
+      "expand": "展开任务进度",
+      "collapse": "收起任务进度",
+      "noTasks": "暂无任务。请先开始对话。",
+      "emptyTitle": "任务进度不可用",
+      "emptyHint": "通过对话生成并配置研究流水线。"
+    },
+    "stages": {
+      "survey": "文献",
+      "literature": "文献",
+      "ideation": "构思",
+      "experiment": "实验",
+      "publication": "发表",
+      "promotion": "推广"
+    },
+    "loading": "正在加载任务..."
+  },
+  "skillShortcuts": {
+    "title": "研究技能快捷方式",
+    "useAll": "全部使用",
+    "useAutoRoute": "自动选择",
+    "useSelected": "使用选中（{{count}}）",
+    "clearSelected": "清空选中",
+    "useSingle": "单独使用此技能",
+    "metaStatisticTypes": "统计类型",
+    "categories": {
+      "metaPipeline": "启动 Meta pipeline",
+      "metaAnalysis": "Meta 分析",
+      "metaLiterature": "文献调研",
+      "metaIdeation": "Meta 选题",
+      "metaScopingReview": "范围 / 系统综述",
+      "metaProtocol": "Protocol / PICO",
+      "metaSearchDedupe": "检索与去重",
+      "metaFullTextDownload": "全文下载",
+      "metaPdfAcquisition": "Zotero 通讯",
+      "metaManualScreening": "题摘一筛",
+      "metaTitleAbstractScreening": "题目筛选",
+      "metaTitleAbstractFirstScreen": "题摘一筛",
+      "metaTitleAbstractSecondScreen": "题摘 AI 二筛",
+      "metaMineru": "文档解析",
+      "metaFullTextScreening": "全文筛选",
+      "metaFullTextFirstScreen": "全文一筛",
+      "metaFullTextSecondScreen": "全文 AI 二筛",
+      "metaExtractionQuality": "数据提取",
+      "metaStatistics": "统计合并 / 建模",
+      "metaDiagnostic": "诊断准确性 Meta",
+      "metaIntervention": "干预 / 效应量 Meta",
+      "metaPrognostic": "预后 HR Meta",
+      "metaPrevalence": "患病率 / 单臂 Meta",
+      "metaNetwork": "网状 Meta",
+      "metaFigures": "图表输出 / 医学可视化",
+      "metaManuscript": "PRISMA 成稿 / 论文撰写",
+      "metaQualityAssessment": "质量评估",
+      "metaRescreen": "题摘 AI 二筛"
+    },
+    "promptSingle": "请使用 {{skill}} 技能来帮助我完成这个任务。\n\n在此描述你的任务：",
+    "promptMulti": "请使用以下技能完成这个任务：{{skills}}。\n\n在此描述你的任务：",
+    "prompts": {
+      "metaPipeline": "请协助我启动这个 Meta 项目 pipeline。请优先使用 meta-pipeline-planner，并在跨阶段编排时使用 meta-analysis-workflow。请按项目记忆文件执行，先判断当前阶段、缺失项和下一步任务；把项目启动报告保存到 01_protocol/project_startup_report.md 或带日期的同目录文件；不要编写不存在的数据、PDF、提取字段或统计结果，无法获得数据/PDF/字段时写不能提取报告；关键步骤设置人工复核；长流程后压缩上下文并更新 research_brief/tasks。\n\n我的任务：",
+      "metaAnalysis": "请协助我完成“{{scenario}}”。请按项目记忆文件判断当前 Meta 阶段，并推进最小必要步骤。\n\n我的任务：",
+      "metaLiterature": "请协助我完成 Meta 文献调研与证据综述。请按项目记忆文件执行。\n\n我的任务：",
+      "metaIdeation": "请协助我完成 Meta 选题判断。请按项目记忆文件评估可行性并形成下一步建议。\n\n我的任务：",
+      "metaScopingReview": "请协助我完成范围综述 / 系统综述路径判断。请按项目记忆文件执行。\n\n我的任务：",
+      "metaProtocol": "请协助我完成 Meta Protocol / PICO。请按项目记忆文件执行。\n\n我的任务：",
+      "metaSearchDedupe": "请协助我完成 Meta 检索与去重。请按项目记忆文件中的检索来源分流和去重规则执行。\n\n我的任务：",
+      "metaFullTextDownload": "请协助我完成 Meta 全文下载。请先读取/生成 04_full_text_review/fulltext_manifest.json/csv，只处理 needs_full_text=true 且本地全文不完整的记录；按技能能力从可用技能中选择最小必要组合，从项目已有文件、用户上传、PMC/OA 等公开来源获取 PDF、HTML、Markdown 或文本，记录 downloaded/exists/manual_upload_required/no_oa_pdf/failed 状态；下载失败的记录再进入 Zotero 通讯。\n\n可用技能：{{skills}}。\n\n我的任务：",
+      "metaPdfAcquisition": "请使用 $meta-zotero-fulltext-handoff 协助我完成 Meta 缺全文推送。请先读取当前全文阶段的 04_full_text_review/fulltext_manifest.json/csv、已下载/已解析全文资产；优先从当前环境读取 ZOTERO_API_KEY、ZOTERO_USER_ID、MEDHELP_API_BASE_URL、MEDHELP_API_TOKEN/MEDHELP_AUTHORIZATION，不要在这些环境变量存在时要求用户手动生成 JWT；按当前仍缺可用全文的记录更新缺口清单，再把这些缺口记录推送到 Zotero，让 Zotero 获取/附加 PDF。优先导出 RIS 格式的文献管理文件，再导入 Zotero；如果 RIS 导入失败，立即暂停自动推送，改为生成手动导入说明和待导入 RIS 文件，不要继续尝试其它自动导入路径。不要把题摘 AI 二筛作为硬性前置规则，也不要把这一步当成全文二筛；这里是在全文阶段做缺全文补齐和可用性筛选。不要批量尝试网页下载；除 RIS 失败后的手动导入兜底外，不要让 AI 生成大文件再人工导入。\n\n我的任务：",
+      "metaManualScreening": "请协助我完成 Meta 题摘一筛。请按项目记忆文件执行，并先报告未筛选、已一筛和待 AI 二筛数量。\n\n我的任务：",
+      "metaTitleAbstractScreening": "请协助我完成 Meta 题目筛选。请按项目记忆文件执行，把题摘一筛和 AI 二筛作为同一个任务推进；先报告未筛选、已一筛、待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaTitleAbstractFirstScreen": "请协助我完成 Meta 题摘一筛。请按项目记忆文件执行，并先报告未筛选、已一筛和待 AI 二筛数量。\n\n我的任务：",
+      "metaTitleAbstractSecondScreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaMineru": "请协助我完成文档解析阶段。请按项目记忆文件执行，不暴露 token。\n\n我的任务：",
+      "metaFullTextScreening": "请协助我完成 Meta 全文筛选。请按项目记忆文件执行。可用技能：{{skills}}。\n\n我的任务：",
+      "metaFullTextFirstScreen": "请协助我完成 Meta 全文一筛。请按项目记忆文件执行，并先报告待全文一筛、已一筛和需 AI 二筛数量。\n\n我的任务：",
+      "metaFullTextSecondScreen": "请协助我完成 Meta 全文 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaExtractionQuality": "请协助我完成 Meta 数据提取。优先使用 `meta-extraction`。请按项目记忆文件执行。可用技能：{{skills}}。\n\n我的任务：",
+      "metaStatistics": "请协助我完成 Meta 统计合并 / 建模入口判断。请按项目记忆文件检查能否进入定量合并。\n\n我的任务：",
+      "metaDiagnostic": "请协助我完成诊断准确性 Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaIntervention": "请协助我完成干预 / 效应量 Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaPrognostic": "请协助我完成预后 HR Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaPrevalence": "请协助我完成患病率 / 单臂 Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaNetwork": "请协助我完成网状 Meta 的方案与数据结构分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaFigures": "请协助我完成 Meta 图表输出 / 医学可视化。请按项目记忆文件执行。\n\n我的任务：",
+      "metaManuscript": "请协助我完成 PRISMA 成稿 / 论文撰写。请按项目记忆文件执行。\n\n我的任务：",
+      "metaQualityAssessment": "请协助我完成 Meta 质量评估 / 偏倚风险评估。请按项目记忆文件执行。\n\n我的任务：",
+      "metaRescreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务："
+    },
+    "routePrompts": {
+      "metaPipeline": "请协助我启动 Meta 项目 pipeline。请优先使用 meta-pipeline-planner，并在跨阶段编排时使用 meta-analysis-workflow。请按项目记忆文件执行，先给出当前阶段、缺失项和下一步任务；把项目启动报告保存到 01_protocol/project_startup_report.md 或带日期的同目录文件；不要编写不存在的数据、PDF、提取字段或统计结果，无法获得数据/PDF/字段时写不能提取报告；关键步骤设置人工复核；长流程后压缩上下文并更新 research_brief/tasks。\n\n我的任务：",
+      "metaAnalysis": "请协助我完成“Meta 分析 / 系统综述”。请按项目记忆文件判断当前阶段，并推进最小必要步骤。\n\n我的任务：",
+      "metaTitleAbstractScreening": "请协助我完成 Meta 题目筛选。请按项目记忆文件执行，把题摘一筛和 AI 二筛作为同一个任务推进；先报告未筛选、已一筛、待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaFullTextDownload": "请协助我完成 Meta 全文下载。请先读取/生成 04_full_text_review/fulltext_manifest.json/csv，只处理 needs_full_text=true 且本地全文不完整的记录；按技能能力从可用技能中选择最小必要组合，从项目已有文件、用户上传、PMC/OA 等公开来源获取 PDF、HTML、Markdown 或文本，记录 downloaded/exists/manual_upload_required/no_oa_pdf/failed 状态；下载失败的记录再进入 Zotero 通讯。\n\n可用技能：{{skills}}。\n\n我的任务：",
+      "metaTitleAbstractFirstScreen": "请协助我完成 Meta 题摘一筛。请按项目记忆文件执行，并先报告未筛选、已一筛和待 AI 二筛数量。\n\n我的任务：",
+      "metaTitleAbstractSecondScreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaFullTextScreening": "请协助我完成 Meta 全文筛选。请按项目记忆文件执行。可用技能：{{skills}}。\n\n我的任务：",
+      "metaFullTextFirstScreen": "请协助我完成 Meta 全文一筛。请按项目记忆文件执行，并先报告待全文一筛、已一筛和需 AI 二筛数量。\n\n我的任务：",
+      "metaFullTextSecondScreen": "请协助我完成 Meta 全文 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaRescreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务："
+    }
+  },
+  "guidedStarter": {
+    "greeting": "Hi {{username}}",
+    "title": "接下来我们做什么？",
+    "refresh": "随机换一组",
+    "recommendedSkills": "该方向推荐技能",
+    "loadingSkills": "正在检测可用技能...",
+    "noAvailableSkills": "当前环境中暂无匹配的已安装技能。",
+    "noAvailableSkillsFallback": "未找到已安装匹配项，已回退显示该方向默认推荐技能。",
+    "useAllSkills": "使用全部技能",
+    "useAutoRoute": "自动选择技能",
+    "metaStatisticTypes": "统计类型选择",
+    "metaModes": {
+      "diagnostic": {
+        "title": "诊断准确性 Meta",
+        "description": "肿瘤标志物或诊断试验，重点围绕 TP、FP、FN、TN、敏感度、特异度、DOR 和 SROC。"
+      },
+      "intervention": {
+        "title": "干预 / 效应量 Meta",
+        "description": "治疗、暴露或干预类合并，围绕 OR、RR、HR、MD、SMD 等效应量。"
+      },
+      "prognostic": {
+        "title": "预后 HR Meta",
+        "description": "预后因素和生存结局，重点处理 HR、调整模型、亚组和敏感性分析。"
+      },
+      "prevalence": {
+        "title": "患病率 / 单臂 Meta",
+        "description": "单臂患病率、发生率、比例或率的合并，包含转换、异质性和分层计划。"
+      },
+      "network": {
+        "title": "网状 Meta",
+        "description": "多干预证据网络，关注节点、比较、传递性、一致性和排序输出。"
+      },
+      "scoping": {
+        "title": "范围综述 / 系统综述",
+        "description": "证据图谱或系统综述流程，不强制进入定量合并。"
+      }
+    },
+    "template": {
+      "intro": "请协助我完成“{{scenario}}”。先判断当前任务属于哪一段研究流程，再使用必要技能推进：{{skills}}。",
+      "background": "研究背景：",
+      "goal": "目标与预期产出：",
+      "database": "目标数据库 / 队列：",
+      "question": "核心研究问题（人群 / 暴露 / 结局）：",
+      "variables": "关键变量、表型定义与协变量：",
+      "design": "研究设计 / 统计分析计划：",
+      "inputs": "已有数据、代码、数据字典或参考论文：",
+      "constraints": "约束条件（时间 / 算力 / 数据权限 / 投稿等）：",
+      "output": "请先给出分步执行计划，并从第一个可落地任务开始。"
+    },
+    "prompts": {
+      "metaAnalysis": "请协助我完成“{{scenario}}”。请按项目记忆文件判断当前 Meta 阶段，并推进最小必要步骤。\n\n我的任务：",
+      "paperWriting": "请协助我完成“{{scenario}}”。先确认目标期刊/体裁、研究设计、主要结果和引用材料；若需撰写或核对数据可用性声明（Data Availability）、存库方案、数据集引用与 FAIR 元数据，请使用 nature-data；再按 Title、Abstract、Introduction、Methods、Results、Discussion 和参考文献核验顺序推进。可用技能：{{skills}}。\n\n我的任务：",
+      "paperPolishing": "请协助我完成“{{scenario}}”。先确认目标期刊/体裁、待润色片段与语气（严谨投稿 / 略人性化）；Nature 倾向的学术英语与篇章逻辑优先 nature-polishing；自然可读、减少“AI腔”时用 inno-humanizer；可配合 scientific-writing 做 IMRAD 与段落级科学写作；引用与书目核对用 citation-management；特定期刊/会议版式与结构对照用 venue-templates。可用技能：{{skills}}。\n\n我的任务：",
+      "manuscriptReview": "请协助我完成“{{scenario}}”。先按研究设计、统计有效性、证据链、因果表述、图表一致性和投稿规范检查；再列出必须修改、建议修改和可保留内容。可用技能：{{skills}}。\n\n我的任务：",
+      "rebuttalResponse": "请协助我完成“{{scenario}}”。先把每条意见分为方法学、统计、数据定义、结果解释、写作和格式问题；再设计补充分析、敏感性分析、文字修改和逐条回复。可用技能：{{skills}}。\n\n我的任务：",
+      "presentationPromotion": "请协助我完成“{{scenario}}”。先确定听众、时长、核心结论和展示资产；再把论文内容压缩为背景、方法、结果、临床意义、局限性和下一步计划。可用技能：{{skills}}。\n\n我的任务：",
+      "metaPipeline": "请协助我启动这个 Meta 项目 pipeline。请优先使用 meta-pipeline-planner，并在跨阶段编排时使用 meta-analysis-workflow。请按项目记忆文件执行，先判断当前阶段、缺失项和下一步任务；把项目启动报告保存到 01_protocol/project_startup_report.md 或带日期的同目录文件；不要编写不存在的数据、PDF、提取字段或统计结果，无法获得数据/PDF/字段时写不能提取报告；关键步骤设置人工复核；长流程后压缩上下文并更新 research_brief/tasks。\n\n我的任务：",
+      "metaLiterature": "请协助我完成 Meta 文献调研与证据综述。请按项目记忆文件执行。\n\n我的任务：",
+      "metaIdeation": "请协助我完成 Meta 选题判断。请按项目记忆文件评估可行性并形成下一步建议。\n\n我的任务：",
+      "metaScopingReview": "请协助我完成范围综述 / 系统综述路径判断。请按项目记忆文件执行。\n\n我的任务：",
+      "metaProtocol": "请协助我完成 Meta Protocol / PICO。请按项目记忆文件执行。\n\n我的任务：",
+      "metaSearchDedupe": "请协助我完成 Meta 检索与去重。请按项目记忆文件中的检索来源分流和去重规则执行。\n\n我的任务：",
+      "metaFullTextDownload": "请协助我完成 Meta 全文下载。请先读取/生成 04_full_text_review/fulltext_manifest.json/csv，只处理 needs_full_text=true 且本地全文不完整的记录；按技能能力从可用技能中选择最小必要组合，从项目已有文件、用户上传、PMC/OA 等公开来源获取 PDF、HTML、Markdown 或文本，记录 downloaded/exists/manual_upload_required/no_oa_pdf/failed 状态；下载失败的记录再进入 Zotero 通讯。\n\n可用技能：{{skills}}。\n\n我的任务：",
+      "metaPdfAcquisition": "请使用 $meta-zotero-fulltext-handoff 协助我完成 Meta 缺全文推送。请先读取当前全文阶段的 04_full_text_review/fulltext_manifest.json/csv、已下载/已解析全文资产；优先从当前环境读取 ZOTERO_API_KEY、ZOTERO_USER_ID、MEDHELP_API_BASE_URL、MEDHELP_API_TOKEN/MEDHELP_AUTHORIZATION，不要在这些环境变量存在时要求用户手动生成 JWT；按当前仍缺可用全文的记录更新缺口清单，再把这些缺口记录推送到 Zotero，让 Zotero 获取/附加 PDF。优先导出 RIS 格式的文献管理文件，再导入 Zotero；如果 RIS 导入失败，立即暂停自动推送，改为生成手动导入说明和待导入 RIS 文件，不要继续尝试其它自动导入路径。不要把题摘 AI 二筛作为硬性前置规则，也不要把这一步当成全文二筛；这里是在全文阶段做缺全文补齐和可用性筛选。不要批量尝试网页下载；除 RIS 失败后的手动导入兜底外，不要让 AI 生成大文件再人工导入。\n\n我的任务：",
+      "metaManualScreening": "请协助我完成 Meta 题摘一筛。请按项目记忆文件执行，并先报告未筛选、已一筛和待 AI 二筛数量。\n\n我的任务：",
+      "metaTitleAbstractScreening": "请协助我完成 Meta 题目筛选。请按项目记忆文件执行，把题摘一筛和 AI 二筛作为同一个任务推进；先报告未筛选、已一筛、待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaTitleAbstractFirstScreen": "请协助我完成 Meta 题摘一筛。请按项目记忆文件执行，并先报告未筛选、已一筛和待 AI 二筛数量。\n\n我的任务：",
+      "metaTitleAbstractSecondScreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaMineru": "请协助我完成文档解析阶段。请按项目记忆文件执行，不暴露 token。\n\n我的任务：",
+      "metaFullTextScreening": "请协助我完成 Meta 全文筛选。请按项目记忆文件执行。可用技能：{{skills}}。\n\n我的任务：",
+      "metaFullTextFirstScreen": "请协助我完成 Meta 全文一筛。请按项目记忆文件执行，并先报告待全文一筛、已一筛和需 AI 二筛数量。\n\n我的任务：",
+      "metaFullTextSecondScreen": "请协助我完成 Meta 全文 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaExtractionQuality": "请协助我完成 Meta 数据提取。优先使用 `meta-extraction`。请按项目记忆文件执行。可用技能：{{skills}}。\n\n我的任务：",
+      "metaStatistics": "请协助我完成 Meta 统计合并 / 建模入口判断。请按项目记忆文件检查能否进入定量合并。\n\n我的任务：",
+      "metaDiagnostic": "请协助我完成诊断准确性 Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaIntervention": "请协助我完成干预 / 效应量 Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaPrognostic": "请协助我完成预后 HR Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaPrevalence": "请协助我完成患病率 / 单臂 Meta 的统计分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaNetwork": "请协助我完成网状 Meta 的方案与数据结构分流。请按项目记忆文件执行。\n\n我的任务：",
+      "metaFigures": "请协助我完成 Meta 图表输出 / 医学可视化。请按项目记忆文件执行。\n\n我的任务：",
+      "metaManuscript": "请协助我完成 PRISMA 成稿 / 论文撰写。请按项目记忆文件执行。\n\n我的任务：",
+      "metaQualityAssessment": "请协助我完成 Meta 质量评估 / 偏倚风险评估。请按项目记忆文件执行。\n\n我的任务：",
+      "metaRescreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务："
+    },
+    "routePrompts": {
+      "metaPipeline": "请协助我启动 Meta 项目 pipeline。请优先使用 meta-pipeline-planner，并在跨阶段编排时使用 meta-analysis-workflow。请按项目记忆文件执行，先给出当前阶段、缺失项和下一步任务；把项目启动报告保存到 01_protocol/project_startup_report.md 或带日期的同目录文件；不要编写不存在的数据、PDF、提取字段或统计结果，无法获得数据/PDF/字段时写不能提取报告；关键步骤设置人工复核；长流程后压缩上下文并更新 research_brief/tasks。\n\n我的任务：",
+      "metaAnalysis": "请协助我完成“Meta 分析 / 系统综述”。请按项目记忆文件判断当前阶段，并推进最小必要步骤。\n\n我的任务：",
+      "metaTitleAbstractFirstScreen": "请协助我完成 Meta 题摘一筛。请按项目记忆文件执行，并先报告未筛选、已一筛和待 AI 二筛数量。\n\n我的任务：",
+      "metaTitleAbstractSecondScreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaFullTextFirstScreen": "请协助我完成 Meta 全文一筛。请按项目记忆文件执行，并先报告待全文一筛、已一筛和需 AI 二筛数量。\n\n我的任务：",
+      "metaFullTextSecondScreen": "请协助我完成 Meta 全文 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务：",
+      "metaRescreen": "请协助我完成 Meta 题摘 AI 二筛。请按项目记忆文件执行，并先报告待 AI 二筛、已 AI 二筛和查漏补缺候选数量。不要生成大规模用户待办队列；如仍不稳，最多追加一次 AI 查漏补缺。\n\n我的任务："
+    },
+    "scenarios": {
+      "metaAnalysis": {
+        "title": "Meta 分析",
+        "description": "按 PRISMA 逻辑推进系统综述 / Meta：文献调研、Protocol、AI 多轮筛选、PDF/MinerU、提取质评、统计合并、图表、成稿和汇报。"
+      },
+      "paperWriting": {
+        "title": "论文撰写",
+        "description": "完成章节结构、论点与论证；涉及数据可用性声明、存库方案、数据集引用与 FAIR 元数据核对时使用 nature-data；建议先用 citation-management 统一管理与核验引用/参考文献；成稿后的英文润色、Nature 风格与拟人化表达请使用「论文润色」快捷方式；面向目标期刊或会议体裁。"
+      },
+      "paperPolishing": {
+        "title": "论文润色",
+        "description": "在已定稿或接近定稿的文本上优化学术英语与逻辑：Nature 倾向的修改与衔接用 nature-polishing；更自然、少模板句的人称与可读性用 inno-humanizer；可配合 scientific-writing、citation-management 与 venue-templates 对齐目标刊物。"
+      },
+      "manuscriptReview": {
+        "title": "论文审评",
+        "description": "审稿视角检查方法与证据；并解读结果、临床意义、局限性与成文框架。"
+      },
+      "rebuttalResponse": {
+        "title": "审稿答复",
+        "description": "专业回应审稿意见；补强混杂、稳健性、替代定义与因果表述。"
+      },
+      "presentationPromotion": {
+        "title": "汇报与转化",
+        "description": "演示文稿与组会材料；或旁白、音视频等多媒体产出。"
+      }
+    },
+    "metaFlow": {
+      "pipeline": {
+        "title": "启动 Meta pipeline",
+        "description": "按 Meta 分析流程生成研究简报、任务队列、目录规则和第一步执行计划。"
+      },
+      "literature": {
+        "title": "文献调研",
+        "description": "研究空白、检索范围、seed references 和证据综述。"
+      },
+      "ideation": {
+        "title": "选题判断",
+        "description": "评估临床意义、证据量、异质性风险、可提取效应量和投稿价值。"
+      },
+      "scopingReview": {
+        "title": "范围 / 系统综述",
+        "description": "证据图谱、系统综述设计、叙述综合和 PRISMA 计数，不强制统计合并。"
+      },
+      "protocol": {
+        "title": "Protocol / PICO",
+        "description": "Review type、PICO/PECO、纳排标准和 PRISMA 逻辑。"
+      },
+      "searchDedupe": {
+        "title": "检索与去重",
+        "description": "检索式、检索日志、导入记录、去重和候选文献表。"
+      },
+      "screeningPdf": {
+        "title": "AI 筛选 / 全文",
+        "description": "AI 一筛评分、Claude AI 二筛、最多一次查漏补缺、全文候选、全文上传和合法来源核验。"
+      },
+      "pdfAcquisition": {
+        "title": "Zotero 通讯",
+        "description": "按当前全文阶段的缺口清单和本地全文资产状态，只把仍缺可用全文的记录通过 RIS 优先导入 Zotero；RIS 导入失败时暂停自动推送并转手动导入。"
+      },
+      "manualScreening": {
+        "title": "题摘一筛",
+        "description": "检索去重后读取候选文献，形成题名摘要 AI 一筛建议和待 AI 二筛队列。"
+      },
+      "titleAbstractScreening": {
+        "title": "题目筛选",
+        "description": "把题摘一筛和 AI 二筛放在同一个入口中推进，统一处理题名摘要决策、冲突、排除原因、include/maybe 和查漏补缺候选。"
+      },
+      "fullTextDownload": {
+        "title": "全文下载",
+        "description": "先处理 fulltext_manifest 中 needs_full_text=true 且本地全文不完整的记录，按可用下载技能从公开来源获取 PDF、HTML、Markdown 或文本，并记录失败原因。"
+      },
+      "titleAbstractFirstScreen": {
+        "title": "题摘一筛",
+        "description": "检索去重后读取候选文献，形成题名摘要 AI 一筛建议和待 AI 二筛队列。"
+      },
+      "titleAbstractSecondScreen": {
+        "title": "题摘 AI 二筛",
+        "description": "由 Claude AI 二筛复核题摘一筛结果，必要时最多一次查漏补缺，输出冲突、排除原因和可进入 Zotero 补全文的 include/maybe。"
+      },
+      "fullTextFirstScreen": {
+        "title": "全文一筛",
+        "description": "Zotero 附件同步回来后读取 PDF、Markdown、HTML 或文本材料，形成全文 AI 一筛建议和需 AI 二筛队列。"
+      },
+      "fullTextSecondScreen": {
+        "title": "全文 AI 二筛",
+        "description": "由 Claude AI 二筛复核全文一筛结果，必要时最多一次查漏补缺，输出全文排除原因、冲突和最终纳入候选。"
+      },
+      "mineru": {
+        "title": "文档解析",
+        "description": "已核验 PDF 的解析队列、Markdown、tables、figures、质量评分和 Claude AI 复审问题。"
+      },
+      "fullTextScreening": {
+        "title": "全文筛选",
+        "description": "把全文一筛和 AI 二筛放在同一个入口中推进，统一处理全文材料、排除原因、冲突、最终纳入候选和查漏补缺。"
+      },
+      "extractionQuality": {
+        "title": "数据提取",
+        "description": "候选提取表、研究特征、效应量字段、证据定位、置信度和 AI 二筛/用户覆盖状态。"
+      },
+      "statistics": {
+        "title": "统计合并 / 建模",
+        "description": "效应量、模型、异质性、亚组、敏感性分析和 meta-ready 数据。"
+      },
+      "figures": {
+        "title": "图表 / 医学可视化",
+        "description": "forest、funnel、SROC、PRISMA flow、RoB 图和投稿级医学可视化。"
+      },
+      "manuscript": {
+        "title": "PRISMA 成稿 / 论文撰写",
+        "description": "手稿、摘要、投稿格式、补充材料、checklist 和引用核验。"
+      },
+      "promotion": {
+        "title": "汇报转化",
+        "description": "Slides、项目页、音频、视频和传播材料。"
+      },
+      "qualityAssessment": {
+        "title": "质量评估",
+        "description": "RoB、QUADAS、NOS、GRADE、证据等级和用户覆盖/抽查状态。"
+      },
+      "rescreen": {
+        "title": "题摘 AI 二筛",
+        "description": "由 Claude AI 二筛复核题摘一筛结果，必要时最多一次查漏补缺，输出冲突、排除原因和可进入 Zotero 补全文的 include/maybe。"
+      }
+    }
+  },
+  "attachedPrompt": {
+    "showPrompt": "显示提示词",
+    "hidePrompt": "隐藏提示词",
+    "remove": "移除"
+  },
+  "pipelineOnboarding": {
+    "noBrief": {
+      "title": "设置研究流水线",
+      "description": "在下方描述您的研究想法，智能体将通过对话帮您构建流水线，生成研究简报和任务列表。",
+      "stepsLabel": "建议包含以下信息",
+      "step1": "您的研究主题和总体目标",
+      "step2": "范围、边界和目标会议/期刊（如有）",
+      "step3": "偏好的方法和评估方案",
+      "buttonLabel": "使用分析模板"
+    },
+    "noTasks": {
+      "title": "从研究简报生成任务",
+      "description": "检测到研究简报，但尚未生成任务。你可以直接一键生成任务，或继续在对话中让智能体调整后再生成。",
+      "briefExists": "已检测到 research_brief.json",
+      "buttonLabel": "立即生成任务",
+      "buttonLoadingLabel": "正在生成任务...",
+      "secondaryButtonLabel": "在对话中继续"
+    }
+  },
+  "importedProject": {
+    "title": "分析已导入的项目？",
+    "description": "新建会话以扫描此项目、分析项目结构与实现，并总结后续步骤。",
+    "provider": "智能体",
+    "model": "模型",
+    "notInstalled": "未安装",
+    "notLoggedIn": "未登录",
+    "notAvailable": "所选智能体不可用。",
+    "notNow": "暂时不要",
+    "analyzeProject": "分析项目"
+  },
+  "taskMaster": {
+    "initFailed": "初始化 TaskMaster 失败：{{message}}",
+    "initError": "初始化 TaskMaster 时出错，请重试。",
+    "createFailed": "创建任务失败：{{message}}",
+    "createError": "创建任务时出错，请重试。",
+    "templateError": "错误：{{message}}",
+    "setupTitle": "TaskMaster 配置",
+    "setupSubtitle": "{{project}} 的交互式命令行",
+    "setupFooter": "将自动开始 TaskMaster 初始化",
+    "close": "关闭",
+    "createTaskTitle": "新建任务",
+    "useAiGenerate": "使用 AI 生成任务详情",
+    "taskDescAi": "任务描述（AI 将生成详情）",
+    "taskDescAiPlaceholder": "描述你要完成的内容…",
+    "taskTitle": "任务标题",
+    "taskTitlePlaceholder": "输入任务标题…",
+    "description": "描述",
+    "taskDescPlaceholder": "描述任务…",
+    "priority": "优先级",
+    "priorityLow": "低",
+    "priorityMedium": "中",
+    "priorityHigh": "高",
+    "creating": "创建中…",
+    "createTask": "创建任务",
+    "loadingTemplates": "正在加载模板…",
+    "selectPrdTemplate": "选择 PRD 模板",
+    "customizeTemplateStep": "自定义模板",
+    "generatingTasksStep": "正在生成任务",
+    "fileName": "文件名",
+    "customizeTemplateLabel": "自定义模板",
+    "enterFieldPlaceholder": "填写 {{field}}",
+    "back": "返回",
+    "applying": "应用中…",
+    "applyGenerateTasks": "应用并生成任务",
+    "templateSuccessTitle": "模板应用成功！",
+    "templateSuccessBody": "已创建 PRD，正在生成任务…"
+  }
+}

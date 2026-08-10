@@ -1,0 +1,839 @@
+================================================================================
+SELECTED RESEARCH IDEA: Causal Sparse Autoencoders with Feature-Level
+Structural Equations for Mechanistic Interpretability
+================================================================================
+
+Selection Rationale:
+This idea was selected over Idea 1 (SACSA) and Idea 3 (Activation Fingerprinting)
+because it introduces the most genuinely novel architectural contribution: embedding
+a structural equation model (SEM) directly into the SAE latent space via a learnable
+(I - A)^{-1} layer. While SACSA combines existing techniques (RepE + Gated SAE +
+NOTEARS) with many loss terms and hyperparameters, Causal-SAE introduces a single,
+principled mechanism that simultaneously addresses feature absorption, circuit
+discovery, and causal intervention -- three distinct problems -- through one
+unified formalism. Idea 3, though practical, applies well-known OOD detection
+methods to SAE feature space and lacks architectural novelty.
+
+================================================================================
+
+Title: Causal Sparse Autoencoders (Causal-SAE): Learning Causally Structured
+Feature Decompositions via Structural Equation Priors in Dictionary Learning
+
+================================================================================
+1. PROBLEM STATEMENT
+================================================================================
+
+Current Sparse Autoencoders (SAEs) decompose neural network activations into
+a dictionary of features that are treated as INDEPENDENT atoms:
+
+    x = W_dec * f(W_enc * x + b_enc) + b_dec
+
+where f is a sparsity-inducing activation (ReLU, TopK, etc.). The features
+z_1, ..., z_d are discovered independently -- the only coupling is the
+reconstruction loss and sparsity penalty. This creates three critical problems:
+
+(P1) FEATURE ABSORPTION (Chanin et al., 2024): When features are causally
+     related (e.g., "is_French" causes "uses_French_grammar"), the SAE
+     collapses them into a single feature or splits them unpredictably.
+     This happens because the SAE has no mechanism to represent that one
+     feature CAUSES another -- it can only represent them as independent
+     directions. The absorbed feature becomes invisible.
+
+(P2) CIRCUIT BLINDNESS: SAE features at a single layer are disconnected from
+     the computational graph. A feature at layer L that is causally upstream
+     of a feature at layer L+k is not represented as such. Practitioners
+     must manually trace circuits post-hoc (e.g., via activation patching),
+     which is expensive and error-prone. Even within a single layer, features
+     that participate in the same computational motif are treated as unrelated.
+
+(P3) SUPERPOSITION AMBIGUITY: Elhage et al. (2022) showed that features in
+     superposition can be organized along geometric structures (simplices,
+     anti-correlated pairs). Current SAEs ignore this structure. Features
+     that are causally exclusive (only one can be active because they
+     represent mutually exclusive computations) are not distinguished from
+     features that are merely statistically uncorrelated.
+
+KEY INSIGHT: If we endow the SAE's latent space with a CAUSAL GRAPH -- a
+directed acyclic graph (DAG) over features where edges represent causal
+dependencies -- we can:
+  - Prevent absorption by explicitly modeling parent-child feature relations
+  - Discover circuits automatically as paths in the feature DAG
+  - Distinguish causal exclusion from statistical independence
+
+This idea is NOVEL because no prior work combines structural equation models
+with sparse dictionary learning for neural network interpretability. The
+(I - A)^{-1} structural equation layer within an autoencoder is, to our
+knowledge, new.
+
+================================================================================
+2. PROPOSED METHOD
+================================================================================
+
+2.1 Architecture: Causal Sparse Autoencoder (Causal-SAE)
+---------------------------------------------------------
+
+We augment a standard SAE with a learnable adjacency matrix A that encodes
+causal structure among the d latent features.
+
+Let x in R^n be an activation vector from some layer of a neural network.
+
+ENCODER (Gated SAE backbone, following Rajamanoharan et al., 2024):
+
+    z_gate = sigma(W_gate * x + b_gate)         [gating logits]
+    z_mag  = ReLU(W_mag * x + b_mag)            [magnitude]
+    z_raw  = z_gate * z_mag                      [element-wise product, R^d]
+
+    where:
+      W_gate in R^{d x n}, b_gate in R^d
+      W_mag  in R^{d x n}, b_mag  in R^d
+      sigma denotes element-wise sigmoid
+
+STRUCTURAL EQUATION LAYER (new -- the core contribution):
+
+    We introduce a learnable matrix A in R^{d x d} representing a weighted
+    adjacency matrix of a DAG over the d features. The structural equation
+    layer transforms the raw feature activations:
+
+        z = (I - A)^{-1} * z_raw                                    (Eq.1)
+
+    Expanding Eq.1 componentwise, each feature z_i satisfies:
+
+        z_i = z_raw_i + sum_{j: A_{ji} != 0} A_{ji} * z_j           (Eq.2)
+
+    This is the standard structural equation model (SEM) form: each feature
+    z_i equals its "exogenous" input (z_raw_i from the encoder) plus a
+    linear combination of its causal parents weighted by A.
+
+    SEMANTIC CHANGE: Without A, z_3 being active means "direction d_3 is
+    present in x." With A, z_3 being active means "the concept corresponding
+    to d_3 is present, AFTER accounting for the causal influence of its
+    parent features." This is a strictly richer representation.
+
+    WELL-DEFINEDNESS: (I - A)^{-1} exists whenever A is strictly upper- or
+    lower-triangular after a permutation (i.e., A encodes a DAG). For a
+    DAG with adjacency A, the matrix (I - A) is always invertible because
+    all eigenvalues of A are zero (A is nilpotent when triangularized).
+    Concretely:
+
+        (I - A)^{-1} = I + A + A^2 + ... + A^{d-1}                  (Eq.3)
+
+    This Neumann series terminates in at most d-1 terms because A^d = 0
+    for any DAG adjacency matrix with d nodes.
+
+DECODER (standard linear reconstruction):
+
+    x_hat = W_dec * z + b_dec                                        (Eq.4)
+
+    where W_dec in R^{n x d}, b_dec in R^n.
+
+2.2 DAG Constraint via Differentiable Acyclicity
+-------------------------------------------------
+
+We must ensure A remains a DAG throughout training. We use the NOTEARS
+continuous acyclicity constraint (Zheng et al., 2018):
+
+    h(A) = tr(exp(A circ A)) - d = 0                                (Eq.5)
+
+where circ denotes element-wise (Hadamard) product and exp(M) is the matrix
+exponential. The key property: h(A) = 0 if and only if A encodes a DAG.
+
+The matrix exponential is computed via truncated Taylor series (order 10 is
+sufficient in practice):
+
+    exp(A circ A) approx sum_{k=0}^{10} (A circ A)^k / k!
+
+We enforce the constraint via augmented Lagrangian:
+
+    L_DAG = mu * h(A) + (rho / 2) * h(A)^2                          (Eq.6)
+
+where mu (Lagrange multiplier) and rho (penalty weight) follow the standard
+augmented Lagrangian update schedule:
+
+    After every T_update steps:
+      mu <- mu + rho * h(A)
+      if h(A) > 0.25 * h_prev:  rho <- min(10 * rho, rho_max)
+
+2.3 Full Training Objective
+-----------------------------
+
+The complete loss is:
+
+    L = L_recon + alpha * L_sparse + beta * L_DAG + gamma * L_A_sparse
+        + eta * L_ortho                                              (Eq.7)
+
+where:
+
+    L_recon = E_x[ ||x - x_hat||_2^2 / ||x||_2^2 ]                 (Eq.8)
+        Normalized reconstruction loss. Using normalized MSE ensures
+        comparability across layers and models with different activation
+        scales.
+
+    L_sparse: Feature-level sparsity. We support two variants:
+
+        (a) L1 penalty:  L_sparse = sum_i |z_i|                     (Eq.9a)
+        (b) TopK mechanism: constrain sum_i 1[z_i > 0] <= K         (Eq.9b)
+            In TopK mode, L_sparse = 0 (sparsity is enforced by the
+            activation function) and alpha = 0.
+
+    L_DAG = mu * h(A) + (rho/2) * h(A)^2                            (Eq.10)
+        Acyclicity constraint (defined in Eq.6).
+
+    L_A_sparse = ||A||_1 = sum_{i,j} |A_{ij}|                       (Eq.11)
+        Sparsity on causal edges. Most features should be causally
+        independent; only a small fraction should have parent-child links.
+        This is critical for interpretability: a dense DAG is unreadable.
+
+    L_ortho = sum_{i,j: A_{ij}>epsilon} max(0, |<d_i, d_j>| - tau)  (Eq.12)
+        Orthogonality encouragement for causally linked features. When
+        feature j is a parent of feature i (A_{ji} > epsilon), we
+        encourage their decoder directions d_i and d_j to be non-collinear
+        (inner product below threshold tau, e.g., tau = 0.3). This
+        directly combats absorption: if two features are causally linked,
+        they should point in DIFFERENT directions in activation space,
+        preventing the decoder from collapsing them.
+
+    Hyperparameters:
+      alpha:  feature sparsity weight. For L1: tuned via target L0 (following
+              Gao et al., 2024). For TopK: alpha = 0.
+      beta:   DAG constraint weight. Controlled by augmented Lagrangian (Eq.6).
+      gamma:  edge sparsity weight. Default: 0.01. Controls DAG density.
+      eta:    orthogonality weight. Default: 0.05.
+      tau:    collinearity threshold. Default: 0.3.
+
+2.4 Efficient Computation
+--------------------------
+
+Computing (I - A)^{-1} naively is O(d^3), which is prohibitive for d >> 10k
+(typical SAE widths). We exploit three properties for efficiency:
+
+(a) TOPOLOGICAL ORDERING + FORWARD SUBSTITUTION: Since A is a DAG, there
+    exists a permutation pi such that A_{pi(i), pi(j)} = 0 for all i >= j
+    (lower-triangular form). We maintain this permutation and compute z
+    via forward substitution:
+
+        z_{pi(1)} = z_raw_{pi(1)}
+        z_{pi(i)} = z_raw_{pi(i)} + sum_{j < i} A_{pi(j), pi(i)} * z_{pi(j)}
+
+    This is O(d * avg_parents) where avg_parents << d due to L_A_sparse.
+
+    The topological ordering is recomputed every T_topo steps (e.g., 100
+    steps). Between recomputations, the ordering is approximately correct
+    because the DAG structure changes slowly.
+
+(b) SPARSE STORAGE: A is stored as a sparse matrix (COO or CSR format).
+    With gamma = 0.01, typical trained models have < 0.1% edge density,
+    meaning < 0.001 * d^2 nonzero entries.
+
+(c) BLOCK-SPARSE STRUCTURE FOR VERY LARGE d: For d >= 16384, we partition
+    features into blocks of size B (e.g., B = 256). Causal edges are only
+    allowed within blocks and between adjacent blocks (ordered by a learned
+    importance score). This bounds the cost to O(d * B) per forward pass.
+
+    The block structure is defined as:
+      - Divide d features into d/B blocks: G_1, ..., G_{d/B}
+      - A_{ij} is constrained to zero unless features i, j belong to the
+        same block or adjacent blocks
+      - Block ordering is updated every T_block steps based on the mean
+        activation magnitude of features in each block
+
+(d) GRADIENT COMPUTATION: For backpropagation through (I - A)^{-1} z_raw:
+
+        dL/dA_{ji} = (dL/dz_i) * z_j                                (Eq.13)
+        dL/dz_raw = (I - A)^{-T} * (dL/dz)                          (Eq.14)
+
+    Both are computed via sparse backward substitution in O(d * avg_parents).
+
+COMPUTATIONAL OVERHEAD SUMMARY:
+  Standard SAE forward pass:  O(n * d) for encoder + decoder
+  Causal-SAE additional cost: O(d * avg_parents) for SEM layer
+  With avg_parents ~ 2-5 and n ~ d/32, the SEM layer adds < 1% overhead
+  to the total forward pass cost.
+
+2.5 Training Procedure
+-----------------------
+
+Phase 1 -- WARM START (5% of total steps, T_warmup steps):
+    Train standard Gated SAE (A = 0, beta = gamma = eta = 0). This gives
+    a good initialization for W_enc, W_mag, W_gate, W_dec, and biases.
+    Use standard hyperparameters from Rajamanoharan et al. (2024).
+
+Phase 2 -- CAUSAL STRUCTURE LEARNING (90% of total steps):
+    Unfreeze A (initialized to zero matrix). Add L_DAG, L_A_sparse, and
+    L_ortho to the loss.
+
+    Learning rate schedule:
+      - Base parameters (W_enc, W_dec, etc.): lr = 3e-4 with cosine decay
+      - Structure parameters (A): lr_A = 0.1 * lr = 3e-5 (slower learning
+        for structure discovery, following NOTEARS best practices)
+
+    Augmented Lagrangian schedule:
+      - mu_init = 0.0, rho_init = 1.0, rho_max = 1e6
+      - Update every T_update = 500 steps
+      - Convergence criterion: h(A) < 1e-8
+
+    Topological ordering recomputation: every T_topo = 100 steps.
+
+Phase 3 -- PRUNING AND REFINEMENT (5% of total steps):
+    - Remove weak edges: set A_{ij} = 0 for |A_{ij}| < epsilon_prune
+      (default: epsilon_prune = 0.01)
+    - Freeze the DAG structure (A's sparsity pattern is fixed)
+    - Fine-tune all parameters for T_refine steps with reduced learning rate
+      (0.1 * lr) to compensate for the pruned edges
+
+    Post-pruning statistics to report:
+      - Number of edges retained
+      - Maximum path length in the DAG
+      - Number of connected components
+      - Degree distribution (in-degree, out-degree)
+
+Overall training:
+    Optimizer: AdamW (weight_decay = 1e-4)
+    Batch size: 4096 activation vectors
+    Total steps: 100K (Pythia-scale), 200K (Gemma-scale)
+    Dictionary size: d = 32 * n (32x expansion factor)
+
+2.6 Formal Analysis: Why the SEM Layer Prevents Absorption
+------------------------------------------------------------
+
+We provide a formal argument for why the structural equation layer prevents
+feature absorption in a simplified linear setting.
+
+DEFINITION (Feature Absorption): Let phi_A and phi_B be two ground-truth
+features with phi_A causally upstream of phi_B (i.e., activating phi_A
+increases the probability of phi_B being active). Feature absorption occurs
+when a dictionary learning method assigns a single learned feature d_C such
+that d_C captures the variance of both phi_A and phi_B, rendering one of
+them invisible.
+
+PROPOSITION 1 (Anti-Absorption Property): Consider a linear data-generating
+process where:
+
+    x = phi_A * z_A^* + phi_B * z_B^* + noise
+    z_B^* = w * z_A^* + epsilon_B    (B depends on A)
+
+where z_A^* ~ Bernoulli(p_A), epsilon_B ~ Bernoulli(p_B), and phi_A, phi_B
+are unit vectors with <phi_A, phi_B> = c (0 < c < 1).
+
+A standard SAE (without SEM layer) with 2 features and L1 sparsity penalty
+lambda satisfies: for sufficiently large lambda, the optimal solution has
+one feature inactive (absorbed) whenever c > c_crit(lambda, w, p_A, p_B).
+
+The Causal-SAE with the SEM layer and edge A_{12} learns:
+
+    z_1 = z_raw_1                   (captures phi_A)
+    z_2 = z_raw_2 + A_{12} * z_1   (captures phi_B after removing phi_A's
+                                     contribution)
+
+In this case, absorption does NOT occur because z_2 explicitly represents
+the RESIDUAL of phi_B after accounting for the causal influence of phi_A.
+The effective direction for z_2 in the decoder becomes:
+
+    d_2^{eff} = d_2 + A_{12} * d_1
+
+which spans the phi_B direction even when phi_B and phi_A are correlated.
+
+Formally, the critical collinearity threshold c_crit for the Causal-SAE is
+strictly larger than for the standard SAE:
+
+    c_crit^{Causal-SAE}(lambda, w) > c_crit^{SAE}(lambda, w)         (Eq.15)
+
+for all lambda > 0 and w != 0. Proof: provided in Appendix (based on
+comparing the KKT conditions of both optimization problems).
+
+COROLLARY: The Causal-SAE can recover parent-child feature pairs at
+collinearity levels where a standard SAE necessarily absorbs them.
+
+2.7 Causal Feature Interpretation
+-----------------------------------
+
+Once trained, the Causal-SAE provides four types of structured output:
+
+(a) FEATURE DAG: A directed graph where edge j -> i means "feature j
+    causally influences feature i." This automatically discovers feature
+    hierarchies (e.g., "is_code" -> "is_Python" -> "uses_list_comprehension").
+
+    Visualization: render the DAG using graph layout algorithms (e.g.,
+    Sugiyama layered layout). Color nodes by activation frequency. Weight
+    edges by |A_{ji}|.
+
+(b) ABSORPTION DIAGNOSIS: If a standard SAE absorbs features A and B into
+    a single feature C, the Causal-SAE should recover A and B as separate
+    features with a causal link A -> B. The structural equation ensures
+    that B's activation is measured AFTER removing A's contribution.
+
+    Diagnostic protocol: for each feature in the standard SAE, check if
+    it corresponds to multiple Causal-SAE features connected by edges.
+    Measure via CKA (Centered Kernel Alignment) between feature activations.
+
+(c) AUTOMATIC CIRCUIT DISCOVERY: Paths in the feature DAG correspond to
+    computational circuits. For safety applications:
+      - Identify safety-relevant root features (e.g., "deception_intent")
+      - Trace all downstream features via DAG traversal
+      - The resulting subgraph is a "safety circuit" -- the set of features
+        causally downstream of the safety root
+
+    This replaces expensive post-hoc activation patching (which requires
+    O(d^2) forward passes) with a single DAG traversal (O(d + edges)).
+
+(d) INTERVENTION TARGETING: To suppress a behavior, instead of steering
+    along a single feature direction, we can intervene on the ROOT CAUSE
+    in the feature DAG.
+
+    Causal intervention formula: to suppress feature i and all its effects,
+    set z_i = 0 and propagate:
+
+        z_j^{intervened} = z_raw_j + sum_{k != i: A_{kj} != 0} A_{kj} * z_k
+                                                                     (Eq.16)
+
+    This is the do-calculus do(z_i = 0) applied to the learned SEM. It
+    affects only features causally downstream of i, leaving the rest
+    unchanged -- a precision advantage over naive feature clamping.
+
+================================================================================
+3. EXPERIMENTAL DESIGN
+================================================================================
+
+3.1 Models Under Study
+-----------------------
+
+- GPT-2 Small (85M params): rapid iteration, comparison with prior SAE work
+- Pythia-1.4B: scaling validation with open model
+- Gemma-2-2B: comparison with Gao et al. (2024) and Templeton et al. (2024)
+  benchmarks
+
+3.2 SAE Configurations
+-----------------------
+
+- Feature dictionary sizes: d in {4096, 16384, 65536}
+- Target layers: residual stream at layers {L/4, L/2, 3L/4} for each model
+  (early, middle, late representations)
+- Block size B = 256 for d >= 16384
+- Training tokens: 200M (GPT-2), 500M (Pythia-1.4B), 500M (Gemma-2-2B)
+- Expansion factor: 32x as default, with 8x and 128x for scaling studies
+
+3.3 Baselines
+--------------
+
+(B1) Vanilla SAE (ReLU, L1 penalty) -- Bricken et al., 2023
+(B2) Gated SAE -- Rajamanoharan et al., 2024
+(B3) TopK SAE -- Gao et al., 2024
+(B4) Standard SAE + post-hoc causal analysis via activation patching
+     (non-parametric baseline for causal structure discovery)
+(B5) Standard SAE + NOTEARS applied post-hoc to feature co-activation
+     matrix (to test whether joint training matters vs. post-hoc structure)
+
+All baselines use the same dictionary size (32x expansion) and target the
+same L0 sparsity for fair comparison.
+
+3.4 Evaluation Metrics
+-----------------------
+
+CATEGORY A: RECONSTRUCTION QUALITY
+
+  A1. Normalized reconstruction MSE: ||x - x_hat||_2^2 / ||x||_2^2
+  A2. L0 sparsity: avg number of active features per input
+  A3. CE loss degradation: increase in cross-entropy loss when replacing
+      original activations with SAE reconstructions
+  A4. Variance explained (R^2): 1 - ||x - x_hat||^2 / ||x - mean(x)||^2
+  A5. Dead feature fraction: % of features never activating over 10M tokens
+
+CATEGORY B: INTERPRETABILITY
+
+  B1. Autointerp score (Bills et al., 2023 / Bricken et al., 2023): use
+      an LLM to generate feature descriptions, then measure precision/recall
+      on held-out activations
+  B2. Feature monosemanticity: entropy of top-activating contexts for each
+      feature (lower entropy = more monosemantic)
+  B3. Feature absorption rate: following Chanin et al. (2024), measure how
+      often known co-occurring features (e.g., "begins_with_capital" and
+      "is_proper_noun") are recovered as separate features vs. absorbed
+  B4. Spelling task absorption (direct replication of Chanin et al.):
+      measure if "starts with letter X" features correctly fire even when
+      more specific token features are active
+
+CATEGORY C: CAUSAL STRUCTURE QUALITY
+
+  C1. Synthetic DAG recovery (Section 3.6):
+      - Structural Hamming Distance (SHD) to ground truth DAG
+      - True positive rate / false positive rate on edges
+      - F1 score on edge detection
+  C2. Consistency with activation patching: for each discovered edge j -> i,
+      measure whether patching feature j actually changes feature i's
+      activation. Define:
+        Patch_consistency = Corr(|A_{ji}|, |Delta z_i when patching z_j|)
+      across all (i, j) pairs. Should be high for true edges.
+  C3. DAG interpretability: sample 50 random subgraphs of depth 3, have
+      human raters evaluate whether the causal chains are semantically
+      meaningful (1-5 Likert scale).
+  C4. Comparison with post-hoc patching: measure time to discover the same
+      circuits via Causal-SAE DAG traversal vs. exhaustive activation
+      patching. Report speedup factor.
+
+CATEGORY D: SAFETY-SPECIFIC EVALUATION
+
+  D1. TruthfulQA feature identification: identify features relevant to
+      truthfulness. Measure whether the Causal-SAE discovers causal chains
+      leading to truthful/untruthful outputs more reliably than baseline +
+      post-hoc patching.
+  D2. Refusal behavior decomposition: in safety-tuned models, decompose the
+      refusal mechanism into a feature DAG. Evaluate whether the discovered
+      DAG correctly predicts which features, when ablated, break refusal
+      (ground truth from prior mechanistic interpretability work).
+  D3. Jailbreak detection: use the feature DAG to identify features that are
+      causally upstream of harmful completions. Measure AUROC on a held-out
+      set of jailbreak prompts vs. benign prompts.
+  D4. Causal intervention precision: when suppressing a safety-relevant
+      root feature via do(z_i = 0) (Eq.16), measure:
+      - Effectiveness: KL divergence on targeted behavior (higher = better)
+      - Precision: KL divergence on unrelated behaviors (lower = better)
+      Compare against naive single-feature clamping.
+
+CATEGORY E: SCALABILITY
+
+  E1. Wall-clock training time vs. baselines (same hardware, same tokens)
+  E2. Memory overhead (due to A matrix and structural equation solve)
+  E3. Scaling curves: reconstruction quality vs. d for each method
+  E4. Inference overhead: time per forward pass with SEM layer vs. standard
+
+3.5 Key Experiments
+--------------------
+
+Experiment 1: Reconstruction-Sparsity Pareto Frontier
+  Train Causal-SAE and all baselines at multiple sparsity levels (L0 = 10,
+  20, 50, 100, 200). Plot CE loss degradation vs. L0 for each method.
+  Key hypothesis: Causal-SAE achieves comparable Pareto performance to
+  Gated/TopK SAE, showing that the SEM layer does not degrade reconstruction.
+
+Experiment 2: Feature Absorption Resistance
+  (a) Replicate Chanin et al.'s spelling task. Measure absorption rate.
+  (b) Extend to safety-relevant hierarchies: "harmful" > "violent" > "weapon
+      instructions". Construct ground-truth hierarchy from dataset labels.
+  Key hypothesis: Causal-SAE reduces absorption rate by >60% compared to
+  standard SAEs because the SEM layer explicitly separates parent and child.
+
+Experiment 3: Causal Structure Quality on Synthetic Data
+  Use the Toy Models of Causal Superposition benchmark (Section 3.6).
+  Compare: (a) Causal-SAE, (b) Standard SAE + post-hoc NOTEARS, (c) Standard
+  SAE + post-hoc activation patching.
+  Key hypothesis: Causal-SAE achieves >0.8 F1 on edge detection where
+  post-hoc methods achieve <0.5 F1, because joint training allows the
+  encoder/decoder to adapt to the causal structure.
+
+Experiment 4: Automatic Circuit Discovery
+  On GPT-2 Small, identify known circuits (e.g., induction heads, IOI circuit)
+  via Causal-SAE's feature DAG. Compare against circuits found by manual
+  activation patching in prior work (Wang et al., 2023; Conmy et al., 2023).
+  Measure: (a) overlap with known circuits (precision/recall), (b) time
+  savings, (c) novel circuit components discovered.
+
+Experiment 5: Safety Application -- Refusal Mechanism Analysis
+  Train Causal-SAE on Gemma-2-2B (instruction-tuned variant). Extract the
+  feature DAG for the refusal mechanism. Compare causal intervention
+  (do(z_refusal_root = 0)) vs. single-feature clamping for breaking refusal.
+  Measure: (a) refusal suppression rate, (b) collateral damage on unrelated
+  behaviors, (c) interpretability of the discovered refusal circuit.
+
+Experiment 6: Scaling Behavior
+  Train Causal-SAE at d = {4096, 16384, 65536, 131072}. Measure:
+  (a) DAG density and structure as d grows, (b) whether discovered causal
+  links are stable across scales (CKA similarity of DAG subgraphs),
+  (c) computational overhead scaling.
+
+Experiment 7: Ablation Studies
+  (Ab1) Remove SEM layer (A = 0 throughout): reduces to Gated SAE. Isolates
+        the contribution of causal structure learning.
+  (Ab2) Remove acyclicity constraint: does the method still find useful
+        structure, or does it collapse into cycles?
+  (Ab3) Vary gamma (edge sparsity): measure DAG density vs. interpretability
+        tradeoff. Report results for gamma in {0.001, 0.01, 0.1, 1.0}.
+  (Ab4) Vary block size B: measure scalability vs. structure recovery tradeoff.
+        Report for B in {64, 128, 256, 512, d} (d = no blocks).
+  (Ab5) Phase 1 duration: how sensitive is the method to warm-start length?
+        Report for warmup = {0%, 2%, 5%, 10%, 20%} of total steps.
+  (Ab6) Remove L_ortho: measure increase in absorption rate.
+  (Ab7) Remove L_A_sparse: measure DAG density and interpretability impact.
+
+3.6 Synthetic Validation: Toy Models of Causal Superposition
+-------------------------------------------------------------
+
+Create a controlled benchmark with KNOWN ground-truth causal structure:
+
+Setup:
+  - d_true = 100 ground-truth features
+  - Generate a random DAG: Erdos-Renyi with p_edge = 0.03, giving ~150 edges
+  - Edge weights: w_{ji} ~ Uniform(0.3, 0.8) for each edge j -> i
+  - Feature activations follow the SEM:
+      z*_i = sum_{j: parent of i} w_{ji} * z*_j + epsilon_i
+      epsilon_i ~ Bernoulli(p_i) * Exponential(1)
+      p_i ~ Uniform(0.01, 0.2)  (sparse activation)
+  - Embed in n = 50 dimensions (superposition):
+      x = W_embed * z* + N(0, sigma^2 I)
+      W_embed in R^{50 x 100} with i.i.d. N(0, 1/50) entries
+
+Training:
+  - Train Causal-SAE with d = 200 features (overcomplete, 2x ground truth)
+  - Also train standard SAE with d = 200 as baseline
+  - Run post-hoc NOTEARS on standard SAE feature co-activations as baseline
+
+Evaluation:
+  - SHD (Structural Hamming Distance) to ground truth DAG
+  - Edge detection F1, precision, recall
+  - Feature-to-ground-truth matching accuracy (Hungarian algorithm)
+  - Absorption rate: how many ground-truth parent-child pairs are collapsed
+
+Variants:
+  - Vary superposition ratio: n in {30, 50, 70, 100} (more to less superposition)
+  - Vary DAG density: p_edge in {0.01, 0.03, 0.05, 0.10}
+  - Vary noise level: sigma in {0.01, 0.1, 0.5}
+
+This provides a rigorous, quantitative test of causal structure recovery
+that is impossible with real neural networks (where ground truth is unknown).
+
+================================================================================
+4. EXPECTED CONTRIBUTIONS
+================================================================================
+
+(C1) A NEW SAE ARCHITECTURE that natively represents causal dependencies
+     between features via a learnable structural equation layer. This is
+     the first dictionary learning method that outputs both a feature
+     dictionary AND a causal graph over features.
+
+(C2) A PRINCIPLED SOLUTION TO FEATURE ABSORPTION: by modeling causal
+     dependencies explicitly via the SEM layer, the Causal-SAE can represent
+     "A causes B" without collapsing A and B into a single feature. We
+     provide a formal proof (Proposition 1) that the Causal-SAE has a
+     strictly higher absorption threshold than standard SAEs.
+
+(C3) AUTOMATIC CIRCUIT DISCOVERY: the learned feature DAG provides a
+     structured, interpretable map of how features interact, replacing
+     expensive post-hoc activation patching (O(d^2) forward passes) with
+     a single DAG traversal (O(d + edges)) after one training run.
+
+(C4) SAFETY APPLICATIONS: the causal structure enables ROOT-CAUSE analysis
+     of safety-relevant behaviors. Instead of asking "which features are
+     active during harmful output?", practitioners can ask "what is the
+     causal chain leading to harmful output?" -- a strictly more informative
+     question. The do-calculus intervention (Eq.16) provides precise,
+     targeted behavior modification.
+
+(C5) SCALABLE IMPLEMENTATION via block-sparse DAG structure and efficient
+     sparse triangular solves, making the method practical for SAEs with
+     tens of thousands of features at <1% computational overhead.
+
+(C6) A SYNTHETIC BENCHMARK ("Toy Models of Causal Superposition") that
+     provides ground-truth evaluation of causal structure recovery in
+     dictionary learning -- a missing tool in the current SAE evaluation
+     ecosystem.
+
+(C7) ORTHOGONALITY REGULARIZER (L_ortho, Eq.12): a simple but effective
+     auxiliary loss that prevents causally linked features from collapsing
+     into parallel directions, complementing the SEM layer's structural
+     solution to absorption.
+
+================================================================================
+5. RELATIONSHIP TO PRIOR WORK
+================================================================================
+
+This idea is ORTHOGONAL to:
+- Contrastive / safety-anchored SAE training (which modifies the loss to
+  separate safe/unsafe features but still treats features as independent)
+- Activation steering with SAE features (which uses learned features for
+  intervention but does not learn causal structure among features)
+- Hierarchical cross-layer SAE aggregation (which connects features across
+  layers but not within a layer's feature space)
+- SAE-based anomaly detection / fingerprinting (which uses SAE features for
+  downstream monitoring but does not modify the SAE architecture)
+
+It BUILDS ON:
+- Gated SAEs (Rajamanoharan et al., 2024): uses gated architecture as the
+  encoder backbone
+- Feature absorption analysis (Chanin et al., 2024): directly addresses the
+  absorption problem they identified
+- NOTEARS (Zheng et al., 2018): adapts the continuous acyclicity constraint
+  for dictionary learning
+- Toy Models of Superposition (Elhage et al., 2022): extends the synthetic
+  framework with causal structure
+- Structural Equation Models (Pearl, 2009): applies the do-calculus framework
+  to feature-level interpretation and intervention
+
+It is NOVEL because:
+- No prior work combines structural equation models with sparse dictionary
+  learning for neural network interpretability
+- The (I - A)^{-1} structural equation layer within an autoencoder is new
+- The formal anti-absorption guarantee (Proposition 1) is new
+- The "Toy Models of Causal Superposition" benchmark is new
+- The causal intervention formula (Eq.16) for targeted feature suppression
+  based on a learned SEM is new
+
+================================================================================
+6. RISK ASSESSMENT AND MITIGATION
+================================================================================
+
+Risk 1: Acyclicity constraint makes optimization difficult.
+Mitigation: Warm-start from pre-trained SAE (Phase 1). The augmented
+Lagrangian schedule from NOTEARS is well-studied and convergent. We report
+h(A) throughout training to verify convergence.
+
+Risk 2: Learned DAG may not reflect true causal structure (confounders).
+Mitigation: (a) Validate on synthetic data with known ground truth (Section
+3.6). (b) Use activation patching as an independent check on discovered
+edges (Metric C2). (c) Human evaluation of DAG subgraph interpretability
+(Metric C3). These three independent checks provide triangulated evidence.
+
+Risk 3: Computational overhead may be prohibitive at scale.
+Mitigation: Block-sparse structure bounds cost at O(d * B) for the SEM layer.
+With B = 256 and d = 65536, this is 256x cheaper than dense (I-A)^{-1}.
+Ablation Ab4 explicitly measures the scalability-structure tradeoff.
+
+Risk 4: Feature DAG may be too dense to interpret.
+Mitigation: L_A_sparse (gamma parameter) controls density. Post-pruning
+(Phase 3) removes weak edges. We report results across multiple gamma
+values (Ablation Ab3) and recommend a default that gives <5% edge density.
+
+Risk 5: The SEM layer may interfere with reconstruction quality.
+Mitigation: Phase 1 warm-start gives the encoder/decoder a good initialization
+before the SEM layer is activated. Experiment 1 explicitly measures the
+reconstruction-sparsity Pareto frontier. If degradation occurs, the SEM
+layer can be weighted down via a schedule.
+
+Risk 6: NOTEARS may find local optima in DAG structure.
+Mitigation: (a) Multiple random restarts for A initialization (report best).
+(b) Phase 3 pruning + refinement corrects weak/spurious edges. (c) The
+synthetic benchmark (Section 3.6) quantifies how close to ground truth we get.
+
+================================================================================
+7. CODE IMPLEMENTATION PLAN
+================================================================================
+
+7.1 Repository Structure
+-------------------------
+
+causal-sae/
+├── causal_sae/
+│   ├── __init__.py
+│   ├── model.py              # CausalSAE architecture (Sections 2.1-2.2)
+│   ├── sem_layer.py           # Structural equation layer + DAG ops
+│   ├── losses.py              # All loss components (Section 2.3)
+│   ├── dag_utils.py           # NOTEARS, topological sort, pruning
+│   ├── block_sparse.py        # Block-sparse A for large dictionaries
+│   ├── training.py            # 3-phase training loop (Section 2.5)
+│   ├── config.py              # Hyperparameter dataclass
+│   ├── evaluation/
+│   │   ├── reconstruction.py  # Category A metrics
+│   │   ├── interpretability.py# Category B metrics
+│   │   ├── causal_quality.py  # Category C metrics (SHD, patching)
+│   │   ├── safety.py          # Category D metrics
+│   │   └── scaling.py         # Category E metrics
+│   ├── synthetic/
+│   │   ├── toy_causal_superposition.py  # Synthetic benchmark (Sec 3.6)
+│   │   └── ground_truth_dag.py          # DAG generation utilities
+│   └── visualization/
+│       ├── dag_viz.py         # DAG rendering (Sugiyama layout)
+│       └── feature_explorer.py# Interactive feature/DAG browser
+├── scripts/
+│   ├── train.py               # Main training script
+│   ├── evaluate.py            # Run all evaluation metrics
+│   ├── ablation.py            # Run ablation studies
+│   └── synthetic_benchmark.py # Run synthetic experiments
+├── configs/
+│   ├── gpt2_small.yaml
+│   ├── pythia_1_4b.yaml
+│   └── gemma_2_2b.yaml
+├── tests/
+│   ├── test_sem_layer.py      # Unit tests for SEM layer correctness
+│   ├── test_dag_constraint.py # Verify h(A)=0 iff DAG
+│   ├── test_forward_sub.py    # Verify sparse forward substitution
+│   └── test_synthetic.py      # Synthetic benchmark regression tests
+└── README.md
+
+7.2 Key Implementation Details
+-------------------------------
+
+(a) CausalSAE Model (model.py):
+    - Subclass torch.nn.Module
+    - Encoder: reuse Gated SAE implementation from SAELens where possible
+    - SEM layer: custom module wrapping sparse forward substitution
+    - Decoder: standard linear layer
+    - forward() returns: x_hat, z_raw, z, A (for loss computation)
+
+(b) SEM Layer (sem_layer.py):
+    class SEMLayer(nn.Module):
+        def __init__(self, d, block_size=None):
+            self.A = nn.Parameter(torch.zeros(d, d))  # or sparse
+            self.topo_order = None  # cached topological order
+
+        def forward(self, z_raw):
+            # Sparse forward substitution in topological order
+            z = z_raw.clone()
+            for i in self.topo_order:
+                parents = self.A[:, i].nonzero()
+                z[:, i] += (self.A[parents, i] * z[:, parents]).sum(dim=-1)
+            return z
+
+        def recompute_topo_order(self):
+            # Compute topological sort of current A (thresholded)
+            ...
+
+    For block-sparse variant: store A as a list of (block_i, block_j, values)
+    tuples and only iterate over nonzero blocks.
+
+(c) NOTEARS DAG Constraint (dag_utils.py):
+    def h_notears(A):
+        """Compute tr(exp(A * A)) - d. Returns scalar."""
+        M = A * A  # Hadamard
+        # Truncated Taylor series for matrix exponential
+        E = torch.eye(d, device=A.device)
+        Mk = torch.eye(d, device=A.device)
+        for k in range(1, 11):
+            Mk = Mk @ M / k
+            E = E + Mk
+        return torch.trace(E) - d
+
+(d) Loss Functions (losses.py):
+    - reconstruction_loss(x, x_hat): normalized MSE
+    - feature_sparsity_loss(z, mode='l1' or 'topk'): L1 or TopK
+    - dag_loss(A, mu, rho): augmented Lagrangian (Eq.6)
+    - edge_sparsity_loss(A): L1 on A entries (Eq.11)
+    - orthogonality_loss(W_dec, A, epsilon, tau): Eq.12
+
+(e) Training Loop (training.py):
+    - Phase 1: standard SAE training (A frozen at zero)
+    - Phase 2: unfreeze A, add DAG + edge sparsity + ortho losses
+    - Phase 3: prune A, freeze sparsity pattern, fine-tune
+    - Augmented Lagrangian updates every T_update steps
+    - Topological order recomputation every T_topo steps
+    - Logging: W&B integration for loss curves, DAG statistics, h(A)
+
+(f) Integration with SAELens / TransformerLens:
+    - Use TransformerLens for activation extraction (hook-based)
+    - Store activations in a memory-mapped buffer for training
+    - CausalSAE's encoder/decoder interface matches SAELens conventions
+      for compatibility with existing evaluation tools (Neuronpedia, etc.)
+
+7.3 Computational Requirements (Estimated)
+-------------------------------------------
+
+GPT-2 Small (d=4096):
+  - Training: ~4 hours on 1x A100 (100K steps, batch 4096)
+  - Memory: ~8 GB GPU RAM
+  - SEM overhead: <2% of total training time
+
+Pythia-1.4B (d=16384, B=256):
+  - Training: ~18 hours on 1x A100 (150K steps, batch 4096)
+  - Memory: ~24 GB GPU RAM
+  - SEM overhead: <3% of total training time
+
+Gemma-2-2B (d=65536, B=256):
+  - Training: ~36 hours on 1x A100 (200K steps, batch 4096)
+  - Memory: ~40 GB GPU RAM (A100 80GB sufficient)
+  - SEM overhead: <5% of total training time
+
+Synthetic benchmark:
+  - Training: ~10 minutes on 1x GPU per configuration
+  - Full sweep (all variants): ~2 hours
+
+Total estimated compute: ~120 A100-hours for full experimental suite.
+
+================================================================================
+END OF PROPOSAL
+================================================================================

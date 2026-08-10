@@ -1,0 +1,858 @@
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { MutableRefObject } from 'react';
+
+import { api, authenticatedFetch } from '../../../utils/api';
+import { RESUMING_STATUS_TEXT } from '../types/types';
+import type { ChatMessage, Provider, TokenBudget } from '../types/types';
+import type { Project, ProjectSession } from '../../../types/app';
+import {
+  clearSessionTimerStart,
+  isSessionAbortRequested,
+  readSessionTimerStart,
+  safeLocalStorage,
+} from '../utils/chatStorage';
+import {
+  convertSessionMessages,
+  createCachedDiffCalculator,
+  type DiffCalculator,
+} from '../utils/messageTransforms';
+
+const MESSAGES_PER_PAGE = 20;
+const INITIAL_VISIBLE_MESSAGES = 100;
+/** Grace period for WebSocket status-check response before clearing stale resume state */
+const STATUS_VALIDATION_TIMEOUT_MS = 5000;
+
+type PendingViewSession = {
+  sessionId: string | null;
+  startedAt: number;
+};
+
+interface UseChatSessionStateArgs {
+  selectedProject: Project | null;
+  selectedSession: ProjectSession | null;
+  ws: WebSocket | null;
+  sendMessage: (message: unknown) => void;
+  autoScrollToBottom?: boolean;
+  externalMessageUpdate?: number;
+  processingSessions?: Set<string>;
+  resetStreamingState: () => void;
+  pendingViewSessionRef: MutableRefObject<PendingViewSession | null>;
+  onSessionInactive?: (sessionId?: string | null) => void;
+  onSessionNotProcessing?: (sessionId?: string | null) => void;
+}
+
+interface ScrollRestoreState {
+  height: number;
+  top: number;
+}
+
+export function useChatSessionState({
+  selectedProject,
+  selectedSession,
+  ws,
+  sendMessage,
+  autoScrollToBottom,
+  externalMessageUpdate,
+  processingSessions,
+  resetStreamingState,
+  pendingViewSessionRef,
+  onSessionInactive,
+  onSessionNotProcessing,
+}: UseChatSessionStateArgs) {
+  const persistedInitialStartTime = selectedSession?.id ? readSessionTimerStart(selectedSession.id) : null;
+
+  const [chatMessages, _setChatMessages] = useState<ChatMessage[]>(() => {
+    if (typeof window !== 'undefined' && selectedProject) {
+      const saved = safeLocalStorage.getItem(`chat_messages_${selectedProject.name}`);
+      if (saved) {
+        try {
+          return JSON.parse(saved) as ChatMessage[];
+        } catch {
+          console.error('Failed to parse saved chat messages, resetting');
+          safeLocalStorage.removeItem(`chat_messages_${selectedProject.name}`);
+          return [];
+        }
+      }
+      return [];
+    }
+    return [];
+  });
+
+  const setChatMessages = useCallback((updater: React.SetStateAction<ChatMessage[]>) => {
+    _setChatMessages((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      let hasChanges = false;
+      const final = next.map((msg) => {
+        if (!msg.id && !msg.messageId && !msg.toolId && !msg.toolCallId && !msg.blobId && !msg.rowid && !msg.sequence) {
+          hasChanges = true;
+          return { ...msg, messageId: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15) };
+        }
+        return msg;
+      });
+      return hasChanges ? final : next;
+    });
+  }, []);
+
+  const [isLoading, setIsLoading] = useState(() => {
+    if (selectedSession?.id && processingSessions?.has(selectedSession.id)) {
+      return true;
+    }
+    if (persistedInitialStartTime) {
+      return true;
+    }
+    return false;
+  });
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(selectedSession?.id || null);
+  const [sessionMessages, setSessionMessages] = useState<any[]>([]);
+  const [isLoadingSessionMessages, setIsLoadingSessionMessages] = useState(false);
+  const [isLoadingMoreMessages, setIsLoadingMoreMessages] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [totalMessages, setTotalMessages] = useState(0);
+  const [isSystemSessionChange, setIsSystemSessionChange] = useState(false);
+  const [canAbortSession, setCanAbortSession] = useState(false);
+  const [isUserScrolledUp, setIsUserScrolledUp] = useState(false);
+  const [tokenBudget, setTokenBudget] = useState<TokenBudget | null>(null);
+  const [visibleMessageCount, setVisibleMessageCount] = useState(INITIAL_VISIBLE_MESSAGES);
+  const [claudeStatus, setClaudeStatus] = useState<{ text: string; tokens: number; can_interrupt: boolean; startTime?: number } | null>(() => {
+    if (!persistedInitialStartTime) {
+      return null;
+    }
+
+    return {
+      text: RESUMING_STATUS_TEXT,
+      tokens: 0,
+      can_interrupt: true,
+      startTime: persistedInitialStartTime,
+    };
+  });
+  const [statusTextOverride, setStatusTextOverride] = useState<string | null>(null);
+  const [allMessagesLoaded, setAllMessagesLoaded] = useState(false);
+  const [isLoadingAllMessages, setIsLoadingAllMessages] = useState(false);
+  const [loadAllJustFinished, setLoadAllJustFinished] = useState(false);
+  const [showLoadAllOverlay, setShowLoadAllOverlay] = useState(false);
+  const [pendingStatusValidationSessionId, setPendingStatusValidationSessionId] = useState<string | null>(null);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isLoadingSessionRef = useRef(false);
+  const isLoadingMoreRef = useRef(false);
+  const allMessagesLoadedRef = useRef(false);
+  const topLoadLockRef = useRef(false);
+  const pendingScrollRestoreRef = useRef<ScrollRestoreState | null>(null);
+  const pendingInitialScrollRef = useRef(true);
+  const messagesOffsetRef = useRef(0);
+  const scrollPositionRef = useRef({ height: 0, top: 0 });
+  const loadAllFinishedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadAllOverlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const createDiff = useMemo<DiffCalculator>(() => createCachedDiffCalculator(), []);
+
+  const pendingStatusValidationSessionIdRef = useRef(pendingStatusValidationSessionId);
+  useEffect(() => {
+    pendingStatusValidationSessionIdRef.current = pendingStatusValidationSessionId;
+  }, [pendingStatusValidationSessionId]);
+
+  const markSessionStatusCheckPending = useCallback((sessionId?: string | null) => {
+    if (!sessionId) {
+      return;
+    }
+
+    setPendingStatusValidationSessionId(sessionId);
+  }, []);
+
+  const resolveSessionStatusCheck = useCallback((sessionId?: string | null) => {
+    if (!sessionId) {
+      return;
+    }
+
+    setPendingStatusValidationSessionId((previous) => (previous === sessionId ? null : previous));
+  }, []);
+
+  const loadSessionMessages = useCallback(
+    async (projectName: string, sessionId: string, loadMore = false, provider: Provider | string = 'claude') => {
+      if (!projectName || !sessionId) {
+        return [] as any[];
+      }
+
+      const isInitialLoad = !loadMore;
+      if (isInitialLoad) {
+        setIsLoadingSessionMessages(true);
+      } else {
+        setIsLoadingMoreMessages(true);
+      }
+
+      try {
+        const currentOffset = loadMore ? messagesOffsetRef.current : 0;
+        const response = await (api.sessionMessages as any)(
+          projectName,
+          sessionId,
+          MESSAGES_PER_PAGE,
+          currentOffset,
+          provider,
+        );
+        if (!response.ok) {
+          throw new Error('Failed to load session messages');
+        }
+
+        const data = await response.json();
+        console.log('[DEBUG] Received session messages data:', data);
+        if (isInitialLoad && data.tokenUsage) {
+          setTokenBudget(data.tokenUsage);
+        }
+
+        if (data.hasMore !== undefined) {
+          const loadedCount = data.messages?.length || 0;
+          setHasMoreMessages(Boolean(data.hasMore));
+          setTotalMessages(Number(data.total || 0));
+          messagesOffsetRef.current = currentOffset + loadedCount;
+          return data.messages || [];
+        }
+
+        const messages = data.messages || [];
+        setHasMoreMessages(false);
+        setTotalMessages(messages.length);
+        messagesOffsetRef.current = messages.length;
+        return messages;
+      } catch (error) {
+        console.error('Error loading session messages:', error);
+        return [];
+      } finally {
+        if (isInitialLoad) {
+          setIsLoadingSessionMessages(false);
+        } else {
+          setIsLoadingMoreMessages(false);
+        }
+      }
+    },
+    [],
+  );
+
+  const convertedMessages = useMemo(() => {
+    return convertSessionMessages(sessionMessages);
+  }, [sessionMessages]);
+
+  const scrollToBottom = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+    container.scrollTop = container.scrollHeight;
+  }, []);
+
+  const scrollToBottomAndReset = useCallback(() => {
+    scrollToBottom();
+    if (allMessagesLoaded) {
+      setVisibleMessageCount(INITIAL_VISIBLE_MESSAGES);
+      setAllMessagesLoaded(false);
+      allMessagesLoadedRef.current = false;
+    }
+  }, [allMessagesLoaded, scrollToBottom]);
+
+  const isNearBottom = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return false;
+    }
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    return scrollHeight - scrollTop - clientHeight < 50;
+  }, []);
+
+  const loadOlderMessages = useCallback(
+    async (container: HTMLDivElement) => {
+      if (!container || isLoadingMoreRef.current || isLoadingMoreMessages) {
+        return false;
+      }
+      if (allMessagesLoadedRef.current) return false;
+      if (!hasMoreMessages || !selectedSession || !selectedProject) {
+        return false;
+      }
+
+      const sessionProvider = selectedSession.__provider || 'claude';
+
+      isLoadingMoreRef.current = true;
+      const previousScrollHeight = container.scrollHeight;
+      const previousScrollTop = container.scrollTop;
+
+      try {
+        const moreMessages = await loadSessionMessages(
+          selectedProject.name,
+          selectedSession.id,
+          true,
+          sessionProvider,
+        );
+
+        if (moreMessages.length === 0) {
+          return false;
+        }
+
+        pendingScrollRestoreRef.current = {
+          height: previousScrollHeight,
+          top: previousScrollTop,
+        };
+        setSessionMessages((previous) => [...moreMessages, ...previous]);
+        // Keep the rendered window in sync with top-pagination so newly loaded history becomes visible.
+        setVisibleMessageCount((previousCount) => previousCount + moreMessages.length);
+        return true;
+      } finally {
+        isLoadingMoreRef.current = false;
+      }
+    },
+    [hasMoreMessages, isLoadingMoreMessages, loadSessionMessages, selectedProject, selectedSession],
+  );
+
+  const handleScroll = useCallback(async () => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const nearBottom = isNearBottom();
+    setIsUserScrolledUp(!nearBottom);
+
+    if (!allMessagesLoadedRef.current) {
+      const scrolledNearTop = container.scrollTop < 100;
+      if (!scrolledNearTop) {
+        topLoadLockRef.current = false;
+        return;
+      }
+
+      if (topLoadLockRef.current) {
+        if (container.scrollTop > 20) {
+          topLoadLockRef.current = false;
+        }
+        return;
+      }
+
+      const didLoad = await loadOlderMessages(container);
+      if (didLoad) {
+        topLoadLockRef.current = true;
+      }
+    }
+  }, [isNearBottom, loadOlderMessages]);
+
+  useLayoutEffect(() => {
+    if (!pendingScrollRestoreRef.current || !scrollContainerRef.current) {
+      return;
+    }
+
+    const { height, top } = pendingScrollRestoreRef.current;
+    const container = scrollContainerRef.current;
+    const newScrollHeight = container.scrollHeight;
+    const scrollDiff = newScrollHeight - height;
+    container.scrollTop = top + Math.max(scrollDiff, 0);
+    pendingScrollRestoreRef.current = null;
+  }, [chatMessages.length]);
+
+  useEffect(() => {
+    pendingInitialScrollRef.current = true;
+    topLoadLockRef.current = false;
+    pendingScrollRestoreRef.current = null;
+    setVisibleMessageCount(INITIAL_VISIBLE_MESSAGES);
+    setIsUserScrolledUp(false);
+  }, [selectedProject?.name, selectedSession?.id]);
+
+  useEffect(() => {
+    if (!pendingInitialScrollRef.current || !scrollContainerRef.current || isLoadingSessionMessages) {
+      return;
+    }
+
+    if (chatMessages.length === 0) {
+      pendingInitialScrollRef.current = false;
+      return;
+    }
+
+    pendingInitialScrollRef.current = false;
+    setTimeout(() => {
+      scrollToBottom();
+    }, 200);
+  }, [chatMessages.length, isLoadingSessionMessages, scrollToBottom]);
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (selectedSession && selectedProject) {
+        const currentProvider = selectedSession.__provider || 'claude';
+        isLoadingSessionRef.current = true;
+
+        const sessionChanged = currentSessionId !== null && currentSessionId !== selectedSession.id;
+        if (sessionChanged) {
+          if (!isSystemSessionChange) {
+            resetStreamingState();
+            pendingViewSessionRef.current = null;
+            setChatMessages([]);
+            setSessionMessages([]);
+            setClaudeStatus(null);
+            setCanAbortSession(false);
+          }
+
+          messagesOffsetRef.current = 0;
+          setHasMoreMessages(false);
+          setTotalMessages(0);
+          setVisibleMessageCount(INITIAL_VISIBLE_MESSAGES);
+          setAllMessagesLoaded(false);
+          allMessagesLoadedRef.current = false;
+          setIsLoadingAllMessages(false);
+          setLoadAllJustFinished(false);
+          setShowLoadAllOverlay(false);
+          if (loadAllOverlayTimerRef.current) clearTimeout(loadAllOverlayTimerRef.current);
+          if (loadAllFinishedTimerRef.current) clearTimeout(loadAllFinishedTimerRef.current);
+          setTokenBudget(null);
+          
+          // Only set isLoading to false if it's NOT in the processingSessions set
+          const isProcessing =
+            processingSessions?.has(selectedSession.id) ||
+            pendingStatusValidationSessionIdRef.current === selectedSession.id;
+          if (!isProcessing) {
+            setIsLoading(false);
+          }
+        }
+
+        // Always check status for a selected session, especially after returning
+        // to the chat tab. sendMessage queues while the socket reconnects.
+        if (selectedSession?.id) {
+          markSessionStatusCheckPending(selectedSession.id);
+          sendMessage({
+            type: 'check-session-status',
+            sessionId: selectedSession.id,
+            provider: currentProvider,
+          });
+        }
+
+        setCurrentSessionId(selectedSession.id);
+
+        if (!isSystemSessionChange) {
+          const messages = await loadSessionMessages(
+            selectedProject.name,
+            selectedSession.id,
+            false,
+            currentProvider,
+          );
+          setSessionMessages(messages);
+        } else {
+          setIsSystemSessionChange(false);
+        }
+      } else {
+        if (!isSystemSessionChange) {
+          resetStreamingState();
+          pendingViewSessionRef.current = null;
+          setChatMessages([]);
+          setSessionMessages([]);
+          setClaudeStatus(null);
+          setCanAbortSession(false);
+          setIsLoading(false);
+        }
+
+        setCurrentSessionId(null);
+        messagesOffsetRef.current = 0;
+        setHasMoreMessages(false);
+        setTotalMessages(0);
+        setTokenBudget(null);
+      }
+
+      setTimeout(() => {
+        isLoadingSessionRef.current = false;
+      }, 250);
+    };
+
+    loadMessages();
+  }, [
+    // Intentionally exclude currentSessionId: this effect sets it and should not retrigger another full load.
+    isSystemSessionChange,
+    loadSessionMessages,
+    pendingViewSessionRef,
+    resetStreamingState,
+    markSessionStatusCheckPending,
+    selectedProject,
+    selectedSession,
+    sendMessage,
+    ws,
+  ]);
+
+  useEffect(() => {
+    if (!externalMessageUpdate || !selectedSession || !selectedProject) {
+      return;
+    }
+
+    const reloadExternalMessages = async () => {
+      try {
+        const messages = await loadSessionMessages(
+          selectedProject.name,
+          selectedSession.id,
+          false,
+          selectedSession.__provider || 'claude',
+        );
+        setSessionMessages(messages);
+
+        const shouldAutoScroll = Boolean(autoScrollToBottom) && isNearBottom();
+        if (shouldAutoScroll) {
+          setTimeout(() => scrollToBottom(), 200);
+        }
+      } catch (error) {
+        console.error('Error reloading messages from external update:', error);
+      }
+    };
+
+    reloadExternalMessages();
+  }, [
+    autoScrollToBottom,
+    externalMessageUpdate,
+    isNearBottom,
+    loadSessionMessages,
+    scrollToBottom,
+    selectedProject,
+    selectedSession,
+  ]);
+
+  useEffect(() => {
+    if (selectedSession?.id) {
+      pendingViewSessionRef.current = null;
+    }
+  }, [pendingViewSessionRef, selectedSession?.id]);
+
+  useEffect(() => {
+    // Sync converted messages to chat state.
+    // We update even for empty arrays to clear old state when switching to an empty session.
+    setChatMessages((previous) => {
+      const optimisticMessages = previous.filter((message) => message.isOptimistic);
+
+      if (
+        convertedMessages.length === 0
+        && previous.length > 0
+        && (isLoading || isLoadingSessionMessages)
+      ) {
+        return previous;
+      }
+
+      if (optimisticMessages.length === 0) {
+        return convertedMessages;
+      }
+
+      const normalizedPersistedUserMessages = new Set(
+        convertedMessages
+          .filter((message) => message.type === 'user' && typeof message.content === 'string')
+          .map((message) => String(message.content || '').trim()),
+      );
+
+      const unmatchedOptimistic = optimisticMessages.filter((message) => {
+        const normalizedContent = String(message.content || '').trim();
+        return normalizedContent && !normalizedPersistedUserMessages.has(normalizedContent);
+      });
+
+      if (unmatchedOptimistic.length === 0) {
+        return convertedMessages;
+      }
+
+      return [...convertedMessages, ...unmatchedOptimistic].sort((left, right) => (
+        new Date(left.timestamp).getTime() - new Date(right.timestamp).getTime()
+      ));
+    });
+  }, [convertedMessages, isLoading, isLoadingSessionMessages, setChatMessages]);
+
+  useEffect(() => {
+    if (selectedProject && chatMessages.length > 0) {
+      safeLocalStorage.setItem(`chat_messages_${selectedProject.name}`, JSON.stringify(chatMessages));
+    }
+  }, [chatMessages, selectedProject]);
+
+  useEffect(() => {
+    if (!selectedProject || !selectedSession?.id || selectedSession.id.startsWith('new-session-')) {
+      setTokenBudget(null);
+      return;
+    }
+
+    const sessionProvider = selectedSession.__provider || 'claude';
+    const fetchInitialTokenUsage = async () => {
+      try {
+        const url = `/api/projects/${selectedProject.name}/sessions/${selectedSession.id}/token-usage?provider=${encodeURIComponent(sessionProvider)}`;
+        const response = await authenticatedFetch(url);
+        if (response.ok) {
+          const data = await response.json();
+          setTokenBudget(data as TokenBudget);
+        } else {
+          setTokenBudget(null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch initial token usage:', error);
+      }
+    };
+
+    fetchInitialTokenUsage();
+  }, [selectedProject, selectedSession?.id, selectedSession?.__provider]);
+
+  const visibleMessages = useMemo(() => {
+    if (chatMessages.length <= visibleMessageCount) {
+      return chatMessages;
+    }
+    return chatMessages.slice(-visibleMessageCount);
+  }, [chatMessages, visibleMessageCount]);
+
+  useEffect(() => {
+    if (!autoScrollToBottom && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      scrollPositionRef.current = {
+        height: container.scrollHeight,
+        top: container.scrollTop,
+      };
+    }
+  });
+
+  useEffect(() => {
+    if (!scrollContainerRef.current || chatMessages.length === 0) {
+      return;
+    }
+
+    if (isLoadingMoreRef.current || isLoadingMoreMessages || pendingScrollRestoreRef.current) {
+      return;
+    }
+
+    if (autoScrollToBottom) {
+      if (!isUserScrolledUp) {
+        setTimeout(() => scrollToBottom(), 50);
+      }
+      return;
+    }
+
+    const container = scrollContainerRef.current;
+    const prevHeight = scrollPositionRef.current.height;
+    const prevTop = scrollPositionRef.current.top;
+    const newHeight = container.scrollHeight;
+    const heightDiff = newHeight - prevHeight;
+
+    if (heightDiff > 0 && prevTop > 0) {
+      container.scrollTop = prevTop + heightDiff;
+    }
+  }, [autoScrollToBottom, chatMessages.length, isLoadingMoreMessages, isUserScrolledUp, scrollToBottom]);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    const activeViewSessionId = selectedSession?.id || currentSessionId;
+    if (!activeViewSessionId) {
+      return;
+    }
+
+    const persistedStartTime = readSessionTimerStart(activeViewSessionId);
+    if (persistedStartTime) {
+      if (!processingSessions?.has(activeViewSessionId)) {
+        setPendingStatusValidationSessionId((previous) => (
+          previous === activeViewSessionId ? previous : activeViewSessionId
+        ));
+      }
+
+      setClaudeStatus((previous) => {
+        if (previous?.startTime === persistedStartTime) {
+          return previous;
+        }
+
+        return {
+          text: previous?.text || RESUMING_STATUS_TEXT,
+          tokens: previous?.tokens || 0,
+          can_interrupt: previous?.can_interrupt !== false,
+          startTime: persistedStartTime,
+        };
+      });
+    }
+
+    const isTrackedProcessing = Boolean(processingSessions?.has(activeViewSessionId));
+    const isAwaitingStatusValidation =
+      pendingStatusValidationSessionId === activeViewSessionId && Boolean(persistedStartTime);
+    const isAbortPending = isSessionAbortRequested(activeViewSessionId);
+    const shouldBeProcessing = (isTrackedProcessing || isAwaitingStatusValidation) && !isAbortPending;
+
+    if (shouldBeProcessing && !isLoading) {
+      setIsLoading(true);
+      setCanAbortSession(true);
+    }
+  }, [currentSessionId, isLoading, pendingStatusValidationSessionId, processingSessions, selectedSession?.id]);
+
+  useEffect(() => {
+    const activeViewSessionId = selectedSession?.id || currentSessionId;
+    if (!activeViewSessionId || pendingStatusValidationSessionId !== activeViewSessionId) {
+      return;
+    }
+
+    const persistedStartTime = readSessionTimerStart(activeViewSessionId);
+    if (!persistedStartTime) {
+      return;
+    }
+    if (isSessionAbortRequested(activeViewSessionId)) {
+      setPendingStatusValidationSessionId((previous) => (previous === activeViewSessionId ? null : previous));
+      clearSessionTimerStart(activeViewSessionId);
+      onSessionInactive?.(activeViewSessionId);
+      onSessionNotProcessing?.(activeViewSessionId);
+      setIsLoading(false);
+      setCanAbortSession(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const latestPersistedStartTime = readSessionTimerStart(activeViewSessionId);
+      if (latestPersistedStartTime !== persistedStartTime) {
+        return;
+      }
+      if (processingSessions?.has(activeViewSessionId)) {
+        return;
+      }
+
+      clearSessionTimerStart(activeViewSessionId);
+      setPendingStatusValidationSessionId((previous) => (previous === activeViewSessionId ? null : previous));
+      setClaudeStatus((previous) => (previous?.text === RESUMING_STATUS_TEXT ? null : previous));
+      onSessionInactive?.(activeViewSessionId);
+      onSessionNotProcessing?.(activeViewSessionId);
+      setIsLoading(false);
+      setCanAbortSession(false);
+    }, STATUS_VALIDATION_TIMEOUT_MS);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [
+    currentSessionId,
+    onSessionInactive,
+    onSessionNotProcessing,
+    pendingStatusValidationSessionId,
+    processingSessions,
+    selectedSession?.id,
+  ]);
+
+  // Show "Load all" overlay after a batch finishes loading, persist for 2s then hide
+  const prevLoadingRef = useRef(false);
+  useEffect(() => {
+    const wasLoading = prevLoadingRef.current;
+    prevLoadingRef.current = isLoadingMoreMessages;
+
+    if (wasLoading && !isLoadingMoreMessages && hasMoreMessages) {
+      if (loadAllOverlayTimerRef.current) clearTimeout(loadAllOverlayTimerRef.current);
+      setShowLoadAllOverlay(true);
+      loadAllOverlayTimerRef.current = setTimeout(() => {
+        setShowLoadAllOverlay(false);
+      }, 2000);
+    }
+    if (!hasMoreMessages && !isLoadingMoreMessages) {
+      if (loadAllOverlayTimerRef.current) clearTimeout(loadAllOverlayTimerRef.current);
+      setShowLoadAllOverlay(false);
+    }
+    return () => {
+      if (loadAllOverlayTimerRef.current) clearTimeout(loadAllOverlayTimerRef.current);
+    };
+  }, [isLoadingMoreMessages, hasMoreMessages]);
+
+  const loadAllMessages = useCallback(async () => {
+    if (!selectedSession || !selectedProject) return;
+    if (isLoadingAllMessages) return;
+    const sessionProvider = selectedSession.__provider || 'claude';
+
+    const requestSessionId = selectedSession.id;
+
+    allMessagesLoadedRef.current = true;
+    isLoadingMoreRef.current = true;
+    setIsLoadingAllMessages(true);
+    setShowLoadAllOverlay(true);
+
+    const container = scrollContainerRef.current;
+    const previousScrollHeight = container ? container.scrollHeight : 0;
+    const previousScrollTop = container ? container.scrollTop : 0;
+
+    try {
+      const response = await (api.sessionMessages as any)(
+        selectedProject.name,
+        requestSessionId,
+        null,
+        0,
+        sessionProvider,
+      );
+
+      if (currentSessionId !== requestSessionId) return;
+
+      if (response.ok) {
+        const data = await response.json();
+        const allMessages = data.messages || data;
+
+        if (container) {
+          pendingScrollRestoreRef.current = {
+            height: previousScrollHeight,
+            top: previousScrollTop,
+          };
+        }
+
+        setSessionMessages(Array.isArray(allMessages) ? allMessages : []);
+        setHasMoreMessages(false);
+        setTotalMessages(Array.isArray(allMessages) ? allMessages.length : 0);
+        messagesOffsetRef.current = Array.isArray(allMessages) ? allMessages.length : 0;
+
+        setVisibleMessageCount(Infinity);
+        setAllMessagesLoaded(true);
+
+        setLoadAllJustFinished(true);
+        if (loadAllFinishedTimerRef.current) clearTimeout(loadAllFinishedTimerRef.current);
+        loadAllFinishedTimerRef.current = setTimeout(() => {
+          setLoadAllJustFinished(false);
+          setShowLoadAllOverlay(false);
+        }, 1000);
+      } else {
+        allMessagesLoadedRef.current = false;
+        setShowLoadAllOverlay(false);
+      }
+    } catch (error) {
+      console.error('Error loading all messages:', error);
+      allMessagesLoadedRef.current = false;
+      setShowLoadAllOverlay(false);
+    } finally {
+      isLoadingMoreRef.current = false;
+      setIsLoadingAllMessages(false);
+    }
+  }, [selectedSession, selectedProject, isLoadingAllMessages, currentSessionId]);
+
+  const loadEarlierMessages = useCallback(() => {
+    setVisibleMessageCount((previousCount) => previousCount + 100);
+  }, []);
+
+  return {
+    chatMessages,
+    setChatMessages,
+    isLoading,
+    setIsLoading,
+    currentSessionId,
+    setCurrentSessionId,
+    sessionMessages,
+    setSessionMessages,
+    isLoadingSessionMessages,
+    isLoadingMoreMessages,
+    hasMoreMessages,
+    totalMessages,
+    isSystemSessionChange,
+    setIsSystemSessionChange,
+    canAbortSession,
+    setCanAbortSession,
+    isUserScrolledUp,
+    setIsUserScrolledUp,
+    tokenBudget,
+    setTokenBudget,
+    visibleMessageCount,
+    visibleMessages,
+    loadEarlierMessages,
+    loadAllMessages,
+    allMessagesLoaded,
+    isLoadingAllMessages,
+    loadAllJustFinished,
+    showLoadAllOverlay,
+    claudeStatus,
+    setClaudeStatus,
+    statusTextOverride,
+    setStatusTextOverride,
+    createDiff,
+    scrollContainerRef,
+    scrollToBottom,
+    scrollToBottomAndReset,
+    isNearBottom,
+    handleScroll,
+    loadSessionMessages,
+    resolveSessionStatusCheck,
+  };
+}

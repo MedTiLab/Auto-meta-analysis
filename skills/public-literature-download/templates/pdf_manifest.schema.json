@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MedAutoData Public Literature PDF Manifest",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["input_index", "status", "checked_at"],
+    "properties": {
+      "input_index": { "type": "integer", "minimum": 0 },
+      "pmid": { "type": ["string", "null"] },
+      "pmcid": { "type": ["string", "null"] },
+      "doi": { "type": ["string", "null"] },
+      "title": { "type": ["string", "null"] },
+      "status": {
+        "enum": ["downloaded", "exists", "dry_run", "no_identifier", "no_pmcid", "no_oa_pdf", "not_oa", "failed"]
+      },
+      "source": {
+        "type": ["string", "null"],
+        "enum": ["project", "zotero", "pmc_oa", "pmc_tgz", "openalex", "user_uploaded", null]
+      },
+      "url": { "type": ["string", "null"] },
+      "path": { "type": ["string", "null"] },
+      "reason": { "type": ["string", "null"] },
+      "checked_at": { "type": "string" },
+      "sha256": { "type": ["string", "null"] }
+    }
+  }
+}

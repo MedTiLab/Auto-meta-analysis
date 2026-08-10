@@ -1,0 +1,4 @@
+interface:
+  display_name: "MinerU PDF Parser"
+  short_description: "Parse research PDFs for extraction"
+  default_prompt: "Use $mineru-pdf-parser to parse Meta-analysis PDFs with provenance. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

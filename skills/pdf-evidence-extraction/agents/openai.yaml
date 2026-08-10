@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF Evidence Extraction"
+  short_description: "Extract sourced fields from parsed PDFs"
+  default_prompt: "Use $pdf-evidence-extraction to extract evidence-grounded fields. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagnostic Meta-analysis"
+  short_description: "Run diagnostic accuracy Meta routing"
+  default_prompt: "Use $diagnostic-meta-analysis to plan diagnostic accuracy synthesis. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

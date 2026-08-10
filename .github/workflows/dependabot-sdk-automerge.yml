@@ -1,0 +1,53 @@
+name: Dependabot AI Runtime Auto Merge
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  enable-automerge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Approve safe AI runtime dependency updates
+        if: |
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor') &&
+          (contains(steps.metadata.outputs.dependency-names, '@anthropic-ai/claude-agent-sdk') ||
+           contains(steps.metadata.outputs.dependency-names, '@anthropic-ai/sdk') ||
+           contains(steps.metadata.outputs.dependency-names, '@openai/codex') ||
+           contains(steps.metadata.outputs.dependency-names, '@openai/codex-sdk'))
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr review "$PR_URL" --approve --body "Auto-approving safe AI runtime dependency update." || true
+
+      - name: Enable auto-merge for safe AI runtime dependency updates
+        if: |
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor') &&
+          (contains(steps.metadata.outputs.dependency-names, '@anthropic-ai/claude-agent-sdk') ||
+           contains(steps.metadata.outputs.dependency-names, '@anthropic-ai/sdk') ||
+           contains(steps.metadata.outputs.dependency-names, '@openai/codex') ||
+           contains(steps.metadata.outputs.dependency-names, '@openai/codex-sdk'))
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          # Requires the repository's "Allow auto-merge" setting to be enabled.
+          gh pr merge --auto --squash "$PR_URL" || echo "Auto-merge could not be enabled. Check the repository auto-merge setting."

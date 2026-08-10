@@ -1,0 +1,4 @@
+interface:
+  display_name: "NHANES Local Data Access"
+  short_description: "Find and extract real local NHANES data safely"
+  default_prompt: "Use $nhanes-local-data-access to find NHANES variables in the local workspace, verify cycle compatibility, and extract only real data from files without simulating or inventing values. If the task is baseline table or Table 1 extraction, prefer a broad baseline-variable pull from the selected participant matrix instead of a one-field slice. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

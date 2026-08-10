@@ -1,0 +1,290 @@
+import { useTranslation } from 'react-i18next';
+import { useCallback, useMemo, useRef } from 'react';
+import type { RefObject } from 'react';
+
+import MessageComponent from './MessageComponent';
+import AgentTurnContainer from './AgentTurnContainer';
+import ProviderSelectionEmptyState from './ProviderSelectionEmptyState';
+import SessionProviderLogo from '../../../SessionProviderLogo';
+import { Markdown } from './Markdown';
+import type { ChatMessage } from '../../types/types';
+import type { Project, ProjectSession, SessionMode, SessionProvider } from '../../../../types/app';
+import AssistantThinkingIndicator from './AssistantThinkingIndicator';
+import { getIntrinsicMessageKey } from '../../utils/messageKeys';
+import { groupMessagesIntoTurns } from '../../utils/groupAgentTurns';
+import { getProviderDisplayName } from '../../utils/chatFormatting';
+
+interface ChatMessagesPaneProps {
+  scrollContainerRef: RefObject<HTMLDivElement>;
+  onWheel: () => void;
+  onTouchMove: () => void;
+  isLoadingSessionMessages: boolean;
+  chatMessages: ChatMessage[];
+  selectedSession: ProjectSession | null;
+  currentSessionId: string | null;
+  provider: SessionProvider;
+  isLoadingMoreMessages: boolean;
+  hasMoreMessages: boolean;
+  totalMessages: number;
+  sessionMessagesCount: number;
+  visibleMessageCount: number;
+  visibleMessages: ChatMessage[];
+  loadEarlierMessages: () => void;
+  loadAllMessages: () => void;
+  allMessagesLoaded: boolean;
+  isLoadingAllMessages: boolean;
+  loadAllJustFinished: boolean;
+  showLoadAllOverlay: boolean;
+  createDiff: any;
+  onFileOpen?: (filePath: string, diffInfo?: unknown) => void;
+  onShowSettings?: () => void;
+  onGrantToolPermission: (suggestion: { entry: string; toolName: string }) => { success: boolean };
+  autoExpandTools?: boolean;
+  showRawParameters?: boolean;
+  showThinking?: boolean;
+  selectedProject: Project;
+  isLoading: boolean;
+  statusText?: string | null;
+  intakeGreeting?: string | null;
+  newSessionMode?: SessionMode;
+  onRetry?: () => void;
+}
+
+export default function ChatMessagesPane({
+  scrollContainerRef,
+  onWheel,
+  onTouchMove,
+  isLoadingSessionMessages,
+  chatMessages,
+  selectedSession,
+  currentSessionId,
+  provider,
+  isLoadingMoreMessages,
+  hasMoreMessages,
+  totalMessages,
+  sessionMessagesCount,
+  visibleMessageCount,
+  visibleMessages,
+  loadEarlierMessages,
+  loadAllMessages,
+  allMessagesLoaded,
+  isLoadingAllMessages,
+  loadAllJustFinished,
+  showLoadAllOverlay,
+  createDiff,
+  onFileOpen,
+  onShowSettings,
+  onGrantToolPermission,
+  autoExpandTools,
+  showRawParameters,
+  showThinking,
+  selectedProject,
+  isLoading,
+  statusText,
+  intakeGreeting,
+  newSessionMode = 'research',
+  onRetry,
+}: ChatMessagesPaneProps) {
+  const { t } = useTranslation('chat');
+  const messageKeyMapRef = useRef<WeakMap<ChatMessage, string>>(new WeakMap());
+  const allocatedKeysRef = useRef<Set<string>>(new Set());
+  const generatedMessageKeyCounterRef = useRef(0);
+
+  // Keep keys stable across prepends so existing MessageComponent instances retain local state.
+  const getMessageKey = useCallback((message: ChatMessage) => {
+    const existingKey = messageKeyMapRef.current.get(message);
+    if (existingKey) {
+      return existingKey;
+    }
+
+    const intrinsicKey = getIntrinsicMessageKey(message);
+    let candidateKey = intrinsicKey;
+
+    if (!candidateKey || allocatedKeysRef.current.has(candidateKey)) {
+      do {
+        generatedMessageKeyCounterRef.current += 1;
+        candidateKey = intrinsicKey
+          ? `${intrinsicKey}-${generatedMessageKeyCounterRef.current}`
+          : `message-generated-${generatedMessageKeyCounterRef.current}`;
+      } while (allocatedKeysRef.current.has(candidateKey));
+    }
+
+    allocatedKeysRef.current.add(candidateKey);
+    messageKeyMapRef.current.set(message, candidateKey);
+    return candidateKey;
+  }, []);
+
+  const groupedItems = useMemo(
+    () => groupMessagesIntoTurns(visibleMessages, isLoading),
+    [visibleMessages, isLoading]
+  );
+  return (
+    <div
+      ref={scrollContainerRef}
+      onWheel={onWheel}
+      onTouchMove={onTouchMove}
+      className={`overflow-x-hidden px-0 py-3 sm:p-4 relative ${
+        chatMessages.length === 0 && !selectedSession && !currentSessionId
+          ? 'flex-shrink-0'
+          : 'flex-1 overflow-y-auto'
+      }`}
+    >
+      <div className="max-w-5xl mx-auto space-y-3 sm:space-y-4">
+      {isLoadingSessionMessages && chatMessages.length === 0 ? (
+        <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
+          <div className="flex items-center justify-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400" />
+            <p>{t('session.loading.sessionMessages')}</p>
+          </div>
+        </div>
+      ) : chatMessages.length === 0 ? (
+        <>
+          <ProviderSelectionEmptyState
+            selectedSession={selectedSession}
+            currentSessionId={currentSessionId}
+          />
+          {intakeGreeting && (
+            <div className="flex flex-col w-full mb-6 mt-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                  <SessionProviderLogo provider={provider} className="w-full h-full" />
+                </div>
+                <div className="text-xs font-semibold text-gray-900 dark:text-white">
+                  {getProviderDisplayName(provider)}
+                </div>
+              </div>
+              <div className="w-full pl-0">
+                <Markdown className="prose prose-md max-w-none dark:prose-invert prose-gray text-[15.5px] leading-relaxed" projectName={selectedProject?.name}>
+                  {intakeGreeting}
+                </Markdown>
+              </div>
+            </div>
+          )}
+          {/* Workspace QA guidance now lives in the composer placeholder. */}
+        </>
+      ) : (
+        <>
+          {/* Loading indicator for older messages (hide when load-all is active) */}
+          {isLoadingMoreMessages && !isLoadingAllMessages && !allMessagesLoaded && (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-3">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400" />
+                <p className="text-sm">{t('session.loading.olderMessages')}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Indicator showing there are more messages to load (hide when all loaded) */}
+          {hasMoreMessages && !isLoadingMoreMessages && !allMessagesLoaded && (
+            <div className="text-center text-gray-500 dark:text-gray-400 text-sm py-2 border-b border-gray-200 dark:border-gray-700">
+              {totalMessages > 0 && (
+                <span>
+                  {t('session.messages.showingOf', { shown: sessionMessagesCount, total: totalMessages })}{' '}
+                  <span className="text-xs">{t('session.messages.scrollToLoad')}</span>
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Floating "Load all messages" overlay */}
+          {(showLoadAllOverlay || isLoadingAllMessages || loadAllJustFinished) && (
+            <div className="sticky top-2 z-20 flex justify-center pointer-events-none">
+              {loadAllJustFinished ? (
+                <div className="flex items-center space-x-2 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-lg">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{t('session.messages.allLoaded')}</span>
+                </div>
+              ) : (
+                <button
+                  className="pointer-events-auto px-4 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-full shadow-lg transition-all duration-200 hover:scale-105 disabled:opacity-75 disabled:cursor-wait flex items-center space-x-2"
+                  onClick={loadAllMessages}
+                  disabled={isLoadingAllMessages}
+                >
+                  {isLoadingAllMessages && (
+                    <div className="animate-spin rounded-full h-3 w-3 border-2 border-white/30 border-t-white" />
+                  )}
+                  <span>
+                    {isLoadingAllMessages
+                      ? t('session.messages.loadingAll')
+                      : <>{t('session.messages.loadAll')} {totalMessages > 0 && `(${totalMessages})`}</>
+                    }
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Performance warning when all messages are loaded */}
+          {allMessagesLoaded && (
+            <div className="text-center text-amber-600 dark:text-amber-400 text-xs py-1.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
+              {t('session.messages.perfWarning')}
+            </div>
+          )}
+
+          {/* Legacy message count indicator (for non-paginated view) */}
+          {!hasMoreMessages && chatMessages.length > visibleMessageCount && (
+            <div className="text-center text-gray-500 dark:text-gray-400 text-sm py-2 border-b border-gray-200 dark:border-gray-700">
+              {t('session.messages.showingLast', { count: visibleMessageCount, total: chatMessages.length })} |
+              <button className="ml-1 text-blue-600 hover:text-blue-700 underline" onClick={loadEarlierMessages}>
+                {t('session.messages.loadEarlier')}
+              </button>
+              {' | '}
+              <button
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                onClick={loadAllMessages}
+              >
+                {t('session.messages.loadAll')}
+              </button>
+            </div>
+          )}
+
+          {groupedItems.map((item, index) => {
+            if (item.kind === 'user' || item.kind === 'standalone') {
+              return (
+                <MessageComponent
+                  key={getMessageKey(item.message)}
+                  message={item.message}
+                  index={index}
+                  prevMessage={null}
+                  createDiff={createDiff}
+                  onFileOpen={onFileOpen}
+                  onShowSettings={onShowSettings}
+                  onGrantToolPermission={onGrantToolPermission}
+                  autoExpandTools={autoExpandTools}
+                  showRawParameters={showRawParameters}
+                  showThinking={showThinking}
+                  selectedProject={selectedProject}
+                  provider={provider}
+                  onRetry={onRetry}
+                />
+              );
+            }
+            // kind === 'agent-turn'
+            return (
+              <AgentTurnContainer
+                key={`agent-turn-${index}`}
+                turn={item}
+                getMessageKey={getMessageKey}
+                createDiff={createDiff}
+                onFileOpen={onFileOpen}
+                onShowSettings={onShowSettings}
+                onGrantToolPermission={onGrantToolPermission}
+                autoExpandTools={autoExpandTools}
+                showRawParameters={showRawParameters}
+                showThinking={showThinking}
+                selectedProject={selectedProject}
+                provider={provider}
+                onRetry={onRetry}
+              />
+            );
+          })}
+        </>
+      )}
+
+      {isLoading && <AssistantThinkingIndicator selectedProvider={provider} statusText={statusText} />}
+      </div>
+    </div>
+  );
+}

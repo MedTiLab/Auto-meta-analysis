@@ -1,0 +1,167 @@
+name: Desktop Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Optional tag name, defaults to v<package.json version>'
+        required: false
+        type: string
+      release_name:
+        description: 'Optional release title, defaults to MedAutoData <tag>'
+        required: false
+        type: string
+      draft:
+        description: 'Create as draft release'
+        required: false
+        default: false
+        type: boolean
+      prerelease:
+        description: 'Mark release as prerelease'
+        required: false
+        default: false
+        type: boolean
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      release_name: ${{ steps.meta.outputs.release_name }}
+      draft: ${{ steps.meta.outputs.draft }}
+      prerelease: ${{ steps.meta.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
+          INPUT_TAG="${{ github.event.inputs.release_tag }}"
+          INPUT_NAME="${{ github.event.inputs.release_name }}"
+
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="${GITHUB_REF_NAME}"
+            DRAFT="false"
+            PRERELEASE="false"
+          else
+            TAG="${INPUT_TAG:-v${PACKAGE_VERSION}}"
+            DRAFT="${{ github.event.inputs.draft || 'false' }}"
+            PRERELEASE="${{ github.event.inputs.prerelease || 'false' }}"
+          fi
+
+          RELEASE_NAME="${INPUT_NAME:-MedAutoData ${TAG}}"
+
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "release_name=${RELEASE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "draft=${DRAFT}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${PRERELEASE}" >> "$GITHUB_OUTPUT"
+
+  macos-dmg:
+    needs: prepare
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build DMG
+        run: npm run desktop:dist:mac
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: release/*.dmg
+          if-no-files-found: error
+
+  windows-exe:
+    needs: prepare
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build EXE
+        run: npm run desktop:dist:win
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: release/*.exe
+          if-no-files-found: error
+
+  publish-release:
+    needs: [prepare, macos-dmg, windows-exe]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+      RELEASE_NAME: ${{ needs.prepare.outputs.release_name }}
+      RELEASE_DRAFT: ${{ needs.prepare.outputs.draft }}
+      RELEASE_PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+    steps:
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg
+          path: release-artifacts
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-exe
+          path: release-artifacts
+
+      - name: Create or update GitHub Release
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t FILES < <(find release-artifacts -type f \( -name '*.dmg' -o -name '*.exe' \) | sort)
+
+          if [ "${#FILES[@]}" -eq 0 ]; then
+            echo "No release files found."
+            exit 1
+          fi
+
+          EXTRA_FLAGS=()
+          if [ "${RELEASE_DRAFT}" = "true" ]; then
+            EXTRA_FLAGS+=(--draft)
+          fi
+          if [ "${RELEASE_PRERELEASE}" = "true" ]; then
+            EXTRA_FLAGS+=(--prerelease)
+          fi
+
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_TAG}" "${FILES[@]}" --clobber
+          else
+            gh release create "${RELEASE_TAG}" "${FILES[@]}" \
+              --title "${RELEASE_NAME}" \
+              --generate-notes \
+              --target "${GITHUB_SHA}" \
+              "${EXTRA_FLAGS[@]}"
+          fi

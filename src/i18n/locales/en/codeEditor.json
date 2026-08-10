@@ -1,0 +1,110 @@
+{
+  "toolbar": {
+    "changes": "changes",
+    "previousChange": "Previous change",
+    "nextChange": "Next change",
+    "hideDiff": "Hide diff highlighting",
+    "showDiff": "Show diff highlighting",
+    "fontSize": "Editor font size",
+    "settings": "Editor Settings",
+    "collapse": "Collapse editor",
+    "expand": "Expand editor to full width"
+  },
+  "loading": "Loading {{fileName}}...",
+  "header": {
+    "showingChanges": "Showing changes"
+  },
+  "researchContext": {
+    "previewEyebrow": "Research Preview",
+    "previewTitle": "Review context before entering full editing",
+    "previewDescription": "Keep the file tied to its research source, evidence role, and analysis step before switching into the full editor.",
+    "fields": {
+      "source": "Source location",
+      "evidence": "Linked evidence",
+      "stage": "Analysis step"
+    },
+    "sources": {
+      "chat": "Analysis chat",
+      "chatDetail": "Analysis chat · {{detail}}",
+      "files": "Project file tree",
+      "git": "Git change history",
+      "researchlab": "Research workflow panel",
+      "survey": "Literature and preview page",
+      "shell": "Shell workspace",
+      "preview": "Preview panel",
+      "default": "Current workspace"
+    },
+    "evidence": {
+      "chatDiff": "File generated or revised in this chat",
+      "chatSession": "Research material from the current session",
+      "workspaceFile": "Project workspace file",
+      "gitChange": "Version diff and commit trace",
+      "researchArtifact": "Research workflow artifact or draft",
+      "surveyArtifact": "Literature preview material",
+      "shellOutput": "Result file generated from the shell",
+      "default": "Current project material"
+    },
+    "stages": {
+      "literature": "Literature review",
+      "survey": "Literature review",
+      "ideation": "Question framing and protocol setup",
+      "experiment": "Analysis execution and output generation",
+      "publication": "Paper writing and final manuscript",
+      "promotion": "Presentation and communication outputs",
+      "reports": "Project reporting",
+      "drafts": "Draft revision",
+      "workspace": "Project workspace",
+      "unknown": "Unclassified step"
+    },
+    "returnTargets": {
+      "chat": "current chat",
+      "files": "file tree",
+      "git": "Git changes",
+      "researchlab": "research workflow",
+      "survey": "literature page",
+      "shell": "shell workspace",
+      "preview": "preview panel",
+      "default": "previous workspace"
+    },
+    "actions": {
+      "deepEdit": "Deep edit",
+      "return": "Return",
+      "returnTo": "Return to {{target}}"
+    }
+  },
+  "actions": {
+    "askAboutFile": "Ask about this file",
+    "addToNewChat": "Add to new chat",
+    "addToCurrentChat": "Add to current chat",
+    "download": "Download file",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "exitFullscreen": "Exit fullscreen",
+    "fullscreen": "Fullscreen",
+    "close": "Close",
+    "previewMarkdown": "Preview markdown",
+    "editMarkdown": "Edit markdown",
+    "editAsTable": "Edit as table",
+    "editAsText": "Edit as text"
+  },
+  "table": {
+    "empty": "No table data yet.",
+    "size": "{{rows}} rows · {{columns}} columns",
+    "limitNotice": "Editing first {{rows}} rows and {{columns}} columns.",
+    "addRow": "Add row",
+    "addColumn": "Add column",
+    "column": "Column {{index}}",
+    "headerAria": "Column {{index}} header",
+    "cellAria": "Row {{row}}, column {{column}}"
+  },
+  "footer": {
+    "lines": "Lines:",
+    "characters": "Characters:",
+    "shortcuts": "Press Ctrl+S to save • Esc to close"
+  },
+  "preview": {
+    "unsupported": "This file type cannot be previewed",
+    "unsupportedHint": "files are not supported for preview"
+  }
+}

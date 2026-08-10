@@ -1,0 +1,151 @@
+{
+  "projects": {
+    "title": "研究项目",
+    "newProject": "新建项目",
+    "deleteProject": "删除项目",
+    "renameProject": "重命名项目",
+    "noProjects": "未找到研究项目",
+    "loadingProjects": "加载研究项目中...",
+    "searchPlaceholder": "搜索研究项目...",
+    "projectNamePlaceholder": "项目名称",
+    "starred": "星标",
+    "all": "全部",
+    "untitledSession": "未命名会话",
+    "newSession": "新会话",
+    "fetchingProjects": "正在同步研究项目和分析会话",
+    "projects": "项目",
+    "noMatchingProjects": "未找到匹配的研究项目",
+    "tryDifferentSearch": "尝试调整您的搜索词",
+    "runClaudeCli": "在项目目录中启动分析会话，或先创建新项目"
+  },
+  "app": {
+    "title": "医学循证平台",
+    "subtitle": "循证研究自动化平台"
+  },
+  "sessions": {
+    "title": "分析会话",
+    "newSession": "新建会话",
+    "deleteSession": "删除会话",
+    "renameSession": "重命名会话",
+    "noSessions": "暂无分析会话",
+    "loadingSessions": "加载分析会话中...",
+    "unnamed": "未命名",
+    "loading": "加载中...",
+    "showMore": "显示更多分析会话",
+    "mode": {
+      "research": "研究分析",
+      "workspaceQa": "项目问答"
+    }
+  },
+  "shareSession": {
+    "title": "分享会话",
+    "createLink": "生成分享链接",
+    "copyLink": "复制链接",
+    "copyText": "我分享了一段 MedHelp 只读对话，方便你查看这次讨论内容：\n{{url}}\n请不要转发给无关人员。",
+    "cardTitle": "MedHelp",
+    "cardDescription": "Shared via MedHelp, an AI research assistant",
+    "copyFooter": "请不要转发给无关人员。",
+    "linkCardTitle": "分享链接",
+    "emptyLinkHint": "选择访问方式后生成链接，链接会显示在这里。",
+    "public": {
+      "label": "公开访问",
+      "description": "拿到链接的人都可以查看这份只读对话快照。"
+    },
+    "private": {
+      "label": "私有访问",
+      "description": "需要登录，当前仅链接创建者可查看。"
+    }
+  },
+  "tooltips": {
+    "viewEnvironments": "查看环境",
+    "hideSidebar": "隐藏侧边栏",
+    "createProject": "创建研究项目",
+    "refresh": "刷新项目和会话 (Ctrl+R)",
+    "renameProject": "重命名项目 (F2)",
+    "deleteProject": "将项目移到回收站",
+    "projectActions": "更多操作",
+    "addToFavorites": "添加到收藏",
+    "removeFromFavorites": "从收藏移除",
+    "editSessionName": "手动编辑会话名称",
+    "shareSession": "创建并复制会话分享链接",
+    "deleteSession": "永久删除此会话",
+    "save": "保存",
+    "cancel": "取消"
+  },
+  "navigation": {
+    "chat": "聊天",
+    "files": "文件",
+    "git": "Git",
+    "tasks": "任务"
+  },
+  "actions": {
+    "refresh": "刷新",
+    "settings": "设置",
+    "logout": "退出登录",
+    "collapseAll": "全部折叠",
+    "expandAll": "全部展开",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "rename": "重命名"
+  },
+  "status": {
+    "active": "活动",
+    "inactive": "非活动",
+    "thinking": "思考中...",
+    "error": "错误",
+    "aborted": "已中止",
+    "unknown": "未知"
+  },
+  "time": {
+    "justNow": "刚刚",
+    "oneMinuteAgo": "1 分钟前",
+    "minutesAgo": "{{count}} 分钟前",
+    "oneHourAgo": "1 小时前",
+    "hoursAgo": "{{count}} 小时前",
+    "oneDayAgo": "1 天前",
+    "daysAgo": "{{count}} 天前"
+  },
+  "messages": {
+    "deleteConfirm": "确定要删除吗？",
+    "renameSuccess": "重命名成功",
+    "deleteSuccess": "删除成功",
+    "errorOccurred": "发生错误",
+    "deleteSessionConfirm": "确定要删除此会话吗？此操作无法撤销。",
+    "deleteProjectConfirm": "确定要删除此空项目吗？此操作无法撤销。",
+    "enterProjectPath": "请输入项目路径",
+    "deleteSessionFailed": "删除会话失败，请重试。",
+    "deleteSessionError": "删除会话时出错，请重试。",
+    "deleteProjectFailed": "删除项目失败，请重试。",
+    "deleteProjectError": "删除项目时出错，请重试。",
+    "createProjectFailed": "创建项目失败，请重试。",
+    "createProjectError": "创建项目时出错，请重试。",
+    "renameProjectFailed": "重命名项目失败，请重试。",
+    "renameProjectError": "重命名项目时出错，请重试。",
+    "shareSessionCreating": "正在创建分享链接...",
+    "shareSessionCopied": "会话分享链接已复制到剪贴板。",
+    "shareSessionCopyPrompt": "复制这个会话分享链接：",
+    "shareSessionFailed": "创建会话分享链接失败，请重试。"
+  },
+  "version": {
+    "updateAvailable": "有可用更新"
+  },
+  "trial": {
+    "remaining": "剩余体验",
+    "expired": "体验已到期",
+    "expiresAt": "到期时间",
+    "managedByAdmin": "管理员可调整"
+  },
+  "usage": {
+    "title": "用量余量"
+  },
+  "deleteConfirmation": {
+    "deleteProject": "删除项目",
+    "deleteSession": "删除会话",
+    "confirmDelete": "您确定要删除",
+    "sessionCount_one": "此项目包含 {{count}} 个分析会话。",
+    "sessionCount_other": "此项目包含 {{count}} 个分析会话。",
+    "allConversationsDeleted": "项目目录及其会话会先一起移动到回收站。",
+    "cannotUndo": "之后仍可在回收站中恢复，除非您在那里执行永久删除。"
+  }
+}

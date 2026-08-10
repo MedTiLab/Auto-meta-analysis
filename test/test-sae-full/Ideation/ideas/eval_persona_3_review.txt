@@ -1,0 +1,50 @@
+================================================================================
+REVIEW: Causal Sparse Autoencoders with Feature-Level Structural Equations
+         for Mechanistic Interpretability
+Reviewer Persona: Methods Specialist (Senior ML Engineer)
+================================================================================
+
+### Dimension Scores
+
+**Clarity**: 8/10
+The proposal is exceptionally well-structured. The mathematical formulation is precise, equations are numbered and referenced consistently, and the three-phase training procedure is laid out step-by-step with concrete hyperparameter defaults. The code implementation plan (Section 7) reads almost like executable pseudocode, which is rare for a research proposal. Minor deductions: the interplay between the block-sparse structure (Section 2.4c) and the topological ordering (Section 2.4a) is hand-waved -- recomputing topological order every 100 steps while the block structure updates on a different schedule could create subtle correctness issues that deserve more discussion.
+
+**Novelty**: 7/10
+Embedding a learnable SEM layer via (I - A)^{-1} inside an autoencoder's latent space is a genuinely new architectural idea in the interpretability context. The formal anti-absorption guarantee (Proposition 1) is a nice theoretical touch. However, the individual components -- Gated SAE encoders, NOTEARS acyclicity constraints, augmented Lagrangian optimization, sparse triangular solves -- are all well-established. The contribution is primarily in the composition, not in any single component. The orthogonality loss (L_ortho) is conceptually straightforward. The novelty is real but should not be overstated.
+
+**Validity**: 5/10
+This is where I have the most concern. The proposal leans heavily on the assumption that feature-level causal structure in an SAE latent space corresponds to meaningful computational structure in the underlying neural network. This is a strong, unverified assumption. The SEM layer forces a DAG onto the latent features, but DAG structure is only meaningful if the features themselves are clean and monosemantic -- a property that current SAEs only approximate. The formal anti-absorption proof (Proposition 1) is restricted to a toy linear setting with two features and Bernoulli activations; its relevance to real networks with thousands of features in superposition is unclear. The synthetic benchmark (Section 3.6) validates causal recovery but uses the same SEM data-generating process that the model assumes, creating a tautological advantage. The most convincing validation would be Experiment 4 (recovering known circuits in GPT-2), but this is listed without any fallback if the discovered DAG does not match known circuits.
+
+**Feasibility**: 6/10
+From a pure implementation standpoint, most building blocks exist: Gated SAE architectures are available in SAELens, NOTEARS is well-documented, and sparse matrix operations in PyTorch are mature enough. The estimated compute budget (~120 A100-hours) is reasonable for an academic lab. However, several practical red flags concern me. First, the NOTEARS constraint involves computing a matrix exponential via truncated Taylor series of (A * A), where A is d x d. For d = 65536, even storing A * A densely is 16 GB at float32 -- the block-sparse mitigation helps but adds significant implementation complexity that is underspecified. Second, the augmented Lagrangian optimization is notoriously finicky: getting h(A) below 1e-8 while simultaneously training the SAE encoder/decoder is a hard multi-objective problem. In my experience implementing NOTEARS variants, convergence to a true DAG often requires careful manual tuning of the rho schedule, which the proposal glosses over. Third, the forward substitution loop in the SEM layer (iterating over features in topological order) is inherently sequential and will not parallelize well on a GPU -- the claimed "<1% overhead" assumes sparse, shallow DAGs, but this is a property of the converged model, not of the training trajectory. During early Phase 2 when A is dense and the DAG structure is noisy, this loop could be a serious bottleneck. Fourth, the full experimental plan (7 experiments, 7 ablations, 3 models, multiple dictionary sizes) is ambitious for a single paper -- realistically, this would take 6+ months of focused engineering effort.
+
+**Significance**: 6/10
+If the method works as described, the impact would be meaningful: automatic circuit discovery and principled intervention via learned causal structure would be a step forward for mechanistic interpretability. The safety applications (refusal decomposition, jailbreak detection) are timely and practically relevant. However, the significance is tempered by uncertainty about whether the learned DAGs will actually be semantically meaningful at scale. If the DAG edges turn out to be noisy artifacts of the optimization rather than genuine causal relationships, the method reduces to a slightly more expensive Gated SAE with no interpretability gain. The synthetic benchmark contribution (C6) is useful regardless.
+
+### Summary
+
+**Strengths:**
+- Clean, mathematically precise formulation with a single core idea (the SEM layer) that unifies three problems (absorption, circuit discovery, intervention)
+- Thorough experimental plan with synthetic ground-truth validation, real-model experiments, and extensive ablations
+- Practical implementation plan with realistic compute estimates and compatibility with existing tooling (SAELens, TransformerLens)
+- The block-sparse approximation for large dictionary sizes shows awareness of scaling constraints
+- The formal anti-absorption argument, while limited, provides useful theoretical grounding
+
+**Weaknesses:**
+- The NOTEARS matrix exponential computation at scale (d >= 16384) is underspecified and likely harder than presented; dense matrix operations on 65536 x 65536 matrices are not trivial even with block-sparse structure
+- Sequential forward substitution in topological order is GPU-unfriendly and overhead estimates during training (not just at convergence) are likely optimistic
+- The synthetic benchmark validates the method under its own assumptions (SEM data-generating process), which inflates apparent performance; the real test is on natural neural network activations where ground truth is unknown
+- Five loss terms with associated hyperparameters (alpha, beta/mu/rho, gamma, eta, tau) create a large tuning surface; the proposal provides defaults but no sensitivity analysis beyond the planned ablations
+- Augmented Lagrangian convergence for NOTEARS is known to be fragile and may require significant manual intervention that undermines reproducibility
+- The scope of the experimental plan is extremely ambitious for a single research effort
+
+**Suggestions for Improvement:**
+- Start with a minimal viable experiment: train Causal-SAE on GPT-2 Small with d = 4096 (no block-sparse needed) and focus exclusively on the spelling-task absorption benchmark and synthetic DAG recovery; this alone would be a compelling paper if the results are strong
+- Replace the sequential forward substitution loop with a parallel message-passing formulation: compute z = z_raw + A^T @ z iteratively (fixed-point iteration converges in at most depth-of-DAG steps) using batched sparse matrix-vector products, which are GPU-friendly
+- Add a baseline where the DAG is learned post-hoc on a pre-trained Gated SAE's feature activations using NOTEARS (this is B5 in the baselines, which is good -- make sure to give it a fair comparison including the pruning and refinement phase)
+- Provide a concrete plan for what to do if the NOTEARS constraint does not converge (e.g., fall back to a soft penalty, use DAGMA as an alternative acyclicity constraint)
+- Reduce the experimental scope to 3-4 core experiments and defer the rest to follow-up work
+
+**Overall Recommendation:** Borderline Accept
+
+The core architectural idea is sound and novel enough to merit investigation. The proposal is unusually well-specified for a research idea. However, the feasibility concerns around NOTEARS scaling, GPU efficiency of the SEM layer during training, and the large hyperparameter surface introduce meaningful execution risk. The strongest version of this paper is a focused study on GPT-2 Small demonstrating absorption resistance and synthetic DAG recovery, with scaling results deferred. If the authors can show clean results on those two fronts, the contribution stands on its own.

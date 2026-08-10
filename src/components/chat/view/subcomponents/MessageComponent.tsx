@@ -1,0 +1,588 @@
+import React, { memo, useMemo } from 'react';
+import { FileImage, FileText, User, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import SessionProviderLogo from '../../../SessionProviderLogo';
+import type {
+  ChatMessage,
+  PermissionSuggestion,
+  PermissionGrantResult,
+  Provider,
+} from '../../types/types';
+import { Markdown } from './Markdown';
+import { formatUsageLimitText, getProviderDisplayName } from '../../utils/chatFormatting';
+import { getPermissionSuggestion } from '../../utils/chatPermissions';
+import type { Project } from '../../../../types/app';
+import { ToolRenderer, shouldHideToolResult } from '../../tools';
+
+type DiffLine = {
+  type: string;
+  content: string;
+  lineNum: number;
+};
+
+interface MessageComponentProps {
+  message: ChatMessage;
+  index: number;
+  prevMessage: ChatMessage | null;
+  createDiff: (oldStr: string, newStr: string) => DiffLine[];
+  onFileOpen?: (filePath: string, diffInfo?: unknown) => void;
+  onShowSettings?: () => void;
+  onGrantToolPermission?: (suggestion: PermissionSuggestion) => PermissionGrantResult | null | undefined;
+  autoExpandTools?: boolean;
+  showRawParameters?: boolean;
+  showThinking?: boolean;
+  hideThinkingFold?: boolean;
+  selectedProject?: Project | null;
+  provider: Provider | string;
+  onRetry?: () => void;
+}
+
+type InteractiveOption = {
+  number: string;
+  text: string;
+  isSelected: boolean;
+};
+
+type PermissionGrantState = 'idle' | 'granted' | 'error';
+
+function extractSkillContentTitle(content: string, fallback: string): string {
+  const commandMatch = content.match(/<command-name>([^<]+)<\/command-name>/i);
+  if (commandMatch?.[1]?.trim()) {
+    return commandMatch[1].trim();
+  }
+
+  const headingMatch = content.match(/^#\s+(.+)$/m);
+  if (headingMatch?.[1]?.trim()) {
+    return headingMatch[1].trim();
+  }
+
+  const pathMatch = content.match(/Base directory for this skill:\s*(\S+)/i);
+  if (pathMatch?.[1]) {
+    return pathMatch[1].split('/').pop() || fallback;
+  }
+
+  return fallback;
+}
+
+const MessageComponent = memo(({ message, index, prevMessage, createDiff, onFileOpen, onShowSettings, onGrantToolPermission, autoExpandTools, showRawParameters, showThinking, hideThinkingFold, selectedProject, provider, onRetry }: MessageComponentProps) => {
+  const { t } = useTranslation('chat');
+  const isGrouped = prevMessage && prevMessage.type === message.type &&
+                   ((prevMessage.type === 'assistant') ||
+                    (prevMessage.type === 'user') ||
+                    (prevMessage.type === 'tool') ||
+                    (prevMessage.type === 'error'));
+  const messageRef = React.useRef<HTMLDivElement | null>(null);
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const permissionSuggestion = getPermissionSuggestion(message, provider);
+  const [permissionGrantState, setPermissionGrantState] = React.useState<PermissionGrantState>('idle');
+
+
+  React.useEffect(() => {
+    setPermissionGrantState('idle');
+  }, [permissionSuggestion?.entry, message.toolId]);
+
+  React.useEffect(() => {
+    const node = messageRef.current;
+    if (!autoExpandTools || !node || !message.isToolUse) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isExpanded) {
+            setIsExpanded(true);
+            const details = node.querySelectorAll<HTMLDetailsElement>('details');
+            details.forEach((detail) => {
+              detail.open = true;
+            });
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(node);
+
+    return () => {
+      observer.unobserve(node);
+    };
+  }, [autoExpandTools, isExpanded, message.isToolUse]);
+
+  const formattedTime = useMemo(() => new Date(message.timestamp).toLocaleTimeString(), [message.timestamp]);
+  const shouldHideThinkingMessage = Boolean(message.isThinking && !showThinking);
+
+  if (shouldHideThinkingMessage) {
+    return null;
+  }
+
+  const visibleAttachments = Array.isArray(message.attachments) ? message.attachments : [];
+  return (
+    <div
+      ref={messageRef}
+      className={`chat-message ${message.type} ${isGrouped ? 'grouped' : ''} flex flex-col w-full px-4 sm:px-6`}
+    >
+      {message.isSkillContent ? (
+        /* Collapsible skill content */
+        <div className="w-full mb-4">
+          <div className="border border-purple-200/50 dark:border-purple-800/30 rounded-lg bg-purple-50/30 dark:bg-purple-900/10 shadow-sm overflow-hidden">
+            <details className="group">
+              <summary className="flex list-none items-center gap-2 px-3 py-2 cursor-pointer text-[13px] select-none hover:bg-purple-50/50 dark:hover:bg-purple-900/20 transition-colors [&::-webkit-details-marker]:hidden">
+                <svg
+                  className="w-3.5 h-3.5 text-purple-400 dark:text-purple-500 transition-transform duration-150 group-open:rotate-90 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                <span className="font-bold text-purple-600 dark:text-purple-400 text-xs flex-shrink-0">Skill</span>
+                <span className="text-gray-300 dark:text-gray-700 text-[10px] flex-shrink-0 mx-0.5">|</span>
+                <span className="text-gray-500 dark:text-gray-400 truncate flex-1 font-medium text-xs">
+                  {extractSkillContentTitle(message.content || '', t('skill.contentLoaded'))}
+                </span>
+              </summary>
+              <div className="px-4 py-3 border-t border-purple-100 dark:border-purple-800/30 max-h-96 overflow-y-auto">
+                <Markdown className="prose prose-sm max-w-none dark:prose-invert" projectName={selectedProject?.name}>
+                  {(message.content || '')
+                    .replace(/<command-name>[^<]*<\/command-name>/g, '')
+                    .replace(/<\/?command-message>/g, '')
+                    .replace(/<command-args>[^<]*<\/command-args>/g, '')
+                    .replace(/<\/?local-command-stdout>/g, '')
+                    .replace(/^[❯>]\s*Base directory for this skill:\s*\S+\s*/m, '')
+                    .trim()}
+                </Markdown>
+              </div>
+            </details>
+          </div>
+        </div>
+      ) : message.type === 'user' ? (
+        /* User message bubble */
+        <div className="flex flex-col items-end w-full mb-4">
+          <div className="flex items-center space-x-2 mb-1.5">
+            {!isGrouped && (
+              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                <User className="w-3.5 h-3.5" />
+              </div>
+            )}
+          </div>
+          <div className="bg-blue-600 text-white rounded-2xl rounded-tr-none px-4 py-2.5 shadow-sm max-w-[90%] sm:max-w-[85%]">
+            {message.attachedPrompt && (
+              <div className={message.content?.trim() ? 'mb-1.5' : ''}>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-100 text-xs font-medium">
+                  <span>{message.attachedPrompt.scenarioIcon}</span>
+                  {message.attachedPrompt.scenarioTitle}
+                </span>
+              </div>
+            )}
+            {message.content?.trim() && (
+              <div className="text-[15px] whitespace-pre-wrap break-words leading-relaxed">
+                {message.content}
+              </div>
+            )}
+            {message.images && message.images.length > 0 && (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {message.images.map((img, idx) => {
+                  const isImage = img.mimeType ? img.mimeType.startsWith('image/') : (img.data && img.data.startsWith('data:image/'));
+                  if (isImage) {
+                    return (
+                      <img
+                        key={img.name || idx}
+                        src={img.data}
+                        alt={img.name}
+                        className="rounded-lg max-w-full h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(img.data, '_blank')}
+                      />
+                    );
+                  }
+                  return (
+                    <div key={img.name || idx} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
+                      <svg className="w-4 h-4 flex-shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-sm truncate">{img.name || 'file'}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {visibleAttachments.length > 0 && (
+              <div className="mt-2 flex flex-col gap-2">
+                {visibleAttachments.map((attachment, idx) => {
+                  const Icon = attachment.kind === 'image' ? FileImage : FileText;
+                  return (
+                    <div
+                      key={`${attachment.name}:${attachment.path || idx}`}
+                      className="flex items-start gap-2 rounded-lg bg-white/10 px-3 py-2"
+                    >
+                      <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 opacity-80" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">{attachment.name}</div>
+                        {attachment.path && (
+                          <div className="mt-1 break-all font-mono text-[11px] opacity-70">
+                            {attachment.path}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          {!isGrouped && (
+            <div className="text-[10px] text-gray-400 mt-1 mr-1">
+              {formattedTime}
+            </div>
+          )}
+        </div>
+      ) : message.isTaskNotification ? (
+        /* Compact task notification on the left */
+        <div className="w-full">
+          <div className="flex items-center gap-2 py-0.5">
+            <span className={`inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full ${message.taskStatus === 'completed' ? 'bg-primary' : 'bg-muted-foreground'}`} />
+            <span className="text-xs text-gray-500 dark:text-gray-400">{message.content}</span>
+          </div>
+        </div>
+      ) : (
+        /* Claude/Error/Tool messages */
+        <div className="flex flex-col w-full mb-6">
+          {!isGrouped && (
+            <div className="flex items-center space-x-2 mb-2">
+              {message.type === 'error' ? (
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-foreground text-[10px] text-background">
+                  !
+                </div>
+              ) : message.type === 'tool' ? (
+                <div className="w-6 h-6 bg-gray-600 dark:bg-gray-700 rounded-full flex items-center justify-center text-white text-[10px] flex-shrink-0">
+                  🔧
+                </div>
+              ) : (
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
+                  <SessionProviderLogo provider={provider} className="w-full h-full" />
+                </div>
+              )}
+              <div className="text-xs font-semibold text-gray-900 dark:text-white">
+                {message.type === 'error' ? t('messageTypes.error') : message.type === 'tool' ? t('messageTypes.tool') : getProviderDisplayName(provider)}
+              </div>
+            </div>
+          )}
+          
+          <div className="w-full pl-0">
+
+            {message.isToolUse ? (
+              <>
+                <div className="flex flex-col">
+                  <div className="flex flex-col">
+                    <Markdown className="prose prose-sm max-w-none dark:prose-invert" onFileOpen={onFileOpen} projectName={selectedProject?.name}>
+                      {String(message.displayText || '')}
+                    </Markdown>
+                  </div>
+                </div>
+
+                {message.toolInput && (
+                  <ToolRenderer
+                    toolName={message.toolName || 'UnknownTool'}
+                    toolInput={message.toolInput}
+                    toolResult={message.toolResult}
+                    toolId={message.toolId}
+                    mode="input"
+                    onFileOpen={onFileOpen}
+                    createDiff={createDiff}
+                    selectedProject={selectedProject}
+                    autoExpandTools={autoExpandTools}
+                    showRawParameters={showRawParameters}
+                    rawToolInput={typeof message.toolInput === 'string' ? message.toolInput : undefined}
+                    isSubagentContainer={message.isSubagentContainer}
+                    subagentState={message.subagentState}
+                  />
+                )}
+                
+                {/* Tool Result Section */}
+                {message.toolResult && !shouldHideToolResult(message.toolName || 'UnknownTool', message.toolResult) && (
+                  message.toolResult.isError ? (
+                    // Error results - red error box with content
+                    <div
+                      id={`tool-result-${message.toolId}`}
+                      className="relative mt-2 scroll-mt-4 rounded border border-border bg-muted/35 p-3"
+                    >
+                      <div className="relative flex items-center gap-1.5 mb-2">
+                        <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span className="text-xs font-medium text-foreground">{t('messageTypes.error')}</span>
+                      </div>
+                      <div className="relative text-sm text-foreground">
+                        <Markdown className="prose prose-sm max-w-none dark:prose-invert" projectName={selectedProject?.name}>
+                          {String(message.toolResult.content || '')}
+                        </Markdown>
+                        {permissionSuggestion && (
+                          <div className="mt-4 border-t border-border pt-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (!onGrantToolPermission) return;
+                                  const result = onGrantToolPermission(permissionSuggestion);
+                                  if (result?.success) {
+                                    setPermissionGrantState('granted');
+                                  } else {
+                                    setPermissionGrantState('error');
+                                  }
+                                }}
+                                disabled={permissionSuggestion.isAllowed || permissionGrantState === 'granted'}
+                                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                                  permissionSuggestion.isAllowed || permissionGrantState === 'granted'
+                                    ? 'cursor-default border-primary/30 bg-primary/10 text-primary'
+                                    : 'border-border bg-background/80 text-foreground hover:bg-muted'
+                                }`}
+                              >
+                                {permissionSuggestion.isAllowed || permissionGrantState === 'granted'
+                                  ? t('permissions.added')
+                                  : t('permissions.grant', { tool: permissionSuggestion.toolName })}
+                              </button>
+                              {onShowSettings && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); onShowSettings(); }}
+                                  className="text-xs text-primary underline hover:text-primary/80"
+                                >
+                                  {t('permissions.openSettings')}
+                                </button>
+                              )}
+                            </div>
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              {t('permissions.addTo', { entry: permissionSuggestion.entry })}
+                            </div>
+                            {permissionGrantState === 'error' && (
+                              <div className="mt-2 text-xs text-foreground">
+                                {t('permissions.error')}
+                              </div>
+                            )}
+                            {(permissionSuggestion.isAllowed || permissionGrantState === 'granted') && (
+                              <div className="mt-2 text-xs text-primary">
+                                {t('permissions.retry')}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    // Non-error results - route through ToolRenderer (single source of truth)
+                    <div id={`tool-result-${message.toolId}`} className="scroll-mt-4">
+                      <ToolRenderer
+                        toolName={message.toolName || 'UnknownTool'}
+                        toolInput={message.toolInput}
+                        toolResult={message.toolResult}
+                        toolId={message.toolId}
+                        mode="result"
+                        onFileOpen={onFileOpen}
+                        createDiff={createDiff}
+                        selectedProject={selectedProject}
+                        autoExpandTools={autoExpandTools}
+                      />
+                    </div>
+                  )
+                )}
+              </>
+            ) : message.isInteractivePrompt ? (
+              // Special handling for interactive prompts
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-amber-900 dark:text-amber-100 text-base mb-3">
+                      {t('interactive.title')}
+                    </h4>
+                    {(() => {
+                      const lines = (message.content || '').split('\n').filter((line) => line.trim());
+                      const questionLine = lines.find((line) => line.includes('?')) || lines[0] || '';
+                      const options: InteractiveOption[] = [];
+                      
+                      // Parse the menu options
+                      lines.forEach((line) => {
+                        // Match lines like "❯ 1. Yes" or "  2. No"
+                        const optionMatch = line.match(/[❯\s]*(\d+)\.\s+(.+)/);
+                        if (optionMatch) {
+                          const isSelected = line.includes('❯');
+                          options.push({
+                            number: optionMatch[1],
+                            text: optionMatch[2].trim(),
+                            isSelected
+                          });
+                        }
+                      });
+                      
+                      return (
+                        <>
+                          <p className="text-sm text-amber-800 dark:text-amber-200 mb-4">
+                            {questionLine}
+                          </p>
+                          
+                          {/* Option buttons */}
+                          <div className="space-y-2 mb-4">
+                            {options.map((option) => (
+                              <button
+                                key={option.number}
+                                className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all ${
+                                  option.isSelected
+                                    ? 'bg-amber-600 dark:bg-amber-700 text-white border-amber-600 dark:border-amber-700 shadow-md'
+                                    : 'bg-white dark:bg-gray-800 text-amber-900 dark:text-amber-100 border-amber-300 dark:border-amber-700'
+                                } cursor-not-allowed opacity-75`}
+                                disabled
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                    option.isSelected
+                                      ? 'bg-white/20'
+                                      : 'bg-amber-100 dark:bg-amber-800/50'
+                                  }`}>
+                                    {option.number}
+                                  </span>
+                                  <span className="text-sm sm:text-base font-medium flex-1">
+                                    {option.text}
+                                  </span>
+                                  {option.isSelected && (
+                                    <span className="text-lg">❯</span>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <div className="bg-amber-100 dark:bg-amber-800/30 rounded-lg p-3">
+                            <p className="text-amber-900 dark:text-amber-100 text-sm font-medium mb-1">
+                              {t('interactive.waiting')}
+                            </p>
+                            <p className="text-amber-800 dark:text-amber-200 text-xs">
+                              {t('interactive.instruction')}
+                            </p>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
+            ) : message.isThinking ? (
+              /* Thinking messages - collapsible by default */
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                {hideThinkingFold ? (
+                  <div className="text-gray-600 dark:text-gray-400 text-sm">
+                    <Markdown className="prose prose-sm max-w-none dark:prose-invert prose-gray" projectName={selectedProject?.name}>
+                      {message.content}
+                    </Markdown>
+                  </div>
+                ) : (
+                  <details className="group">
+                    <summary className="cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium flex items-center gap-2">
+                      <svg className="w-3 h-3 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span>{t('thinking.emoji')}</span>
+                    </summary>
+                    <div className="mt-2 pl-4 border-l-2 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 text-sm">
+                      <Markdown className="prose prose-sm max-w-none dark:prose-invert prose-gray" projectName={selectedProject?.name}>
+                        {message.content}
+                      </Markdown>
+                    </div>
+                  </details>
+                )}
+              </div>
+            ) : (
+              <div className="text-[15px] text-gray-700 dark:text-gray-300">
+                {/* Thinking accordion for reasoning */}
+                {showThinking && message.reasoning && (
+                  <details className="mb-3">
+                    <summary className="cursor-pointer text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium">
+                      {t('thinking.emoji')}
+                    </summary>
+                    <div className="mt-2 pl-4 border-l-2 border-gray-300 dark:border-gray-600 italic text-gray-600 dark:text-gray-400 text-sm">
+                      <div className="whitespace-pre-wrap">
+                        {message.reasoning}
+                      </div>
+                    </div>
+                  </details>
+                )}
+
+                {(() => {
+                  const content = formatUsageLimitText(String(message.content || ''));
+
+                  // Detect if content is pure JSON (starts with { or [)
+                  const trimmedContent = content.trim();
+                  if ((trimmedContent.startsWith('{') || trimmedContent.startsWith('[')) &&
+                      (trimmedContent.endsWith('}') || trimmedContent.endsWith(']'))) {
+                    try {
+                      const parsed = JSON.parse(trimmedContent);
+                      const formatted = JSON.stringify(parsed, null, 2);
+
+                      return (
+                        <div className="my-2">
+                          <div className="flex items-center gap-2 mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <span className="font-medium">{t('json.response')}</span>
+                          </div>
+                          <div className="bg-gray-800 dark:bg-gray-900 border border-gray-600/30 dark:border-gray-700 rounded-lg overflow-hidden">
+                            <pre className="p-4 overflow-x-auto">
+                              <code className="text-gray-100 dark:text-gray-200 text-sm font-mono block whitespace-pre">
+                                {formatted}
+                              </code>
+                            </pre>
+                          </div>
+                        </div>
+                      );
+                    } catch {
+                      // Not valid JSON, fall through to normal rendering
+                    }
+                  }
+
+                  // Normal rendering for non-JSON content
+                  return message.type === 'assistant' ? (
+                    <Markdown className="prose prose-md max-w-none dark:prose-invert prose-gray text-[15.5px] leading-relaxed" onFileOpen={onFileOpen} projectName={selectedProject?.name}>
+                      {content}
+                    </Markdown>
+                  ) : (
+                    <div className="whitespace-pre-wrap text-[15.5px] leading-relaxed">
+                      {content}
+                    </div>
+                  );
+                })()}
+
+                {message.type === 'error' && message.isRetryable && onRetry && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onRetry()}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/80"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      {t('error.retry')}
+                    </button>
+                    {message.errorType === 'usage_limit' && (
+                      <span className="text-xs text-muted-foreground">
+                        {t('error.usageLimitHint')}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isGrouped && (
+              <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-2">
+                {formattedTime}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+export default MessageComponent;

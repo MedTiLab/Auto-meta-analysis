@@ -1,0 +1,4 @@
+version: 1
+models:
+  default:
+    default_prompt: "Use $hrs-local-data-access for HRS-only local data work. Search source hrs or the HRS AI_Access indexes first, verify variable provenance and one_row_per_ID_wave grain, then extract only real columns from $HOME/database/HRS_data/hrs.RData without simulating values. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

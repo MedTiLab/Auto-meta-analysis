@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 2
+    allow:
+      - dependency-name: "@anthropic-ai/claude-agent-sdk"
+      - dependency-name: "@anthropic-ai/sdk"
+      - dependency-name: "@openai/codex"
+      - dependency-name: "@openai/codex-sdk"
+    groups:
+      ai-agent-runtimes:
+        patterns:
+          - "@anthropic-ai/claude-agent-sdk"
+          - "@anthropic-ai/sdk"
+          - "@openai/codex"
+          - "@openai/codex-sdk"
+    labels:
+      - dependencies
+      - ai-runtime
+    commit-message:
+      prefix: deps
+    rebase-strategy: auto

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Meta Pipeline Planner"
+  short_description: "Start or repair Meta project tasks"
+  default_prompt: "Use $meta-pipeline-planner to start this Meta project pipeline with 00_literature before 01_protocol; use $meta-analysis-workflow only for cross-stage orchestration. Save the project startup report to 01_protocol/project_startup_report.md or a dated file in that folder. Do not fabricate data, PDFs, extraction fields, or statistical results; if data/PDF/fields are unavailable, write the appropriate cannot-extract report and create targeted human-review gates. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."

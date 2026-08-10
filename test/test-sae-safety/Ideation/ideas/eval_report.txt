@@ -1,0 +1,183 @@
+================================================================================
+AREA CHAIR META-REVIEW
+================================================================================
+
+Paper: Safety-Aware Sparse Autoencoders: Contrastive Feature Steering for
+       Robust Alignment Monitoring (SafeSAE)
+
+Date: 2026-02-22
+Reviewers: 3 (Senior ML Researcher, Domain Expert, Methods Specialist)
+
+================================================================================
+SCORE AGGREGATION
+================================================================================
+
+| Dimension    | Reviewer 1 | Reviewer 2 | Reviewer 3 | Average | Disagreement? |
+|--------------|------------|------------|------------|---------|---------------|
+| Clarity      |     7      |     7      |     6      |  6.67   | No (spread=1) |
+| Novelty      |     6      |     6      |     5      |  5.67   | No (spread=1) |
+| Validity     |     5      |     5      |     5      |  5.00   | No (spread=0) |
+| Feasibility  |     6      |     5      |     6      |  5.67   | No (spread=1) |
+| Significance |     6      |     6      |     5      |  5.67   | No (spread=1) |
+
+Overall Average: 5.73
+
+================================================================================
+DISAGREEMENT RESOLUTION
+================================================================================
+
+No dimension exhibits a spread greater than 3 points. The reviewers are in
+remarkably close agreement across all five dimensions, with maximum spreads of
+only 1 point. This consensus strengthens confidence in the aggregate assessment.
+
+The tightest agreement is on Validity (all three reviewers scored 5), which is
+notable because validity concerns form the core of every reviewer's criticism.
+
+================================================================================
+SYNTHESIZED ASSESSMENT
+================================================================================
+
+KEY STRENGTHS (consensus):
+---------------------------------------------------------------------------
+
+1. Well-structured and accessible presentation. All three reviewers acknowledge
+   the paper is clearly written at a high level (Clarity scores 6-7). The
+   problem motivation -- improving mechanistic interpretability tools for AI
+   safety monitoring -- is well-articulated and timely.
+
+2. Ambitious integration of multiple relevant techniques. The proposal brings
+   together contrastive learning, sparse autoencoders, hierarchical circuit
+   analysis, and online feature steering into a unified framework. The breadth
+   of the vision is commendable.
+
+3. Hierarchical Circuit SAE is the most novel component. Reviewer 1 explicitly
+   identified this as the most original contribution. The idea of composing
+   token-level SAE features into circuit-level representations for safety
+   monitoring has genuine conceptual appeal.
+
+4. Addresses a real and important problem. AI safety monitoring through
+   mechanistic interpretability is a high-value research direction. If the
+   proposed framework worked as described, the impact would be meaningful.
+
+
+KEY WEAKNESSES (consensus):
+---------------------------------------------------------------------------
+
+1. Contrastive loss formulation is mathematically inconsistent with stated
+   goals. Reviewer 1 identified that the numerator of the contrastive loss
+   pulls safe and unsafe representations together rather than apart. Reviewer 3
+   independently noted that contrastive and reconstruction losses may conflict.
+   This is a fundamental technical flaw that undermines the core training
+   objective.
+
+2. Critical implementation details are undefined. All three reviewers flag
+   missing specifications:
+   - The iterative labeling procedure for safe/unsafe pairs (R1, R2)
+   - The importance weighting scheme (R1, R3)
+   - The steering calibration mechanism (R3)
+   These are not minor details -- they are load-bearing components of the
+   proposed system.
+
+3. MMCS evaluation metric assumes nonexistent ground-truth safety features.
+   Both Reviewer 2 and Reviewer 3 independently identify this as a validity
+   concern. There is no established ground truth for what a "safety feature"
+   should look like in a neural network's latent space, making the proposed
+   primary evaluation metric circular.
+
+4. Scalability of hierarchical SAE is unaddressed. The 512K+ dimensional input
+   to the hierarchical stage (R1, R3) raises serious computational and
+   optimization concerns. Gradient starvation in such high-dimensional sparse
+   regimes is a real risk (R1), and no mitigation strategy is proposed.
+
+5. Limited novelty -- individual components are well-established. All reviewers
+   converge on the assessment that the contribution is primarily an engineering
+   integration of existing techniques (contrastive learning, SAEs, RepE-style
+   steering) rather than a methodologically novel advance. Reviewer 2
+   specifically notes the steering module closely resembles existing
+   Representation Engineering work.
+
+6. Insufficient justification over simpler baselines. Reviewer 2 raises the
+   important question of why SAE-based approaches are needed when simpler tools
+   (linear probes, RepE, input/output filters) already exist and are well-
+   validated. No compelling argument or empirical comparison is provided.
+
+
+UNIQUE INSIGHTS:
+---------------------------------------------------------------------------
+
+- Reviewer 1 (Senior ML Researcher): Identified a subtle circularity between
+  the steering mechanism and the assumption of monosemantic features -- steering
+  presupposes the features are already well-disentangled, but the contrastive
+  objective is supposed to achieve that disentanglement.
+
+- Reviewer 2 (Domain Expert): Noted that HH-RLHF covers only a narrow slice of
+  safety-relevant behaviors. A safety monitoring system evaluated only on
+  helpfulness/harmlessness dialogues would have unknown generalization to other
+  safety failure modes (deception, power-seeking, sycophancy, etc.).
+
+- Reviewer 3 (Methods Specialist): Flagged that 10M tokens is likely
+  insufficient training data for an 8B-parameter model's feature space. Standard
+  SAE training in the literature uses significantly larger corpora.
+
+
+ACTIONABLE SUGGESTIONS:
+---------------------------------------------------------------------------
+
+1. Fix the contrastive loss formulation. The current formulation must be
+   corrected so that safe and unsafe feature representations are pushed apart,
+   not pulled together. Consider adopting a supervised contrastive loss
+   (Khosla et al., 2020) with safety labels as the grouping variable, or a
+   triplet loss with explicit safe-anchor, safe-positive, unsafe-negative
+   structure.
+
+2. Fully specify the iterative labeling pipeline. Provide a concrete algorithm
+   with stopping criteria, quality assurance steps, and analysis of label noise
+   propagation across iterations. Without this, the approach cannot be
+   reproduced or evaluated.
+
+3. Replace MMCS with a grounded evaluation metric. Consider using downstream
+   task performance (e.g., safety classifier accuracy using discovered features,
+   attack success rate reduction with steering) as the primary metric rather
+   than an ungrounded feature-matching score.
+
+4. Provide theoretical or empirical analysis of when SafeSAE outperforms
+   simpler baselines. Run head-to-head comparisons against linear probes, RepE,
+   and standard SAEs on the same safety benchmarks. If the additional complexity
+   does not yield clear gains, the contribution is difficult to justify.
+
+5. Address scalability with concrete experiments or analysis. Provide at minimum
+   a computational budget analysis and ideally preliminary results on the
+   hierarchical SAE at scale, including training stability diagnostics.
+
+6. Expand evaluation beyond HH-RLHF. Include diverse safety benchmarks
+   (TruthfulQA, AdvBench, XSTest, or custom adversarial evaluations) to
+   demonstrate generalization of the safety monitoring capability.
+
+7. Increase training data significantly. Scale from 10M tokens to at least
+   100M-1B tokens to be commensurate with the model size and feature space
+   complexity.
+
+================================================================================
+FINAL DECISION
+================================================================================
+
+Decision: borderline_accept
+
+Rationale: The overall average score of 5.73 falls in the borderline_accept
+range (>= 5.0 and < 6.0). While all three reviewers independently recommended
+borderline reject, the research direction is timely and important, the
+hierarchical Circuit SAE component offers genuine novelty, and the identified
+weaknesses -- particularly the contrastive loss formulation error and missing
+implementation details -- are addressable with revision rather than
+fundamentally fatal. The unanimous agreement on low validity (5.0) is the most
+concerning signal, but it stems primarily from fixable technical issues rather
+than a flawed research premise.
+
+Action: The paper should undergo a major revision addressing the six actionable
+suggestions above before resubmission. The authors should prioritize (1) fixing
+the contrastive loss formulation, (2) specifying the iterative labeling
+procedure, and (3) providing empirical comparisons against simpler baselines.
+A revised version that addresses these core issues could move into solid accept
+territory. The authors are encouraged to resubmit after revision.
+
+================================================================================

@@ -1,0 +1,9 @@
+[
+  { "date": "2025-05-12", "candidate_count": 3, "evidence_count": 5 },
+  { "date": "2025-05-13", "candidate_count": 4, "evidence_count": 7 },
+  { "date": "2025-05-14", "candidate_count": 6, "evidence_count": 9 },
+  { "date": "2025-05-15", "candidate_count": 5, "evidence_count": 8 },
+  { "date": "2025-05-16", "candidate_count": 8, "evidence_count": 11 },
+  { "date": "2025-05-17", "candidate_count": 11, "evidence_count": 14 },
+  { "date": "2025-05-18", "candidate_count": 7, "evidence_count": 10 }
+]

@@ -1,0 +1,44 @@
+## Methods Specialist Review — SafeSAE: Contrastive Feature Steering for Robust Alignment Monitoring
+
+### Dimension Scores
+
+**Clarity**: 6/10
+The high-level architecture is communicated reasonably well: a three-component system (contrastive SAE loss, hierarchical circuit SAE, online steering). However, several implementation-critical details are missing or ambiguous. First, the contrastive loss formulation is under-specified: the notation uses z_s to denote "the subset of features identified as safety-relevant through an iterative labeling procedure," but this labeling procedure itself is never defined. In practice, this is a chicken-and-egg problem — you need a trained SAE to identify safety features, but the contrastive loss requires safety feature labels during training. Is this bootstrapped? Alternating optimization? The paper is silent. Second, the "learned importance weighting" in the concatenation operator for the Circuit SAE is vaguely described; it is unclear whether these are learnable scalar weights, an attention mechanism, or something else. Third, the steering strengths alpha and beta lack any guidance on selection. A practitioner reading this would face several ambiguous design choices before they could begin coding.
+
+**Novelty**: 5/10
+This is an evaluation without external evidence, so novelty assessment is based on domain knowledge. The individual components are well-established: contrastive losses on latent representations (SimCLR and variants), sparse autoencoders for interpretability (Cunningham et al., Bricken et al., Gao et al.), and activation steering via representation directions (Zou et al., Turner et al.). The core novelty claim is the combination: applying a contrastive safety objective specifically to SAE training, plus the hierarchical cross-layer aggregation. The combination is reasonable but feels more like engineering integration than a conceptual breakthrough. The hierarchical SAE idea (Level 1 per-layer, Level 2 cross-layer) is potentially interesting but similar ideas exist in hierarchical variational autoencoders and multi-scale dictionary learning. The steering module is essentially representation engineering applied to SAE decoder directions, which is a natural but incremental extension.
+
+**Validity**: 5/10
+From a methods standpoint, several validity concerns arise. The contrastive loss as formulated creates a tension with the reconstruction objective: forcing safety-relevant features to separate in z-space may degrade overall reconstruction fidelity, yet the paper does not analyze this trade-off or propose mechanisms to mitigate it (e.g., a Pareto optimization schedule). The hierarchical Circuit SAE concatenates per-layer SAE features — but SAE dictionary sizes are typically large (e.g., 16K–65K features per layer). Concatenating across, say, 32 layers of Llama-3-8B yields a vector of potentially 500K+ dimensions for the Level 2 SAE input, which raises serious questions about whether the Level 2 SAE can learn meaningful structure at that scale without massive data. The evaluation protocol claims to measure MMCS against "ground-truth features," but no ground truth exists for safety features in real LLMs — this metric is only applicable in synthetic toy settings. The 2% utility degradation threshold is a reasonable constraint but no statistical testing procedure is specified for determining whether the threshold is met.
+
+**Feasibility**: 6/10
+The building blocks largely exist: SAE training code is available in open-source repositories (SAELens, dictionary_learning), contrastive losses are standard in PyTorch, and activation steering has working implementations. The target models (Gemma-2B, Llama-3-8B) are accessible and manageable. However, several practical concerns arise. Training per-layer SAEs on Llama-3-8B across all layers is already compute-intensive (Anthropic used significant cluster resources for their scaled SAEs). Adding a contrastive term requires paired forward passes, roughly doubling the data pipeline complexity. The Circuit SAE over concatenated features from all layers faces the dimensionality issue described above and would require substantial memory. The 10M + 1M token training budget seems modest for SAEs on 8B-parameter models given that Anthropic used billions of tokens; this could lead to under-trained features. On the positive side, no custom CUDA kernels are required, the framework is implementable in standard PyTorch, and the steering module is lightweight. A realistic timeline for a small team: 3-4 months, assuming single-node multi-GPU compute is available.
+
+**Significance**: 5/10
+The problem — making SAEs more useful for safety monitoring — is genuinely important and timely. If SafeSAE worked as advertised, it would be a useful tool in the alignment monitoring toolkit. However, the practical significance is tempered by several factors. The steering module essentially recapitulates representation engineering with a different feature basis; it is unclear whether SAE-derived steering directions would substantially outperform RepE directions, which are much cheaper to compute. The safety detection use case (AUROC on binary safe/unsafe classification) is relatively simple and could likely be addressed with lightweight probes on activations without full SAE decomposition. The hierarchical circuit discovery component is the most potentially significant contribution, but it is also the least developed and validated in the proposal. The overall impact is incremental: it addresses real limitations but through a combination of known techniques rather than a fundamental advance.
+
+### Summary
+
+**Strengths:**
+- Addresses a genuine gap: current SAEs are not optimized for safety-relevant feature discovery, and adding a safety-aware training signal is a well-motivated direction.
+- The experimental design includes appropriate baselines (vanilla SAE, TopK SAE, RepE, activation patching) and meaningful evaluation metrics (AUROC, ASR reduction, utility preservation).
+- All core building blocks exist in standard frameworks; no exotic hardware or custom kernels are required.
+- The three-component architecture (contrastive training, hierarchical circuits, online steering) is modular, allowing ablation studies to isolate each contribution.
+
+**Weaknesses:**
+- The "iterative labeling procedure" for identifying safety-relevant features during contrastive training is entirely undefined — this is a critical gap that makes the method under-specified and potentially circular.
+- The hierarchical Circuit SAE faces serious scalability issues: concatenating SAE features across all layers of an 8B model creates a dimensionality problem that the proposal does not address.
+- The contrastive loss and reconstruction loss may be in tension; no analysis of this trade-off is provided, and no mechanism to balance them dynamically is proposed.
+- The "ground-truth features" referenced in MMCS evaluation do not exist for safety features in real models, undermining a key evaluation metric.
+- The training data budget (10M + 1M tokens) appears insufficient for training high-quality SAEs on 8B-parameter models.
+
+**Suggestions for Improvement:**
+- Explicitly specify the iterative labeling procedure for safety features: define initialization, update rules, and convergence criteria. Consider a two-phase approach where Phase 1 trains a standard SAE and Phase 2 fine-tunes with the contrastive loss using features identified from Phase 1.
+- Address the dimensionality challenge in the Circuit SAE by using feature selection or top-k activation masking per layer before concatenation, or by using an attention-based aggregation instead of full concatenation.
+- Add explicit analysis of the reconstruction-contrastive trade-off, including ablations over lambda_2 and possibly a dynamic weighting schedule.
+- Replace or supplement the MMCS metric with metrics that do not require ground-truth features, such as feature specificity (fraction of variance explained in safety-relevant activations) or downstream probing accuracy.
+- Increase the SAE training data budget to at least 100M tokens for the 8B model, consistent with findings from scaled SAE literature.
+
+**Overall Recommendation:** Borderline Reject
+
+The proposal tackles a relevant problem and the high-level framing is sound, but the method is under-specified at critical junctures (feature labeling procedure, hierarchical scaling, loss trade-offs). As a Methods Specialist, I cannot confidently say this proposal could be implemented from the description alone without making significant design choices that are not justified in the text. With revisions addressing the labeling procedure and scalability concerns, this could become a solid contribution.
