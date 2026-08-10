@@ -12,7 +12,7 @@ AutoMeta 是一个面向医学研究与系统综述的本地优先 AI 工作台�
 - 结构化数据提取与质量检查
 - R 统计分析、结果叙述和图表输出
 - Methods、Results 等论文内容辅助撰写
-- Claude、Codex、Gemini 及自定义 LLM Provider 接入
+- Claude、Codex 及自定义 LLM Provider 接入
 - 项目文件、任务、会话、Git 和研究技能统一管理
 - Living review / surveillance 持续文献监测
 
@@ -21,7 +21,7 @@ AutoMeta 是一个面向医学研究与系统综述的本地优先 AI 工作台�
 - Git
 - Node.js `20`、`22` 或 `24`（推荐使用仓库 `.nvmrc` 指定的 Node.js 24）
 - npm
-- 可选：Claude Code、Codex CLI 或 Gemini CLI，按你要使用的 AI 后端安装
+- 可选：Claude Code 或 Codex CLI，按你要使用的 AI 后端安装
 - 可选：R，用于运行部分 Meta 分析统计脚本
 
 ## 安装
@@ -29,7 +29,7 @@ AutoMeta 是一个面向医学研究与系统综述的本地优先 AI 工作台�
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/medicinehelp/Auto-meta-analysis.git
+git clone https://github.com/MedTiLab/Auto-meta-analysis.git
 cd Auto-meta-analysis
 ```
 
@@ -134,14 +134,6 @@ AutoMeta 默认将应用数据库、会话索引和运行状态保存在：
 - macOS / Linux：`~/autometa_workspace`
 - Windows：优先 `D:\autometa_workspace`，其次 `E:\autometa_workspace`；如果 D、E 盘不可用，则使用当前用户目录下的 `autometa_workspace`
 
-旧 MedHelp / MedAutoData 数据默认不会导入。如确实需要主动迁移旧数据，可在 `.env` 中设置：
-
-```dotenv
-AUTOMETA_IMPORT_LEGACY_DATA=true
-```
-
-建议迁移前备份旧数据库和项目目录。
-
 ## 常用命令
 
 ```bash
@@ -173,7 +165,6 @@ Windows 用户如果遇到本地编译错误，可能还需要安装 Visual Stud
 ```bash
 claude --version
 codex --version
-gemini --version
 ```
 
 ### 局域网或公网部署

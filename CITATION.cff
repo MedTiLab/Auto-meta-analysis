@@ -18,6 +18,6 @@ authors:
   - family-names: Sun
     given-names: Lichao
 year: 2026
-repository-code: "https://github.com/medicinehelp/Auto-meta-analysis"
-url: "https://github.com/medicinehelp/Auto-meta-analysis"
+repository-code: "https://github.com/MedTiLab/Auto-meta-analysis"
+url: "https://github.com/MedTiLab/Auto-meta-analysis"
 license: "GPL-3.0-or-later AND AGPL-3.0-or-later"

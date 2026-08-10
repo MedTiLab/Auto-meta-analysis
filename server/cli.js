@@ -187,10 +187,10 @@ Environment Variables:
   CONTEXT_WINDOW      Set context window size (default: 1000000)
 
 Documentation:
-  ${packageJson.homepage || 'https://github.com/medicinehelp/Auto-meta-analysis'}
+  ${packageJson.homepage || 'https://github.com/MedTiLab/Auto-meta-analysis'}
 
 Report Issues:
-  ${packageJson.bugs?.url || 'https://github.com/medicinehelp/Auto-meta-analysis/issues'}
+  ${packageJson.bugs?.url || 'https://github.com/MedTiLab/Auto-meta-analysis/issues'}
 `);
 }
 
