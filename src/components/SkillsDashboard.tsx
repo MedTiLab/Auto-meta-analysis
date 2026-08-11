@@ -189,7 +189,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const folderInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement | null>(null);
   const [skillDialog, setSkillDialog] = useState<'add' | 'delete' | 'local' | null>(null);
   const [pendingSkillFile, setPendingSkillFile] = useState<File | null>(null);
   const [skillValidation, setSkillValidation] = useState<SkillValidation | null>(null);
@@ -200,11 +200,6 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
   const [localSkills, setLocalSkills] = useState<LocalSkillItem[]>([]);
   const [selectedLocalSkills, setSelectedLocalSkills] = useState<string[]>([]);
   const [selectedFolderFiles, setSelectedFolderFiles] = useState<File[]>([]);
-
-  useEffect(() => {
-    folderInputRef.current?.setAttribute('webkitdirectory', '');
-    folderInputRef.current?.setAttribute('directory', '');
-  }, []);
 
   const loadSkills = useCallback(async () => {
     setLoading(true);
@@ -512,9 +507,17 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
               }}
             />
             <input
-              ref={folderInputRef}
+              ref={(node) => {
+                folderInputRef.current = node;
+                if (node) {
+                  (node as HTMLInputElement & { webkitdirectory: boolean }).webkitdirectory = true;
+                  node.setAttribute('webkitdirectory', '');
+                  node.setAttribute('directory', '');
+                }
+              }}
               type="file"
               multiple
+              {...({ webkitdirectory: '', directory: '' } as Record<string, string>)}
               className="hidden"
               onChange={(event) => handleLocalFolderSelection(event.target.files)}
             />
