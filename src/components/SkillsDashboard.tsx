@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Check, Loader2, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, X } from 'lucide-react';
+import { ArrowRight, Check, FolderSearch, Loader2, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 
@@ -23,6 +23,13 @@ type SkillValidation = {
   fileCount?: number;
 };
 
+type LocalSkillItem = {
+  name: string;
+  hasSkillMd: boolean;
+  alreadyImported: boolean;
+  sourcePath: string;
+};
+
 type SkillsDashboardProps = {
   onSendToChat?: (command: string) => void;
   uploadProjectName?: string | null;
@@ -40,8 +47,22 @@ const COPY = {
     loading: '正在读取技能…',
     retry: '重新加载',
     add: '添加技能',
+    scanLocal: '扫描本地路径',
     addTitle: '添加 Skill',
     addHint: '选择包含 SKILL.md 的 ZIP 包。安装前会先校验文件结构。',
+    scanTitle: '从本地路径加载 Skill',
+    scanHint: '输入一个包含 Skill 子目录的本地路径。系统只加载直接子目录中带有 SKILL.md 的项目。',
+    pathPlaceholder: '例如：~/.claude/skills 或 D:\\skills',
+    scan: '扫描',
+    scanning: '正在扫描…',
+    scanEmpty: '这个路径下没有找到可加载的 Skill。',
+    scanFound: (count: number) => `找到 ${count} 个有效 Skill`,
+    selectAll: '选择全部可加载项',
+    alreadyInstalled: '已安装',
+    invalidSkill: '缺少 SKILL.md',
+    loadSelected: '加载所选 Skill',
+    loadingSelected: '正在加载…',
+    selectRequired: '请至少选择一个尚未安装的 Skill。',
     install: '安装 Skill',
     delete: '删除技能',
     deleteTitle: '删除 Skill',
@@ -70,8 +91,22 @@ const COPY = {
     loading: 'Reading skills…',
     retry: 'Reload',
     add: 'Add Skill',
+    scanLocal: 'Scan Local Path',
     addTitle: 'Add Skill',
     addHint: 'Choose a ZIP package containing SKILL.md. Its structure will be validated before installation.',
+    scanTitle: 'Load Skills from a Local Path',
+    scanHint: 'Enter a local folder containing skill subfolders. Only direct children with a SKILL.md file are loaded.',
+    pathPlaceholder: 'For example: ~/.claude/skills or D:\\skills',
+    scan: 'Scan',
+    scanning: 'Scanning…',
+    scanEmpty: 'No loadable skills were found at this path.',
+    scanFound: (count: number) => `${count} valid skills found`,
+    selectAll: 'Select all loadable skills',
+    alreadyInstalled: 'Installed',
+    invalidSkill: 'Missing SKILL.md',
+    loadSelected: 'Load Selected Skills',
+    loadingSelected: 'Loading…',
+    selectRequired: 'Select at least one skill that is not already installed.',
     install: 'Install Skill',
     delete: 'Delete Skill',
     deleteTitle: 'Delete Skill',
@@ -152,11 +187,15 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [skillDialog, setSkillDialog] = useState<'add' | 'delete' | null>(null);
+  const [skillDialog, setSkillDialog] = useState<'add' | 'delete' | 'local' | null>(null);
   const [pendingSkillFile, setPendingSkillFile] = useState<File | null>(null);
   const [skillValidation, setSkillValidation] = useState<SkillValidation | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [localPath, setLocalPath] = useState('~/.claude/skills');
+  const [scannedPath, setScannedPath] = useState<string | null>(null);
+  const [localSkills, setLocalSkills] = useState<LocalSkillItem[]>([]);
+  const [selectedLocalSkills, setSelectedLocalSkills] = useState<string[]>([]);
 
   const loadSkills = useCallback(async () => {
     setLoading(true);
@@ -212,7 +251,60 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     setPendingSkillFile(null);
     setSkillValidation(null);
     setActionError(null);
+    setScannedPath(null);
+    setLocalSkills([]);
+    setSelectedLocalSkills([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const scanLocalPath = async () => {
+    const requestedPath = localPath.trim();
+    if (!requestedPath) return;
+    setActionLoading(true);
+    setActionError(null);
+    setScannedPath(null);
+    setLocalSkills([]);
+    setSelectedLocalSkills([]);
+    try {
+      const response = await api.scanLocalSkills(requestedPath);
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Failed to scan local skills');
+      const scanned = Array.isArray(payload.skills) ? payload.skills as LocalSkillItem[] : [];
+      setScannedPath(payload.resolvedPath || requestedPath);
+      setLocalSkills(scanned);
+      setSelectedLocalSkills(scanned
+        .filter((skill) => skill.hasSkillMd && !skill.alreadyImported)
+        .map((skill) => skill.name));
+    } catch (scanError) {
+      setActionError(scanError instanceof Error ? scanError.message : 'Failed to scan local skills');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const importSelectedLocalSkills = async () => {
+    if (selectedLocalSkills.length === 0) {
+      setActionError(text.selectRequired);
+      return;
+    }
+    setActionLoading(true);
+    setActionError(null);
+    try {
+      const response = await api.importLocalSkills(localPath.trim(), selectedLocalSkills);
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Failed to load local skills');
+      const imported = Array.isArray(payload.imported) ? payload.imported : [];
+      const errors = Array.isArray(payload.errors) ? payload.errors : [];
+      if (errors.length > 0) throw new Error(errors.join('\n'));
+      if (imported.length === 0) throw new Error(text.selectRequired);
+      await loadSkills();
+      setSelectedPath(imported[0]);
+      closeSkillDialog();
+    } catch (importError) {
+      setActionError(importError instanceof Error ? importError.message : 'Failed to load local skills');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const validateSkillFile = async (file: File) => {
@@ -298,7 +390,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
             <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl">{text.title}</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{text.subtitle}</p>
           </div>
-          <div className="flex min-w-0 items-center gap-3 sm:w-[440px]">
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-3 sm:w-[620px]">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
@@ -315,6 +407,17 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
               aria-label={text.retry}
             >
               <RefreshCw className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActionError(null);
+                setSkillDialog('local');
+              }}
+              className="inline-flex h-9 flex-none items-center gap-1.5 border border-border px-3 text-xs font-medium text-foreground hover:bg-muted"
+            >
+              <FolderSearch className="h-3.5 w-3.5" />
+              {text.scanLocal}
             </button>
             <button
               type="button"
@@ -440,11 +543,15 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-base font-semibold text-foreground">{skillDialog === 'add' ? text.addTitle : text.deleteTitle}</h2>
+                <h2 className="text-base font-semibold text-foreground">
+                  {skillDialog === 'add' ? text.addTitle : skillDialog === 'local' ? text.scanTitle : text.deleteTitle}
+                </h2>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">
                   {skillDialog === 'add'
                     ? text.addHint
-                    : selectedSkill ? text.deleteHint(selectedSkill.name) : ''}
+                    : skillDialog === 'local'
+                      ? text.scanHint
+                      : selectedSkill ? text.deleteHint(selectedSkill.name) : ''}
                 </p>
               </div>
               <button type="button" onClick={closeSkillDialog} className="p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
@@ -473,23 +580,102 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
               </div>
             )}
 
+            {skillDialog === 'local' && (
+              <div className="mt-5 space-y-4">
+                <div className="flex gap-2">
+                  <input
+                    value={localPath}
+                    onChange={(event) => setLocalPath(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && !actionLoading) void scanLocalPath();
+                    }}
+                    placeholder={text.pathPlaceholder}
+                    className="h-10 min-w-0 flex-1 border border-border bg-background px-3 font-mono text-xs text-foreground outline-none focus:border-foreground"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void scanLocalPath()}
+                    disabled={actionLoading || !localPath.trim()}
+                    className="inline-flex h-10 items-center gap-2 bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-35"
+                  >
+                    {actionLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    {actionLoading ? text.scanning : text.scan}
+                  </button>
+                </div>
+
+                {scannedPath && (
+                  <div>
+                    <p className="break-all font-mono text-[11px] text-muted-foreground">{scannedPath}</p>
+                    {localSkills.length === 0 ? (
+                      <p className="mt-4 border border-border bg-muted/30 px-3 py-4 text-sm text-muted-foreground">{text.scanEmpty}</p>
+                    ) : (
+                      <div className="mt-3 max-h-64 overflow-y-auto border border-border">
+                        <div className="flex items-center justify-between border-b border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                          <span>{text.scanFound(localSkills.filter((skill) => skill.hasSkillMd).length)}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedLocalSkills(localSkills
+                              .filter((skill) => skill.hasSkillMd && !skill.alreadyImported)
+                              .map((skill) => skill.name))}
+                            className="text-foreground hover:underline"
+                          >
+                            {text.selectAll}
+                          </button>
+                        </div>
+                        {localSkills.map((skill) => {
+                          const selectable = skill.hasSkillMd && !skill.alreadyImported;
+                          const checked = selectedLocalSkills.includes(skill.name);
+                          return (
+                            <label key={skill.sourcePath} className={`flex items-center gap-3 border-b border-border px-3 py-3 last:border-b-0 ${selectable ? 'cursor-pointer' : 'opacity-55'}`}>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                disabled={!selectable}
+                                onChange={() => setSelectedLocalSkills((current) => checked
+                                  ? current.filter((name) => name !== skill.name)
+                                  : [...current, skill.name])}
+                                className="h-4 w-4 accent-primary"
+                              />
+                              <span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">{skill.name}</span>
+                              <span className="text-[11px] text-muted-foreground">
+                                {skill.alreadyImported ? text.alreadyInstalled : !skill.hasSkillMd ? text.invalidSkill : ''}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {actionError && <div className="mt-4 border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">{actionError}</div>}
 
             <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
               <button type="button" onClick={closeSkillDialog} disabled={actionLoading} className="h-9 border border-border px-4 text-sm text-muted-foreground hover:bg-muted disabled:opacity-40">
                 {text.cancel}
               </button>
-              <button
-                type="button"
-                onClick={() => void (skillDialog === 'add' ? installSkill() : deleteSkill())}
-                disabled={actionLoading || (skillDialog === 'add' && !skillValidation)}
-                className="inline-flex h-9 items-center gap-2 bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-35"
-              >
-                {actionLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {actionLoading
-                  ? skillDialog === 'add' ? text.installing : text.deleting
-                  : skillDialog === 'add' ? text.install : text.delete}
-              </button>
+              {(skillDialog !== 'local' || scannedPath) && (
+                <button
+                  type="button"
+                  onClick={() => void (skillDialog === 'add'
+                    ? installSkill()
+                    : skillDialog === 'local'
+                      ? importSelectedLocalSkills()
+                      : deleteSkill())}
+                  disabled={actionLoading
+                    || (skillDialog === 'add' && !skillValidation)
+                    || (skillDialog === 'local' && selectedLocalSkills.length === 0)}
+                  className="inline-flex h-9 items-center gap-2 bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-35"
+                >
+                  {actionLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {actionLoading
+                    ? skillDialog === 'add' ? text.installing : skillDialog === 'local' ? text.loadingSelected : text.deleting
+                    : skillDialog === 'add' ? text.install : skillDialog === 'local' ? text.loadSelected : text.delete}
+                </button>
+              )}
             </div>
           </div>
         </div>

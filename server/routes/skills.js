@@ -348,6 +348,16 @@ function safeDirName(name) {
     .slice(0, 80);
 }
 
+function isSafeSkillDirectoryName(name) {
+  return typeof name === 'string'
+    && name.length > 0
+    && name !== '.'
+    && name !== '..'
+    && path.basename(name) === name
+    && !name.includes('/')
+    && !name.includes('\\');
+}
+
 /**
  * Validate that a zip buffer contains a valid skill package.
  */
@@ -611,10 +621,14 @@ router.post('/import-from-local', async (req, res) => {
     let dirsToImport = [];
     if (Array.isArray(skillNames) && skillNames.length > 0) {
       for (const name of skillNames) {
+        if (!isSafeSkillDirectoryName(name)) {
+          continue;
+        }
         const skillDir = path.join(absolutePath, name);
         try {
-          const s = await fs.stat(skillDir);
-          if (s.isDirectory()) {
+          const s = await fs.lstat(skillDir);
+          await fs.access(path.join(skillDir, 'SKILL.md'));
+          if (s.isDirectory() && !s.isSymbolicLink()) {
             dirsToImport.push({ name, sourcePath: skillDir });
           }
         } catch {
@@ -625,7 +639,13 @@ router.post('/import-from-local', async (req, res) => {
       const entries = await fs.readdir(absolutePath, { withFileTypes: true });
       for (const entry of entries) {
         if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
-        dirsToImport.push({ name: entry.name, sourcePath: path.join(absolutePath, entry.name) });
+        const skillDir = path.join(absolutePath, entry.name);
+        try {
+          await fs.access(path.join(skillDir, 'SKILL.md'));
+          dirsToImport.push({ name: entry.name, sourcePath: skillDir });
+        } catch {
+          // Ignore ordinary directories that are not skill packages.
+        }
       }
     }
 
