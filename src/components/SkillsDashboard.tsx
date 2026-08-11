@@ -487,7 +487,6 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
               onClick={() => {
                 setActionError(null);
                 setSkillDialog('local');
-                folderInputRef.current?.click();
               }}
               className="inline-flex h-9 flex-none items-center gap-1.5 border border-border px-3 text-xs font-medium text-foreground hover:bg-muted"
             >
