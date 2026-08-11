@@ -5,7 +5,6 @@ declare global {
     isDesktop: boolean;
     platform: string;
     writeClipboardText?: (text: string) => Promise<boolean>;
-    chooseDirectory?: (defaultPath?: string) => Promise<{ canceled?: boolean; filePath?: string }>;
     saveFile?: (payload: { defaultFileName: string; data: ArrayBuffer }) => Promise<{ canceled?: boolean; filePath?: string }>;
   }
 

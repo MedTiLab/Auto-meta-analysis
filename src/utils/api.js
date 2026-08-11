@@ -579,10 +579,11 @@ export const api = {
     }),
 
   // Browse filesystem for project suggestions
-  browseFilesystem: (dirPath = null, { selectDefaultLocation = false } = {}) => {
+  browseFilesystem: (dirPath = /** @type {string | null} */ (null), { selectDefaultLocation = false, showHidden = false } = {}) => {
     const params = new URLSearchParams();
     if (dirPath) params.append('path', dirPath);
     if (selectDefaultLocation) params.append('selectDefaultLocation', 'true');
+    if (showHidden) params.append('showHidden', 'true');
 
     return authenticatedFetch(`/api/browse-filesystem?${params}`);
   },
@@ -682,12 +683,6 @@ export const api = {
     authenticatedFetch('/api/skills/import-from-local', {
       method: 'POST',
       body: JSON.stringify({ sourcePath, skillNames }),
-    }),
-  importLocalSkillFolder: (formData) =>
-    authenticatedFetch('/api/skills/import-folder', {
-      method: 'POST',
-      body: formData,
-      headers: {},
     }),
   deleteProjectSkill: (projectName, skillDirName) =>
     authenticatedFetch(`/api/skills/${encodeURIComponent(projectName)}/${encodeURIComponent(skillDirName)}`, {

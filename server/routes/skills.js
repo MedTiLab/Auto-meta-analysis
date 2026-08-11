@@ -549,9 +549,29 @@ router.get('/scan-local', async (req, res) => {
       return res.status(400).json({ error: `Path is not a directory: ${rawPath}` });
     }
 
-    // Scan for subdirectories (1-level deep)
-    const entries = await fs.readdir(absolutePath, { withFileTypes: true });
     const skills = [];
+    let rootIsSkill = false;
+    try {
+      await fs.access(path.join(absolutePath, 'SKILL.md'));
+      rootIsSkill = true;
+    } catch {
+      // Scan direct child directories below.
+    }
+
+    if (rootIsSkill) {
+      const name = path.basename(absolutePath);
+      let alreadyImported = false;
+      try {
+        await fs.access(path.join(GLOBAL_SKILLS_DIR, name));
+        alreadyImported = true;
+      } catch {
+        // Not imported.
+      }
+      skills.push({ name, hasSkillMd: true, alreadyImported, sourcePath: absolutePath });
+    }
+
+    // Scan direct subdirectories when the selected directory is a skill collection.
+    const entries = rootIsSkill ? [] : await fs.readdir(absolutePath, { withFileTypes: true });
 
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
@@ -584,7 +604,7 @@ router.get('/scan-local', async (req, res) => {
       });
     }
 
-    res.json({ path: rawPath, resolvedPath: absolutePath, skills });
+    res.json({ path: rawPath, resolvedPath: absolutePath, rootIsSkill, skills });
   } catch (error) {
     console.error('[skills] scan-local error:', error);
     res.status(500).json({ error: error.message });
@@ -729,7 +749,20 @@ router.post('/import-from-local', async (req, res) => {
 
     // If skillNames is provided, only import those; otherwise scan all subdirectories
     let dirsToImport = [];
-    if (Array.isArray(skillNames) && skillNames.length > 0) {
+    let rootIsSkill = false;
+    try {
+      await fs.access(path.join(absolutePath, 'SKILL.md'));
+      rootIsSkill = true;
+    } catch {
+      // Treat the directory as a collection.
+    }
+
+    if (rootIsSkill) {
+      const name = path.basename(absolutePath);
+      if ((!Array.isArray(skillNames) || skillNames.length === 0 || skillNames.includes(name)) && isSafeSkillDirectoryName(name)) {
+        dirsToImport.push({ name, sourcePath: absolutePath });
+      }
+    } else if (Array.isArray(skillNames) && skillNames.length > 0) {
       for (const name of skillNames) {
         if (!isSafeSkillDirectoryName(name)) {
           continue;
@@ -795,7 +828,21 @@ router.post('/import-from-local', async (req, res) => {
       }
     }
 
-    res.json({ imported, skipped, errors });
+    const activated = [...new Set([...imported, ...skipped])];
+    if (skipped.length > 0) {
+      const stageSkillMapPath = path.join(GLOBAL_SKILLS_DIR, 'stage-skill-map.json');
+      let stageSkillMap = { skillOrigins: {} };
+      try {
+        stageSkillMap = JSON.parse(await fs.readFile(stageSkillMapPath, 'utf8'));
+      } catch { /* use defaults */ }
+      stageSkillMap.skillOrigins = stageSkillMap.skillOrigins || {};
+      skipped.forEach((name) => {
+        stageSkillMap.skillOrigins[name] = 'local-import';
+      });
+      await fs.writeFile(stageSkillMapPath, JSON.stringify(stageSkillMap, null, 2), 'utf8');
+    }
+
+    res.json({ imported, skipped, activated, errors });
   } catch (error) {
     console.error('[skills] import-from-local error:', error);
     res.status(500).json({ error: error.message });

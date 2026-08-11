@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Check, FolderOpen, FolderSearch, Loader2, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, X } from 'lucide-react';
+import { ArrowRight, Check, ChevronUp, Folder, FolderOpen, FolderSearch, Loader2, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 
@@ -30,6 +30,11 @@ type LocalSkillItem = {
   sourcePath: string;
 };
 
+type LocalFolderItem = {
+  name: string;
+  path: string;
+};
+
 type SkillsDashboardProps = {
   onSendToChat?: (command: string) => void;
   uploadProjectName?: string | null;
@@ -54,6 +59,11 @@ const COPY = {
     scanHint: '直接选择 Skill 文件夹，或输入一个包含 Skill 子目录的本地路径。系统只加载带有 SKILL.md 的项目。',
     pathPlaceholder: '例如：~/.claude/skills 或 D:\\skills',
     chooseDirectory: '选择目录',
+    browserTitle: '选择本地 Skill 目录',
+    browserUp: '上一级',
+    browserEmpty: '当前目录没有子文件夹。',
+    browserChoose: '选择当前目录',
+    browserFailed: '读取目录失败。',
     scan: '扫描',
     scanning: '正在扫描…',
     scanEmpty: '这个路径下没有找到可加载的 Skill。',
@@ -99,6 +109,11 @@ const COPY = {
     scanHint: 'Choose a Skill folder directly, or enter a local path containing skill subfolders. Only folders with SKILL.md are loaded.',
     pathPlaceholder: 'For example: ~/.claude/skills or D:\\skills',
     chooseDirectory: 'Choose Folder',
+    browserTitle: 'Choose a Local Skill Directory',
+    browserUp: 'Up',
+    browserEmpty: 'This directory has no subfolders.',
+    browserChoose: 'Choose This Folder',
+    browserFailed: 'Failed to browse the directory.',
     scan: 'Scan',
     scanning: 'Scanning…',
     scanEmpty: 'No loadable skills were found at this path.',
@@ -189,7 +204,6 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const folderInputRef = useRef<HTMLInputElement | null>(null);
   const [skillDialog, setSkillDialog] = useState<'add' | 'delete' | 'local' | null>(null);
   const [pendingSkillFile, setPendingSkillFile] = useState<File | null>(null);
   const [skillValidation, setSkillValidation] = useState<SkillValidation | null>(null);
@@ -199,7 +213,12 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
   const [scannedPath, setScannedPath] = useState<string | null>(null);
   const [localSkills, setLocalSkills] = useState<LocalSkillItem[]>([]);
   const [selectedLocalSkills, setSelectedLocalSkills] = useState<string[]>([]);
-  const [selectedFolderFiles, setSelectedFolderFiles] = useState<File[]>([]);
+  const [folderBrowserOpen, setFolderBrowserOpen] = useState(false);
+  const [folderBrowserLoading, setFolderBrowserLoading] = useState(false);
+  const [folderBrowserPath, setFolderBrowserPath] = useState('');
+  const [folderBrowserParent, setFolderBrowserParent] = useState<string | null>(null);
+  const [folderBrowserFolders, setFolderBrowserFolders] = useState<LocalFolderItem[]>([]);
+  const [folderBrowserError, setFolderBrowserError] = useState<string | null>(null);
 
   const loadSkills = useCallback(async () => {
     setLoading(true);
@@ -258,9 +277,8 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     setScannedPath(null);
     setLocalSkills([]);
     setSelectedLocalSkills([]);
-    setSelectedFolderFiles([]);
+    setFolderBrowserOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    if (folderInputRef.current) folderInputRef.current.value = '';
   };
 
   const scanLocalPath = async (pathOverride?: string) => {
@@ -271,7 +289,6 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     setScannedPath(null);
     setLocalSkills([]);
     setSelectedLocalSkills([]);
-    setSelectedFolderFiles([]);
     try {
       const response = await api.scanLocalSkills(requestedPath);
       const payload = await response.json().catch(() => ({}));
@@ -289,47 +306,34 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     }
   };
 
-  const chooseLocalDirectory = () => {
-    setActionError(null);
-    folderInputRef.current?.click();
+  const loadFolderBrowser = async (requestedPath?: string | null) => {
+    setFolderBrowserLoading(true);
+    setFolderBrowserError(null);
+    try {
+      let response = await api.browseFilesystem(requestedPath || null, {
+        selectDefaultLocation: true,
+        showHidden: true,
+      });
+      let payload = await response.json().catch(() => ({}));
+      if (!response.ok && requestedPath) {
+        response = await api.browseFilesystem(null, { selectDefaultLocation: true, showHidden: true });
+        payload = await response.json().catch(() => ({}));
+      }
+      if (!response.ok) throw new Error(payload.error || text.browserFailed);
+      setFolderBrowserPath(payload.path || requestedPath || '');
+      setFolderBrowserParent(payload.parentPath || null);
+      setFolderBrowserFolders(Array.isArray(payload.suggestions) ? payload.suggestions : []);
+    } catch (browseError) {
+      setFolderBrowserError(browseError instanceof Error ? browseError.message : text.browserFailed);
+    } finally {
+      setFolderBrowserLoading(false);
+    }
   };
 
-  const handleLocalFolderSelection = (fileList: FileList | null) => {
-    const files = Array.from(fileList || []);
-    if (files.length === 0) return;
-
-    const candidates = new Map<string, LocalSkillItem>();
-    for (const file of files) {
-      const relativePath = file.webkitRelativePath || file.name;
-      const parts = relativePath.split('/').filter(Boolean);
-      if (parts.at(-1) !== 'SKILL.md') continue;
-
-      let name = '';
-      let sourcePath = '';
-      if (parts.length === 2) {
-        name = parts[0];
-        sourcePath = parts[0];
-      } else if (parts.length === 3) {
-        name = parts[1];
-        sourcePath = `${parts[0]}/${parts[1]}`;
-      }
-      if (!name || candidates.has(name)) continue;
-
-      candidates.set(name, {
-        name,
-        hasSkillMd: true,
-        alreadyImported: skills.some((skill) => skill.name === name || skill.dirPath === name),
-        sourcePath,
-      });
-    }
-
-    const discovered = [...candidates.values()].sort((left, right) => left.name.localeCompare(right.name));
-    const selectedRoot = (files[0].webkitRelativePath || files[0].name).split('/').filter(Boolean)[0] || 'local-folder';
-    setSelectedFolderFiles(files);
-    setLocalSkills(discovered);
-    setScannedPath(selectedRoot);
-    setSelectedLocalSkills(discovered.filter((skill) => !skill.alreadyImported).map((skill) => skill.name));
+  const chooseLocalDirectory = () => {
     setActionError(null);
+    setFolderBrowserOpen(true);
+    void loadFolderBrowser(localPath.trim() || null);
   };
 
   const importSelectedLocalSkills = async () => {
@@ -340,23 +344,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     setActionLoading(true);
     setActionError(null);
     try {
-      let response;
-      if (selectedFolderFiles.length > 0) {
-        const selectedPrefixes = new Set(localSkills
-          .filter((skill) => selectedLocalSkills.includes(skill.name))
-          .map((skill) => skill.sourcePath));
-        const filesToUpload = selectedFolderFiles.filter((file) => {
-          const relativePath = file.webkitRelativePath || file.name;
-          return [...selectedPrefixes].some((prefix) => relativePath === prefix || relativePath.startsWith(`${prefix}/`));
-        });
-        const formData = new FormData();
-        filesToUpload.forEach((file) => formData.append('files', file, file.name));
-        formData.append('relativePaths', JSON.stringify(filesToUpload.map((file) => file.webkitRelativePath || file.name)));
-        formData.append('skillNames', JSON.stringify(selectedLocalSkills));
-        response = await api.importLocalSkillFolder(formData);
-      } else {
-        response = await api.importLocalSkills(localPath.trim(), selectedLocalSkills);
-      }
+      const response = await api.importLocalSkills(localPath.trim(), selectedLocalSkills);
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || 'Failed to load local skills');
       const imported = Array.isArray(payload.imported) ? payload.imported : [];
@@ -505,21 +493,6 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
                 const file = event.target.files?.[0];
                 if (file) void validateSkillFile(file);
               }}
-            />
-            <input
-              ref={(node) => {
-                folderInputRef.current = node;
-                if (node) {
-                  (node as HTMLInputElement & { webkitdirectory: boolean }).webkitdirectory = true;
-                  node.setAttribute('webkitdirectory', '');
-                  node.setAttribute('directory', '');
-                }
-              }}
-              type="file"
-              multiple
-              {...({ webkitdirectory: '', directory: '' } as Record<string, string>)}
-              className="hidden"
-              onChange={(event) => handleLocalFolderSelection(event.target.files)}
             />
           </div>
         </header>
@@ -770,6 +743,84 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {folderBrowserOpen && (
+        <div
+          className="fixed inset-0 z-[10020] flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
+          onClick={() => setFolderBrowserOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="flex h-[70vh] w-full max-w-xl flex-col overflow-hidden border border-border bg-background shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <header className="flex h-14 items-center justify-between border-b border-border px-4">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">{text.browserTitle}</p>
+                <p className="truncate font-mono text-[11px] text-muted-foreground">{folderBrowserPath}</p>
+              </div>
+              <button type="button" onClick={() => setFolderBrowserOpen(false)} className="grid h-8 w-8 flex-none place-items-center text-muted-foreground hover:text-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </header>
+
+            <div className="flex items-center gap-2 border-b border-border p-3">
+              <button
+                type="button"
+                onClick={() => folderBrowserParent && void loadFolderBrowser(folderBrowserParent)}
+                disabled={!folderBrowserParent || folderBrowserLoading}
+                className="inline-flex h-8 items-center gap-1.5 border border-border px-2.5 text-xs text-foreground disabled:opacity-35"
+              >
+                <ChevronUp className="h-4 w-4" /> {text.browserUp}
+              </button>
+              <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted-foreground">{folderBrowserPath}</span>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto p-2">
+              {folderBrowserLoading ? (
+                <div className="grid min-h-44 place-items-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" /></div>
+              ) : folderBrowserFolders.length > 0 ? (
+                <div className="divide-y divide-border">
+                  {folderBrowserFolders.map((folder) => (
+                    <button
+                      key={folder.path}
+                      type="button"
+                      onClick={() => void loadFolderBrowser(folder.path)}
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-primary/5"
+                    >
+                      <Folder className="h-4 w-4 flex-none text-primary/75" />
+                      <span className="truncate text-sm text-foreground">{folder.name}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid min-h-44 place-items-center text-xs text-muted-foreground">{text.browserEmpty}</div>
+              )}
+              {folderBrowserError && <p className="p-3 text-xs text-destructive">{folderBrowserError}</p>}
+            </div>
+
+            <footer className="flex items-center justify-end gap-2 border-t border-border p-3">
+              <button type="button" onClick={() => setFolderBrowserOpen(false)} className="h-9 px-3 text-xs text-muted-foreground hover:text-foreground">
+                {text.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const chosenPath = folderBrowserPath;
+                  setLocalPath(chosenPath);
+                  setFolderBrowserOpen(false);
+                  void scanLocalPath(chosenPath);
+                }}
+                disabled={!folderBrowserPath || folderBrowserLoading}
+                className="h-9 bg-primary px-4 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-35"
+              >
+                {text.browserChoose}
+              </button>
+            </footer>
           </div>
         </div>
       )}
