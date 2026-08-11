@@ -50,6 +50,22 @@ ipcMain.handle('desktop:write-clipboard-text', async (_event, text) => {
   return true;
 });
 
+ipcMain.handle('desktop:choose-directory', async (_event, defaultPath = '') => {
+  const requestedPath = String(defaultPath || '').trim();
+  const expandedPath = requestedPath.replace(/^~(?=$|[\\/])/, os.homedir());
+  const openResult = await dialog.showOpenDialog(mainWindow || undefined, {
+    title: 'Select Skill Directory',
+    defaultPath: expandedPath ? path.resolve(expandedPath) : os.homedir(),
+    properties: ['openDirectory'],
+  });
+
+  if (openResult.canceled || !openResult.filePaths[0]) {
+    return { canceled: true };
+  }
+
+  return { canceled: false, filePath: openResult.filePaths[0] };
+});
+
 function sanitizeDesktopDownloadFileName(defaultFileName) {
   const fallbackName = 'download.zip';
   const safeBaseName = path.basename(String(defaultFileName || fallbackName))

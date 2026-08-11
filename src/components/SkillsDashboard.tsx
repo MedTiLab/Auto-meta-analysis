@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Check, FolderSearch, Loader2, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, X } from 'lucide-react';
+import { ArrowRight, Check, FolderOpen, FolderSearch, Loader2, Plus, RefreshCw, Search, Sparkles, Trash2, Upload, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../utils/api';
 
@@ -53,6 +53,8 @@ const COPY = {
     scanTitle: '从本地路径加载 Skill',
     scanHint: '输入一个包含 Skill 子目录的本地路径。系统只加载直接子目录中带有 SKILL.md 的项目。',
     pathPlaceholder: '例如：~/.claude/skills 或 D:\\skills',
+    chooseDirectory: '选择目录',
+    desktopPickerUnavailable: '当前网页模式无法读取系统绝对路径，请手动输入目录。',
     scan: '扫描',
     scanning: '正在扫描…',
     scanEmpty: '这个路径下没有找到可加载的 Skill。',
@@ -97,6 +99,8 @@ const COPY = {
     scanTitle: 'Load Skills from a Local Path',
     scanHint: 'Enter a local folder containing skill subfolders. Only direct children with a SKILL.md file are loaded.',
     pathPlaceholder: 'For example: ~/.claude/skills or D:\\skills',
+    chooseDirectory: 'Choose Folder',
+    desktopPickerUnavailable: 'The web version cannot read an absolute system path. Enter the folder path manually.',
     scan: 'Scan',
     scanning: 'Scanning…',
     scanEmpty: 'No loadable skills were found at this path.',
@@ -257,8 +261,8 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const scanLocalPath = async () => {
-    const requestedPath = localPath.trim();
+  const scanLocalPath = async (pathOverride?: string) => {
+    const requestedPath = (pathOverride ?? localPath).trim();
     if (!requestedPath) return;
     setActionLoading(true);
     setActionError(null);
@@ -279,6 +283,23 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
       setActionError(scanError instanceof Error ? scanError.message : 'Failed to scan local skills');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const chooseLocalDirectory = async () => {
+    const chooseDirectory = window.medautodataDesktop?.chooseDirectory;
+    if (!chooseDirectory) {
+      setActionError(text.desktopPickerUnavailable);
+      return;
+    }
+    setActionError(null);
+    try {
+      const result = await chooseDirectory(localPath.trim());
+      if (result.canceled || !result.filePath) return;
+      setLocalPath(result.filePath);
+      await scanLocalPath(result.filePath);
+    } catch (pickerError) {
+      setActionError(pickerError instanceof Error ? pickerError.message : text.desktopPickerUnavailable);
     }
   };
 
@@ -538,7 +559,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
           <div
             role="dialog"
             aria-modal="true"
-            className="w-full max-w-md border border-border bg-background p-5 shadow-2xl"
+            className={`w-full border border-border bg-background p-5 shadow-2xl ${skillDialog === 'local' ? 'max-w-2xl' : 'max-w-md'}`}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
@@ -593,6 +614,15 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
                     className="h-10 min-w-0 flex-1 border border-border bg-background px-3 font-mono text-xs text-foreground outline-none focus:border-foreground"
                     autoFocus
                   />
+                  <button
+                    type="button"
+                    onClick={() => void chooseLocalDirectory()}
+                    disabled={actionLoading}
+                    className="inline-flex h-10 flex-none items-center gap-2 border border-border px-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-35"
+                  >
+                    <FolderOpen className="h-4 w-4" />
+                    {text.chooseDirectory}
+                  </button>
                   <button
                     type="button"
                     onClick={() => void scanLocalPath()}
