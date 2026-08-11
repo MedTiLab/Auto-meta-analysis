@@ -512,5 +512,12 @@
         "manuscript-editor"
       ]
     }
+  },
+  "skillOrigins": {
+    "local-database-api-access": "local-import",
+    "zotero-medautodata-library": "local-import",
+    "nature-academic-search": "local-import",
+    "nature-reader": "local-import",
+    "nature-writing": "local-import"
   }
 }

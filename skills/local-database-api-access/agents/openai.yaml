@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Database API Access"
+  short_description: "Detect, query, and extract through the unified MedHelp database API (local = no token)"
+  default_prompt: "Use $local-database-api-access as the shared API layer for MedHelp database work. Auto-detect the base URL: MEDHELP_DATABASE_API_URL if set, else probe http://127.0.0.1:8787 then http://127.0.0.1:8878 via /api/v1/health. On the same host the API needs NO token — never ask for one; if you see 'Access token required' you are on the wrong base/path, switch to http://127.0.0.1:<port>/api/v1/*. Default to high-level /api/v1/* endpoints: list sources, query variables (POST JSON, works for Chinese), build/extract a small dataset (rowCap ~20), then download the CSV via the returned downloadUrl. Use low-level /search,/resolve,/schema only to verify a file/columns before extracting. Query first, extract last; never invent fields, files, or values."

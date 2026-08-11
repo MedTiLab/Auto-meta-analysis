@@ -1,0 +1,4 @@
+interface:
+  display_name: "Zotero Meta Library"
+  short_description: "Sync Zotero references and queued full-text attachments"
+  default_prompt: "Use $zotero-medautodata-library to sync project references and copy user-owned Zotero PDF attachments only for records already listed in 04_full_text_review/fulltext_manifest.json/csv with needs_full_text=true. Do not treat Zotero as a literature database search and do not scan arbitrary folders. Write report-style outputs, saved reports, and handoff summaries in Simplified Chinese unless the user explicitly asks for another language."
