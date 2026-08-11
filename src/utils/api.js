@@ -683,6 +683,12 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ sourcePath, skillNames }),
     }),
+  importLocalSkillFolder: (formData) =>
+    authenticatedFetch('/api/skills/import-folder', {
+      method: 'POST',
+      body: formData,
+      headers: {},
+    }),
   deleteProjectSkill: (projectName, skillDirName) =>
     authenticatedFetch(`/api/skills/${encodeURIComponent(projectName)}/${encodeURIComponent(skillDirName)}`, {
       method: 'DELETE',

@@ -591,6 +591,116 @@ router.get('/scan-local', async (req, res) => {
   }
 });
 
+// POST /import-folder — import skills selected with a browser directory picker
+router.post('/import-folder', async (req, res) => {
+  try {
+    const multer = (await import('multer')).default;
+    const upload = multer({
+      storage: multer.memoryStorage(),
+      limits: { files: 5000, fileSize: 50 * 1024 * 1024 },
+    }).array('files', 5000);
+
+    upload(req, res, async (uploadError) => {
+      if (uploadError) {
+        return res.status(400).json({ error: uploadError.message });
+      }
+
+      try {
+        const files = Array.isArray(req.files) ? req.files : [];
+        const relativePaths = JSON.parse(req.body?.relativePaths || '[]');
+        const requestedNames = JSON.parse(req.body?.skillNames || '[]');
+        if (!Array.isArray(relativePaths) || relativePaths.length !== files.length || !Array.isArray(requestedNames)) {
+          return res.status(400).json({ error: 'Invalid folder upload metadata.' });
+        }
+
+        const uploaded = files.map((file, index) => {
+          const normalized = String(relativePaths[index] || '').replace(/\\/g, '/').replace(/^\/+/, '');
+          const parts = normalized.split('/').filter(Boolean);
+          const safe = parts.length > 0 && parts.every((part) => part !== '.' && part !== '..' && !part.includes('\0'));
+          return { file, normalized, parts, safe };
+        });
+        if (uploaded.some((entry) => !entry.safe)) {
+          return res.status(400).json({ error: 'Folder contains an unsafe relative path.' });
+        }
+
+        const skillPrefixes = new Map();
+        for (const entry of uploaded) {
+          if (entry.parts.at(-1) !== 'SKILL.md') continue;
+          if (entry.parts.length === 2) {
+            skillPrefixes.set(entry.parts[0], entry.parts[0]);
+          } else if (entry.parts.length === 3) {
+            skillPrefixes.set(entry.parts[1], `${entry.parts[0]}/${entry.parts[1]}`);
+          }
+        }
+
+        const selectedNames = [...new Set(requestedNames.filter(isSafeSkillDirectoryName))];
+        const imported = [];
+        const skipped = [];
+        const errors = [];
+        await fs.mkdir(GLOBAL_SKILLS_DIR, { recursive: true });
+
+        for (const name of selectedNames) {
+          const prefix = skillPrefixes.get(name);
+          if (!prefix) {
+            errors.push(`${name}: SKILL.md not found`);
+            continue;
+          }
+
+          const destDir = path.join(GLOBAL_SKILLS_DIR, name);
+          try {
+            await fs.access(destDir);
+            skipped.push(name);
+            continue;
+          } catch {
+            // The destination is available.
+          }
+
+          const skillFiles = uploaded.filter((entry) => entry.normalized === prefix || entry.normalized.startsWith(`${prefix}/`));
+          try {
+            await fs.mkdir(destDir, { recursive: true });
+            for (const entry of skillFiles) {
+              const relativePath = entry.normalized.slice(prefix.length).replace(/^\/+/, '');
+              if (!relativePath) continue;
+              const destination = path.resolve(destDir, relativePath);
+              if (destination !== destDir && !destination.startsWith(`${destDir}${path.sep}`)) {
+                throw new Error('Unsafe destination path');
+              }
+              await fs.mkdir(path.dirname(destination), { recursive: true });
+              await fs.writeFile(destination, entry.file.buffer);
+            }
+            imported.push(name);
+          } catch (error) {
+            await fs.rm(destDir, { recursive: true, force: true });
+            errors.push(`${name}: ${error.message}`);
+          }
+        }
+
+        const activated = [...new Set([...imported, ...skipped])];
+        if (activated.length > 0) {
+          const stageSkillMapPath = path.join(GLOBAL_SKILLS_DIR, 'stage-skill-map.json');
+          let stageSkillMap = { skillOrigins: {} };
+          try {
+            stageSkillMap = JSON.parse(await fs.readFile(stageSkillMapPath, 'utf8'));
+          } catch { /* use defaults */ }
+          stageSkillMap.skillOrigins = stageSkillMap.skillOrigins || {};
+          activated.forEach((name) => {
+            stageSkillMap.skillOrigins[name] = 'local-folder-import';
+          });
+          await fs.writeFile(stageSkillMapPath, JSON.stringify(stageSkillMap, null, 2), 'utf8');
+        }
+
+        return res.json({ imported, skipped, activated, errors });
+      } catch (error) {
+        console.error('[skills] import-folder error:', error);
+        return res.status(500).json({ error: error.message });
+      }
+    });
+  } catch (error) {
+    console.error('[skills] import-folder setup error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /import-from-local — copy selected skills from a local directory into GLOBAL_SKILLS_DIR
 router.post('/import-from-local', async (req, res) => {
   try {

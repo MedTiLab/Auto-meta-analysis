@@ -51,10 +51,9 @@ const COPY = {
     addTitle: '添加 Skill',
     addHint: '选择包含 SKILL.md 的 ZIP 包。安装前会先校验文件结构。',
     scanTitle: '从本地路径加载 Skill',
-    scanHint: '输入一个包含 Skill 子目录的本地路径。系统只加载直接子目录中带有 SKILL.md 的项目。',
+    scanHint: '直接选择 Skill 文件夹，或输入一个包含 Skill 子目录的本地路径。系统只加载带有 SKILL.md 的项目。',
     pathPlaceholder: '例如：~/.claude/skills 或 D:\\skills',
     chooseDirectory: '选择目录',
-    desktopPickerUnavailable: '当前网页模式无法读取系统绝对路径，请手动输入目录。',
     scan: '扫描',
     scanning: '正在扫描…',
     scanEmpty: '这个路径下没有找到可加载的 Skill。',
@@ -97,10 +96,9 @@ const COPY = {
     addTitle: 'Add Skill',
     addHint: 'Choose a ZIP package containing SKILL.md. Its structure will be validated before installation.',
     scanTitle: 'Load Skills from a Local Path',
-    scanHint: 'Enter a local folder containing skill subfolders. Only direct children with a SKILL.md file are loaded.',
+    scanHint: 'Choose a Skill folder directly, or enter a local path containing skill subfolders. Only folders with SKILL.md are loaded.',
     pathPlaceholder: 'For example: ~/.claude/skills or D:\\skills',
     chooseDirectory: 'Choose Folder',
-    desktopPickerUnavailable: 'The web version cannot read an absolute system path. Enter the folder path manually.',
     scan: 'Scan',
     scanning: 'Scanning…',
     scanEmpty: 'No loadable skills were found at this path.',
@@ -191,6 +189,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
   const [skillDialog, setSkillDialog] = useState<'add' | 'delete' | 'local' | null>(null);
   const [pendingSkillFile, setPendingSkillFile] = useState<File | null>(null);
   const [skillValidation, setSkillValidation] = useState<SkillValidation | null>(null);
@@ -200,6 +199,12 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
   const [scannedPath, setScannedPath] = useState<string | null>(null);
   const [localSkills, setLocalSkills] = useState<LocalSkillItem[]>([]);
   const [selectedLocalSkills, setSelectedLocalSkills] = useState<string[]>([]);
+  const [selectedFolderFiles, setSelectedFolderFiles] = useState<File[]>([]);
+
+  useEffect(() => {
+    folderInputRef.current?.setAttribute('webkitdirectory', '');
+    folderInputRef.current?.setAttribute('directory', '');
+  }, []);
 
   const loadSkills = useCallback(async () => {
     setLoading(true);
@@ -258,7 +263,9 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     setScannedPath(null);
     setLocalSkills([]);
     setSelectedLocalSkills([]);
+    setSelectedFolderFiles([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (folderInputRef.current) folderInputRef.current.value = '';
   };
 
   const scanLocalPath = async (pathOverride?: string) => {
@@ -269,6 +276,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     setScannedPath(null);
     setLocalSkills([]);
     setSelectedLocalSkills([]);
+    setSelectedFolderFiles([]);
     try {
       const response = await api.scanLocalSkills(requestedPath);
       const payload = await response.json().catch(() => ({}));
@@ -286,21 +294,47 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     }
   };
 
-  const chooseLocalDirectory = async () => {
-    const chooseDirectory = window.medautodataDesktop?.chooseDirectory;
-    if (!chooseDirectory) {
-      setActionError(text.desktopPickerUnavailable);
-      return;
-    }
+  const chooseLocalDirectory = () => {
     setActionError(null);
-    try {
-      const result = await chooseDirectory(localPath.trim());
-      if (result.canceled || !result.filePath) return;
-      setLocalPath(result.filePath);
-      await scanLocalPath(result.filePath);
-    } catch (pickerError) {
-      setActionError(pickerError instanceof Error ? pickerError.message : text.desktopPickerUnavailable);
+    folderInputRef.current?.click();
+  };
+
+  const handleLocalFolderSelection = (fileList: FileList | null) => {
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+
+    const candidates = new Map<string, LocalSkillItem>();
+    for (const file of files) {
+      const relativePath = file.webkitRelativePath || file.name;
+      const parts = relativePath.split('/').filter(Boolean);
+      if (parts.at(-1) !== 'SKILL.md') continue;
+
+      let name = '';
+      let sourcePath = '';
+      if (parts.length === 2) {
+        name = parts[0];
+        sourcePath = parts[0];
+      } else if (parts.length === 3) {
+        name = parts[1];
+        sourcePath = `${parts[0]}/${parts[1]}`;
+      }
+      if (!name || candidates.has(name)) continue;
+
+      candidates.set(name, {
+        name,
+        hasSkillMd: true,
+        alreadyImported: skills.some((skill) => skill.name === name || skill.dirPath === name),
+        sourcePath,
+      });
     }
+
+    const discovered = [...candidates.values()].sort((left, right) => left.name.localeCompare(right.name));
+    const selectedRoot = (files[0].webkitRelativePath || files[0].name).split('/').filter(Boolean)[0] || 'local-folder';
+    setSelectedFolderFiles(files);
+    setLocalSkills(discovered);
+    setScannedPath(selectedRoot);
+    setSelectedLocalSkills(discovered.filter((skill) => !skill.alreadyImported).map((skill) => skill.name));
+    setActionError(null);
   };
 
   const importSelectedLocalSkills = async () => {
@@ -311,15 +345,34 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
     setActionLoading(true);
     setActionError(null);
     try {
-      const response = await api.importLocalSkills(localPath.trim(), selectedLocalSkills);
+      let response;
+      if (selectedFolderFiles.length > 0) {
+        const selectedPrefixes = new Set(localSkills
+          .filter((skill) => selectedLocalSkills.includes(skill.name))
+          .map((skill) => skill.sourcePath));
+        const filesToUpload = selectedFolderFiles.filter((file) => {
+          const relativePath = file.webkitRelativePath || file.name;
+          return [...selectedPrefixes].some((prefix) => relativePath === prefix || relativePath.startsWith(`${prefix}/`));
+        });
+        const formData = new FormData();
+        filesToUpload.forEach((file) => formData.append('files', file, file.name));
+        formData.append('relativePaths', JSON.stringify(filesToUpload.map((file) => file.webkitRelativePath || file.name)));
+        formData.append('skillNames', JSON.stringify(selectedLocalSkills));
+        response = await api.importLocalSkillFolder(formData);
+      } else {
+        response = await api.importLocalSkills(localPath.trim(), selectedLocalSkills);
+      }
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || 'Failed to load local skills');
       const imported = Array.isArray(payload.imported) ? payload.imported : [];
+      const activated = Array.isArray(payload.activated)
+        ? payload.activated
+        : [...imported, ...(Array.isArray(payload.skipped) ? payload.skipped : [])];
       const errors = Array.isArray(payload.errors) ? payload.errors : [];
       if (errors.length > 0) throw new Error(errors.join('\n'));
-      if (imported.length === 0) throw new Error(text.selectRequired);
+      if (activated.length === 0) throw new Error(text.selectRequired);
       await loadSkills();
-      setSelectedPath(imported[0]);
+      setSelectedPath(activated[0]);
       closeSkillDialog();
     } catch (importError) {
       setActionError(importError instanceof Error ? importError.message : 'Failed to load local skills');
@@ -434,6 +487,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
               onClick={() => {
                 setActionError(null);
                 setSkillDialog('local');
+                folderInputRef.current?.click();
               }}
               className="inline-flex h-9 flex-none items-center gap-1.5 border border-border px-3 text-xs font-medium text-foreground hover:bg-muted"
             >
@@ -457,6 +511,13 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
                 const file = event.target.files?.[0];
                 if (file) void validateSkillFile(file);
               }}
+            />
+            <input
+              ref={folderInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(event) => handleLocalFolderSelection(event.target.files)}
             />
           </div>
         </header>
@@ -616,7 +677,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
                   />
                   <button
                     type="button"
-                    onClick={() => void chooseLocalDirectory()}
+                    onClick={chooseLocalDirectory}
                     disabled={actionLoading}
                     className="inline-flex h-10 flex-none items-center gap-2 border border-border px-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-35"
                   >
@@ -710,6 +771,7 @@ export default function SkillsDashboard({ onSendToChat }: SkillsDashboardProps =
           </div>
         </div>
       )}
+
     </div>
   );
 }
